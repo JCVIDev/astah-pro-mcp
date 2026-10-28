@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class StateMachineDiagramGuide {
-
+    
     private StateMachineDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 IMPORTANT POINTS to Keep in Mind:

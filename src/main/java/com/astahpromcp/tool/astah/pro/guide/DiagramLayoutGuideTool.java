@@ -14,21 +14,21 @@ import java.util.List;
 
 @Slf4j
 public class DiagramLayoutGuideTool implements ToolProvider {
-
+    
     private static final String CLASS_IMAGE_RESOURCE = "/diagram-layout-rules/class-diagram-layout-rules.png";
     private static final String SEQUENCE_IMAGE_RESOURCE = "/diagram-layout-rules/sequence-diagram-layout-rules.png";
     private static final String ACTIVITY_IMAGE_RESOURCE = "/diagram-layout-rules/activity-diagram-layout-rules.png";
     private static final String STATE_MACHINE_IMAGE_RESOURCE = "/diagram-layout-rules/state-machine-diagram-layout-rules.png";
     private static final String REQUIREMENT_IMAGE_RESOURCE = "/diagram-layout-rules/requirement-diagram-layout-rules.png";
-
+    
     private static final String CLASS_ANTI_PATTERNS_IMAGE_RESOURCE = "/diagram-layout-anti-patterns/class-diagram-layout-anti-patterns.png";
     private static final String SEQUENCE_ANTI_PATTERNS_IMAGE_RESOURCE = "/diagram-layout-anti-patterns/sequence-diagram-layout-anti-patterns.png";
     private static final String ACTIVITY_ANTI_PATTERNS_IMAGE_RESOURCE = "/diagram-layout-anti-patterns/activity-diagram-layout-anti-patterns.png";
     private static final String STATE_MACHINE_ANTI_PATTERNS_IMAGE_RESOURCE = "/diagram-layout-anti-patterns/state-machine-diagram-layout-anti-patterns.png";
-
+    
     public DiagramLayoutGuideTool() {
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -37,7 +37,7 @@ public class DiagramLayoutGuideTool implements ToolProvider {
                 "MCP client (you) MUST call this tool function before aligning diagram layout, and then lay out the diagram in strict accordance with this layout guide.",
                 this::getGuide,
                 NoInputDTO.class),
-                
+            
             ToolSupport.toolDefinitionReturningContents(
                 "dgm_layout_anti_patterns",
                 "MCP client (you) MUST call this tool function before aligning diagram layout to learn the layout anti-patterns, and then lay out the diagram so as to avoid these anti-patterns.",
@@ -45,7 +45,7 @@ public class DiagramLayoutGuideTool implements ToolProvider {
                 NoInputDTO.class)
         );
     }
-
+    
     private List<McpSchema.Content> getGuide(NoInputDTO param) throws Exception {
         String content = """
 Common Layout Rules:
@@ -106,7 +106,7 @@ Requirement Diagram Layout Rules:
 Required adjustments after layout:
 * Detect overlaps involving any newly placed or affected node or link presentation using the tool, and adjust either the positions of the node presentations or the paths of the link presentations to eliminate the detected overlaps. On a diagram that existed before your edits, leave an overlap as it is if the tool also reported an overlap between the same two presentations, identified by their IDs, before your edits changed that diagram. However, the readability of the diagram is also important. Therefore, do not place node presentations too far apart merely to avoid overlaps, and do not excessively increase the number of vertices in the paths of link presentations, especially to four or more vertices. In addition, if a particular overlap issue is not resolved after three consecutive layout adjustment attempts, give up on resolving that overlap and move on to resolving a different overlap issue.
         """;
-
+        
         List<McpSchema.Content> contents = new ArrayList<>();
         contents.add(McpSchema.TextContent.builder(content).build());
         contents.add(loadImageContent(CLASS_IMAGE_RESOURCE));
@@ -114,20 +114,20 @@ Required adjustments after layout:
         contents.add(loadImageContent(ACTIVITY_IMAGE_RESOURCE));
         contents.add(loadImageContent(STATE_MACHINE_IMAGE_RESOURCE));
         contents.add(loadImageContent(REQUIREMENT_IMAGE_RESOURCE));
-
+        
         return contents;
     }
-
+    
     private List<McpSchema.Content> getAntiPatterns(NoInputDTO param) throws Exception {
         List<McpSchema.Content> contents = new ArrayList<>();
         contents.add(loadImageContent(CLASS_ANTI_PATTERNS_IMAGE_RESOURCE));
         contents.add(loadImageContent(SEQUENCE_ANTI_PATTERNS_IMAGE_RESOURCE));
         contents.add(loadImageContent(ACTIVITY_ANTI_PATTERNS_IMAGE_RESOURCE));
         contents.add(loadImageContent(STATE_MACHINE_ANTI_PATTERNS_IMAGE_RESOURCE));
-
+        
         return contents;
     }
-
+    
     private McpSchema.ImageContent loadImageContent(String resourcePath) throws Exception {
         try (InputStream stream = getClass().getResourceAsStream(resourcePath)) {
             if (stream == null) {

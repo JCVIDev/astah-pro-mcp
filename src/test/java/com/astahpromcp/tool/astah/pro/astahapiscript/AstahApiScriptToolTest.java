@@ -17,39 +17,39 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AstahApiScriptToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private AstahApiScriptTool tool;
     private Method runScript;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
         projectAccessor = astahApi.getProjectAccessor();
         projectAccessor.create();
-
+        
         // Tool
         tool = new AstahApiScriptTool(projectAccessor);
-
+        
         // runScript() method
         runScript = TestSupport.getAccessibleMethod(
             AstahApiScriptTool.class,
             "runScript",
             RunAstahApiScriptDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void runScript_ok_print() throws Exception {
         // Create input DTO
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO("print('hello from script');");
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -58,19 +58,19 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ok());
         assertTrue(outputDTO.stdout().contains("hello from script"));
         assertEquals("", outputDTO.errorMessage());
     }
-
+    
     @Test
     void runScript_ok_lastExpressionValue() throws Exception {
         // Create input DTO
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO("1 + 2");
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -79,18 +79,18 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ok());
         assertEquals("3", outputDTO.result());
     }
-
+    
     @Test
     void runScript_ok_astahBinding() throws Exception {
         // Create input DTO
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO("astah.getProject().getName()");
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -99,13 +99,13 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ok());
         assertNotNull(outputDTO.result());
     }
-
+    
     @Test
     void runScript_ok_editModel() throws Exception {
         // Create input DTO
@@ -122,7 +122,7 @@ public class AstahApiScriptToolTest {
             clazz.getName();
             """;
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO(script);
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -131,22 +131,22 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ok());
         assertEquals("ScriptCreatedClass", outputDTO.result());
-
+        
         // Check the model
         INamedElement createdClass = TestSupport.instance().getNamedElementByClassAndName(IClass.class, "ScriptCreatedClass");
         assertNotNull(createdClass);
     }
-
+    
     @Test
     void runScript_ng_syntaxErrorReported() throws Exception {
         // Create input DTO
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO("var ;");
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -155,14 +155,14 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertFalse(outputDTO.ok());
         assertNotNull(outputDTO.errorMessage());
         assertEquals(1, outputDTO.errorLine());
     }
-
+    
     @Test
     void runScript_ng_danglingTransactionAborted() throws Exception {
         // Create input DTO
@@ -172,7 +172,7 @@ public class AstahApiScriptToolTest {
             astah.getModelEditorFactory().getBasicModelEditor().createClass(astah.getProject(), 'DanglingClass');
             """;
         RunAstahApiScriptDTO inputDTO = new RunAstahApiScriptDTO(script);
-
+        
         // ----------------------------------------
         // Call runScript()
         // ----------------------------------------
@@ -181,11 +181,11 @@ public class AstahApiScriptToolTest {
             tool,
             inputDTO,
             ScriptResultDTO.class);
-
+        
         // Check the output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.stderr().contains("aborted"));
-
+        
         // Check that no transaction is left open
         assertFalse(TransactionManager.isInTransaction());
     }

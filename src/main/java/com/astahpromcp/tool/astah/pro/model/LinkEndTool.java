@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ILinkEnd.html
 @Slf4j
 public class LinkEndTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public LinkEndTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,22 +41,21 @@ public class LinkEndTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 LinkEndDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_aggr_of_link_end",
                 "Set an aggregation of the specified link end (specified by ID), and return the model element of the link end after it is set.",
                 this::setAggregation,
                 LinkEndWithAggregationDTO.class,
                 LinkEndDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_composition_of_link_end",
                 "Set a composition of the specified link end (specified by ID), and return the model element of the link end after it is set.",
                 this::setComposition,
                 LinkEndWithCompositionDTO.class,
                 LinkEndDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_navigation_of_link_end",
                 "Set the navigability of the specified link end (specified by ID), and return the model element of the link end after it is set. A newly created link end is 'unspecified'. To clear a navigability that was set, specify 'unspecified', not 'non_navigable': 'non_navigable' explicitly marks the link end as not navigable.",
@@ -65,45 +64,45 @@ public class LinkEndTool extends AstahToolProvider {
                 LinkEndDTO.class)
         );
     }
-
+    
     private LinkEndDTO getInfo(IdDTO param) throws Exception {
         ILinkEnd astahLinkEnd = astahProToolSupport.getLinkEnd(param.id());
-
+        
         return LinkEndDTOAssembler.toDTO(astahLinkEnd);
     }
-
+    
     private LinkEndDTO setAggregation(LinkEndWithAggregationDTO param) throws Exception {
         ILinkEnd astahLinkEnd = astahProToolSupport.getLinkEnd(param.targetLinkEndId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahLinkEnd.setAggregation(param.isAggregation());
         });
-
+        
         return LinkEndDTOAssembler.toDTO(astahLinkEnd);
     }
-
+    
     private LinkEndDTO setComposition(LinkEndWithCompositionDTO param) throws Exception {
         ILinkEnd astahLinkEnd = astahProToolSupport.getLinkEnd(param.targetLinkEndId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahLinkEnd.setComposite(param.isComposition());
         });
-
+        
         return LinkEndDTOAssembler.toDTO(astahLinkEnd);
     }
-
+    
     private LinkEndDTO setNavigability(LinkEndWithNavigabilityDTO param) throws Exception {
         // A missing navigabilityKind is rejected when the arguments are bound, but an explicit null is not.
         if (param.navigabilityKind() == null) {
             throw new IllegalArgumentException("navigabilityKind must be one of 'navigable', 'non_navigable' or 'unspecified'.");
         }
-
+        
         ILinkEnd astahLinkEnd = astahProToolSupport.getLinkEnd(param.targetLinkEndId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahLinkEnd.setNavigability(param.navigabilityKind().astahValue);
         });
-
+        
         return LinkEndDTOAssembler.toDTO(astahLinkEnd);
     }
 }

@@ -14,17 +14,17 @@ import java.util.List;
 
 @Slf4j
 public class TerminologyConsistencyTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public TerminologyConsistencyTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -35,7 +35,7 @@ public class TerminologyConsistencyTool extends AstahToolProvider {
                 NoInputDTO.class,
                 StepsDTO.class));
     }
-
+    
     private StepsDTO getSteps(NoInputDTO param) throws Exception {
         String contents = """
 Follow these steps to maintain terminology consistency across model elements and diagrams:
@@ -62,7 +62,7 @@ Follow these steps to maintain terminology consistency across model elements and
    5-2. A spelling/notation variant (4-1) may be unified directly. Unifying synonyms (4-2) or disambiguating homonyms (4-3) rests on a domain judgment; when you cannot make it with confidence, present the candidate set to the user and get confirmation before changing anything.
    5-3. Apply the corrections.
         """;
-
+        
         return new StepsDTO(contents);
     }
 }

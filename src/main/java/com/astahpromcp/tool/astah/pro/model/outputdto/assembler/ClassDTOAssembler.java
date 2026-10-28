@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ClassDTOAssembler {
     public static ClassDTO toDTO(@NonNull IClass astahClass) throws Exception {
-
+        
         List<AttributeDTO> attributeDTOs = new ArrayList<>();
         List<AssociationDTO> associationDTOs = new ArrayList<>();
         for (IAttribute astahAttribute : astahClass.getAttributes()) {
@@ -26,37 +26,37 @@ public class ClassDTOAssembler {
                 attributeDTOs.add(AttributeDTOAssembler.toDTO(astahAttribute));
             }
         }
-
+        
         List<OperationDTO> operationDTOs = new ArrayList<>();
         for (IOperation astahOperation : astahClass.getOperations()) {
             operationDTOs.add(OperationDTOAssembler.toDTO(astahOperation));
         }
-
+        
         List<GeneralizationDTO> generalizationDTOs = new ArrayList<>();
         for (IGeneralization astahGeneralization : astahClass.getGeneralizations()) {
             generalizationDTOs.add(GeneralizationDTOAssembler.toDTO(astahGeneralization));
         }
-
+        
         List<GeneralizationDTO> specializationDTOs = new ArrayList<>();
         for (IGeneralization astahGeneralization : astahClass.getSpecializations()) {
             specializationDTOs.add(GeneralizationDTOAssembler.toDTO(astahGeneralization));
         }
-
+        
         List<PortDTO> portDTOs = new ArrayList<>();
         for (IPort port : astahClass.getPorts()) {
             portDTOs.add(PortDTOAssembler.toDTO(port));
         }
-
+        
         List<NameIdTypeDTO> nestedClassDTOs = new ArrayList<>();
         for (IClass astahNestedClass : astahClass.getNestedClasses()) {
             nestedClassDTOs.add(NameIdTypeDTOAssembler.toDTO(astahNestedClass));
         }
-
+        
         List<NameIdTypeDTO> templateParameterDTOs = new ArrayList<>();
         for (IClassifierTemplateParameter astahTemplateParameter : astahClass.getTemplateParameters()) {
             templateParameterDTOs.add(NameIdTypeDTOAssembler.toDTO(astahTemplateParameter));
         }
-
+        
         return new ClassDTO(
             NamedElementDTOAssembler.toDTO(astahClass),
             attributeDTOs,

@@ -3,10 +3,10 @@ package com.astahpromcp.tool.knowledge;
 import com.astahpromcp.tool.ToolDefinition;
 import com.astahpromcp.tool.ToolProvider;
 import com.astahpromcp.tool.ToolSupport;
-import com.astahpromcp.tool.astah.pro.common.outputdto.AbsoluteFilePathDTO;
-import com.astahpromcp.tool.astah.pro.common.outputdto.GuideDTO;
 import com.astahpromcp.tool.common.inputdto.TextContentsDTO;
 import com.astahpromcp.tool.common.inputdto.NoInputDTO;
+import com.astahpromcp.tool.common.outputdto.AbsoluteFilePathDTO;
+import com.astahpromcp.tool.common.outputdto.GuideDTO;
 import com.astahpromcp.tool.knowledge.outputdto.SmellsDTO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,15 +18,15 @@ import java.util.List;
 
 @Slf4j
 public class ArchitecturalDesignSmellsTool implements ToolProvider {
-
+    
     private static final String SMELLS_FILE_NAME = "smells-on-architecture-and-design.md";
-
+    
     private final Path workspaceDir;
-
+    
     public ArchitecturalDesignSmellsTool(Path workspaceDir) {
         this.workspaceDir = workspaceDir;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -37,14 +37,14 @@ public class ArchitecturalDesignSmellsTool implements ToolProvider {
                     this::recallSmells,
                     NoInputDTO.class,
                     GuideDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "store_architectural_design_smells",
                     "Store architectural smells and design smells that should be avoided in a file, and return the absolute path of the stored file.",
                     this::storeSmells,
                     TextContentsDTO.class,
                     AbsoluteFilePathDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "read_architectural_design_smells",
                     "Read architectural smells and design smells that should be avoided from the stored file.",
@@ -52,17 +52,17 @@ public class ArchitecturalDesignSmellsTool implements ToolProvider {
                     NoInputDTO.class,
                     SmellsDTO.class)
             );
-
+            
         } catch (Exception e) {
             log.error("Failed to create architectural and design smells tools", e);
             return List.of();
         }
     }
-
+    
     private GuideDTO recallSmells(NoInputDTO param) throws Exception {
         Path smellsFile = workspaceDir.resolve(SMELLS_FILE_NAME);
         String absolutePath = smellsFile.toAbsolutePath().toString();
-
+        
         if (Files.exists(smellsFile)) {
             log.info("Smells file already exists: {}", absolutePath);
             String contents = """
@@ -72,7 +72,7 @@ Follow these steps to recall architectural smells and design smells that should 
 """;
 
             return new GuideDTO(contents);
-
+            
         } else {
             log.info("Smells file does not exist: {}", absolutePath);
             String contents = """
@@ -89,36 +89,36 @@ Follow these steps to recall architectural smells and design smells that should 
             return new GuideDTO(contents);
         }
     }
-
+    
     private AbsoluteFilePathDTO storeSmells(TextContentsDTO param) throws Exception {
         Path smellsFile = workspaceDir.resolve(SMELLS_FILE_NAME);
         String absolutePath = smellsFile.toAbsolutePath().toString();
-
+        
         if (param.contents().isBlank()) {
             throw new IllegalArgumentException("The architectural and design smells to store must not be blank.");
         }
-
+        
         try {
             Files.writeString(smellsFile, param.contents(), StandardOpenOption.CREATE_NEW);
         } catch (FileAlreadyExistsException e) {
             throw new IllegalStateException("The file storing architectural and design smells already exists: " + absolutePath);
         }
         log.info("Stored smells file: {}", absolutePath);
-
+        
         return new AbsoluteFilePathDTO(absolutePath);
     }
-
+    
     private SmellsDTO readSmells(NoInputDTO param) throws Exception {
         Path smellsFile = workspaceDir.resolve(SMELLS_FILE_NAME);
         String absolutePath = smellsFile.toAbsolutePath().toString();
-
+        
         if (!Files.exists(smellsFile)) {
             throw new IllegalStateException("The file for storing architectural and design smells has not been created yet: " + absolutePath);
         }
-
+        
         String contents = Files.readString(smellsFile);
         log.info("Read smells file: {}", absolutePath);
-
+        
         return new SmellsDTO(contents, absolutePath);
     }
 }

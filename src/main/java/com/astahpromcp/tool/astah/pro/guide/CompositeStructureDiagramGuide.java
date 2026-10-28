@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class CompositeStructureDiagramGuide {
-
+    
     private CompositeStructureDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 IMPORTANT POINTS to Keep in Mind:
@@ -48,7 +48,7 @@ Terminology Definitions (quoted from OMG UML Specification v.2.5.1):
 * A Component may implement a provided Interface directly, or its realizing Classifiers may do so, or they may be inherited. The required and provided Interfaces may optionally be organized through Ports; these enable the definition of named sets of provided and required Interfaces that are typically (but not always) addressed at run-time.
 * A Component may be realized (or implemented) by a number of Classifiers. In that case, a Component owns a set of ComponentRealizations to these Classifiers.
         """;
-
+        
         return contents;
     }
 }

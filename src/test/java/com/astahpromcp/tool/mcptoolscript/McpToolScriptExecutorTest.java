@@ -43,32 +43,32 @@ import static org.junit.jupiter.api.Assertions.*;
 // not that untrusted code can be run safely. Whether a new escape route exists is what the canary tests below answer,
 // because they watch for the effect rather than for a name.
 public class McpToolScriptExecutorTest {
-
+    
     private static McpSchema.Tool schema(String name) {
         return McpSchema.Tool.builder(name, JsonSupport.MCP_JSON_MAPPER, "{\"type\":\"object\"}")
                 .description("Test tool " + name)
                 .build();
     }
-
+    
     private static class NoopTransactionManager implements ITransactionManager {
         @Override
         public void beginTransaction() {
         }
-
+        
         @Override
         public void endTransaction() {
         }
-
+        
         @Override
         public void abortTransaction() {
         }
-
+        
         @Override
         public boolean isInTransaction() {
             return false;
         }
     }
-
+    
     private static AstahToolRegistry registry() {
         ToolProvider provider = () -> List.of(
                 new ToolDefinition(schema("get_class_info"), ToolDefinition.ResultKind.DTO,
@@ -89,57 +89,57 @@ public class McpToolScriptExecutorTest {
                         (exchange, request) -> ResponseSupport.success(Map.of("ok", true))),
                 new ToolDefinition(schema("get_info_of_ocl_spec"), ToolDefinition.ResultKind.DTO,
                         (exchange, request) -> ResponseSupport.success(Map.of("ok", true))));
-
+        
         // The reasons the manifest gives these three, stated here because this registry has no manifest behind it
         return AstahToolRegistry.of(provider.createToolDefinitions(), Map.of(
                 "capture_dgm_img", NotMcpToolScriptCallableReason.RETURNS_NO_STRUCTURED_CONTENT,
                 "run_astah_api_script", NotMcpToolScriptCallableReason.RUNS_AN_ASTAH_API_SCRIPT,
                 "get_info_of_ocl_spec", NotMcpToolScriptCallableReason.PERFORMS_BLOCKING_IO));
     }
-
+    
     private static McpToolScriptExecutor executor() {
         return new McpToolScriptExecutor(registry(), 30, new FakeTransactionBoundary());
     }
-
+    
     private static String evaluate(String expression) {
         McpToolScriptExecutor.Result result = executor().execute(expression);
         assertTrue(result.ok(), "Script should have run: " + result.errorMessage());
         return result.value();
     }
-
+    
     @AfterEach
     void tearDown() {
         AstahApiLock.clearSuspension();
     }
-
+    
     @Test
     void execute_ok_callsAToolFunction() {
         McpToolScriptExecutor.Result result =
                 executor().execute("var c = tools.get_class_info({ id: 'x' }); c.name;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals("Sample", result.value());
     }
-
+    
     @Test
     void execute_ok_passesNestedArgumentsThrough() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "var r = tools.get_class_info({ id: 'x', points: [{ x: 1 }, { x: 2 }] });"
                         + " '' + r.args.points.length + ':' + r.args.points[1].x;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals("2:2", result.value());
     }
-
+    
     @Test
     void execute_ok_letsAScriptLoopOverManyCalls() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "var n = 0; for (var i = 0; i < 10; i++) { n += tools.get_class_info({ id: '' + i }).name.length; } '' + n;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals("60", result.value());
     }
-
+    
     @Test
     void execute_ok_logsHowManyToolFunctionCallsTheRunMade() {
         Logger logger = (Logger) LoggerFactory.getLogger(McpToolScriptExecutor.class);
@@ -158,30 +158,30 @@ public class McpToolScriptExecutorTest {
             logger.setLevel(originalLevel);
             captured.stop();
         }
-
+        
         assertTrue(captured.list.stream().anyMatch(event -> event.getLevel() == Level.INFO
                         && event.getFormattedMessage().equals("MCP tool script made 3 tool function call(s)")),
                 "Expected the call count at INFO, but the log was: " + captured.list);
     }
-
+    
     @Test
     void execute_ng_letsTheScriptCatchAToolFailureButStillFailsTheRun() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "try { tools.capture_dgm_img({}); print('not reached'); } catch (e) { print('caught'); }");
-
+        
         assertTrue(result.output().contains("caught"), result.output());
         assertFalse(result.ok(), "A caught failure is still a failure of the run");
         assertTrue(result.errorMessage().contains("capture_dgm_img"),
                 "The run has to say which call failed, because the script swallowed the exception: "
                         + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_saysNothingWasLostWhenARunThatOnlyReadsCaughtAToolFailure() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "try { tools.capture_dgm_img({}); } catch (e) { print('caught'); }\n"
                         + "print(tools.get_class_info({ id: 'x' }).name);");
-
+        
         assertFalse(result.ok(), "A caught failure is still a failure of the run");
         assertTrue(result.output().contains("Sample"), result.output());
         assertEquals(ModelChangesKind.NONE, result.modelChanges(), result.errorMessage());
@@ -189,12 +189,12 @@ public class McpToolScriptExecutorTest {
                 "A run that changed nothing must not claim a rollback: " + result.errorMessage());
         assertTrue(result.errorMessage().contains("nothing was lost"), result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_saysNothingWasLostWhenARunThatOnlyReadsFailsOnItsOwn() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "tools.get_class_info({ id: 'x' });\nthrow new Error('boom');");
-
+        
         assertFalse(result.ok());
         assertEquals(ModelChangesKind.NONE, result.modelChanges(), result.errorMessage());
         assertFalse(result.errorMessage().contains("rolled back"), result.errorMessage());
@@ -203,7 +203,7 @@ public class McpToolScriptExecutorTest {
         assertTrue(result.errorMessage().matches("(?s).*column number \\d+\\. The run had not changed the model.*"),
                 result.errorMessage());
     }
-
+    
     // The refusal has to reach the script as the sentence that explains it. Binding only the callable tools would
     // make this fail with "tools.capture_dgm_img is not a function", which reads as "no such tool" and sends the
     // agent looking for a different name instead of calling this one directly.
@@ -211,7 +211,7 @@ public class McpToolScriptExecutorTest {
     void execute_ng_refusesAnExcludedToolWithAMessageThatSaysHowToReachIt() {
         for (String name : List.of("capture_dgm_img", "get_info_of_ocl_spec", "run_astah_api_script")) {
             McpToolScriptExecutor.Result result = executor().execute("tools." + name + "({});");
-
+            
             assertFalse(result.ok(), name);
             assertFalse(result.errorMessage().contains("is not a function"),
                     "'" + name + "' should be refused with an explanation, not reported as missing: "
@@ -220,30 +220,30 @@ public class McpToolScriptExecutorTest {
                     "The refusal should say how to reach it: " + result.errorMessage());
         }
     }
-
+    
     // A refusal arrives as a Java exception, and String.valueOf would prefix it with the exception class name.
     @Test
     void execute_ng_reportsFailuresWithoutTheJavaExceptionClassName() {
         McpToolScriptExecutor.Result result = executor().execute("tools.capture_dgm_img({});");
-
+        
         assertFalse(result.ok());
         assertFalse(result.errorMessage().startsWith("java."),
                 "The message should not lead with the exception class: " + result.errorMessage());
         assertFalse(result.errorMessage().contains("java.lang.IllegalStateException"), result.errorMessage());
     }
-
+    
     // The ordinal answers a question the line number does not: how far the script got before it stopped.
     @Test
     void execute_ng_saysWhichToolCallFailed() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "for (var i = 0; i < 5; i++) { tools.get_class_info({ id: '' + i }); }\n"
                         + "tools.capture_dgm_img({});");
-
+        
         assertFalse(result.ok());
         assertEquals(6, result.errorToolCallIndex(),
                 "Five calls succeeded, so the failing one is the sixth: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_saysWhichPassOfALoopTheFailingCallWasOn() {
         McpToolScriptExecutor.Result result = executor().execute(
@@ -251,33 +251,33 @@ public class McpToolScriptExecutorTest {
                         + "  tools.get_class_info({ id: '' + i });\n"
                         + "  if (i === 2) { tools.capture_dgm_img({}); }\n"
                         + "}\n");
-
+        
         assertFalse(result.ok());
         assertEquals(3, result.errorLine(), "The line is where the failing call is written");
         assertEquals(4, result.errorToolCallIndex(),
                 "Three get_class_info calls preceded it, so the refused one is the fourth: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_leadsWithTheReasonRatherThanTheOrdinal() {
         McpToolScriptExecutor.Result result = executor().execute("tools.capture_dgm_img({});");
-
+        
         assertFalse(result.ok());
         assertFalse(result.errorMessage().contains("Tool call #"),
                 "The ordinal belongs in errorToolCallIndex, not in front of the sentence to act on: " + result.errorMessage());
         assertTrue(result.errorMessage().startsWith("'capture_dgm_img'"),
                 "The message has to open with what went wrong: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_reportsNoOrdinalForAFailureOutsideAToolCall() {
         McpToolScriptExecutor.Result result = executor().execute("var first = 1;\nvar broken = ;\n");
-
+        
         assertFalse(result.ok());
         assertEquals(-1, result.errorToolCallIndex(),
                 "A script-level error belongs to no tool function call: " + result.errorMessage());
     }
-
+    
     // A tool failure arrives as a Java exception, which knows no line of its own.
     @Test
     void execute_ng_reportsTheLineOfAnUncaughtToolFailure() {
@@ -285,12 +285,12 @@ public class McpToolScriptExecutorTest {
                 "var a = 1;\n"
                         + "var b = 2;\n"
                         + "tools.capture_dgm_img({});\n");
-
+        
         assertFalse(result.ok());
         assertEquals(3, result.errorLine(),
                 "The failure has to point at the line the call was made on: " + result.errorMessage());
     }
-
+    
     // The exception is gone by the time the run ends, so this line can only come from what the dispatcher kept while it still had it.
     @Test
     void execute_ng_reportsTheLineOfAToolFailureTheScriptCaught() {
@@ -301,14 +301,14 @@ public class McpToolScriptExecutorTest {
                         + "} catch (e) {\n"
                         + "  print('caught');\n"
                         + "}\n");
-
+        
         assertFalse(result.ok(), "A caught failure is still a failure of the run");
         assertEquals(3, result.errorLine(),
                 "A caught failure has to point at the line the call was made on: " + result.errorMessage());
         assertEquals(1, result.errorToolCallIndex(),
                 "The ordinal has to survive the catch just as the line does: " + result.errorMessage());
     }
-
+    
     // The ordinal counts the first failure, so the message and the line have to belong to that call too: fields describing two different calls read as though the wrong one had been blamed.
     @Test
     void execute_ng_reportsTheFirstFailureWhenTheScriptCaughtItAndThenFailedAgain() {
@@ -319,7 +319,7 @@ public class McpToolScriptExecutorTest {
                         + "  print('caught');\n"
                         + "}\n"
                         + "tools.run_astah_api_script({});\n");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().startsWith("'capture_dgm_img'"),
                 "The message has to name the call the ordinal counts: " + result.errorMessage());
@@ -327,7 +327,7 @@ public class McpToolScriptExecutorTest {
                 "The line has to belong to that same call: " + result.errorMessage());
         assertEquals(1, result.errorToolCallIndex(), result.errorMessage());
     }
-
+    
     // A failure of the script itself carries no ordinal, and reporting it instead would drop the tool function failure the run is being rolled back for.
     @Test
     void execute_ng_reportsTheToolFailureWhenTheScriptCaughtItAndThenFailedOnItsOwn() {
@@ -339,14 +339,14 @@ public class McpToolScriptExecutorTest {
                         + "}\n"
                         + "var broken = null;\n"
                         + "broken.missing();\n");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().startsWith("'capture_dgm_img'"),
                 "A caught tool failure must not be lost because the script then failed on its own: " + result.errorMessage());
         assertEquals(2, result.errorLine(), result.errorMessage());
         assertEquals(1, result.errorToolCallIndex(), result.errorMessage());
     }
-
+    
     // The innermost frame of the script, not the outermost: the line to fix is where the call was made, not where the function holding it was reached.
     @Test
     void execute_ng_reportsTheLineInsideTheFunctionThatMadeTheFailingCall() {
@@ -355,66 +355,66 @@ public class McpToolScriptExecutorTest {
                         + "  tools.capture_dgm_img({});\n"
                         + "}\n"
                         + "step();\n");
-
+        
         assertFalse(result.ok());
         assertEquals(2, result.errorLine(),
                 "The line inside the function is the one that failed: " + result.errorMessage());
     }
-
+    
     // The frames of the prelude that binds the tool functions run closer to the failure than the script's own, and must not be mistaken for it: line 1 of the prelude would be a plausible-looking wrong answer here.
     @Test
     void execute_ng_reportsTheScriptsOwnLineRatherThanAPreludeLine() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "var padding = 1;\n".repeat(20) + "tools.capture_dgm_img({});\n");
-
+        
         assertFalse(result.ok());
         assertEquals(21, result.errorLine(),
                 "The line has to come from the script, not from the prelude: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_saysWhichToolCallFailedForAFailureInsideAHandler() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "tools.get_class_info({ id: 'a' });\n"
                         + "tools.get_class_info({ id: 'b' });\n"
                         + "tools.no_such_tool_here({});");
-
+        
         assertFalse(result.ok());
         // An unknown name never reaches the dispatcher, so this one is a plain script error and keeps its line
         assertTrue(result.errorMessage().contains("not a function"), result.errorMessage());
         assertEquals(3, result.errorLine(), "A script-level error still reports its line");
     }
-
+    
     @Test
     void execute_ok_stillBindsEveryCallableTool() {
         McpToolScriptExecutor.Result result = executor().execute("'' + Object.keys(tools).length;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals("5", result.value(), "Every tool of the registry is bound, callable or not");
     }
-
+    
     @Test
     void execute_ng_reportsAnUnknownToolAsATypeError() {
         McpToolScriptExecutor.Result result = executor().execute("tools.no_such_tool({});");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("not a function"), result.errorMessage());
     }
-
+    
     @Test
     void execute_ok_capturesPrintOutput() {
         McpToolScriptExecutor.Result result = executor().execute("print('hello'); 1;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertTrue(result.output().contains("hello"), result.output());
     }
-
+    
     @Test
     void execute_ok_leavesTheRawAstahApiUnbound() {
         assertEquals("undefined", evaluate("typeof astah;"));
         assertEquals("undefined", evaluate("typeof projectAccessor;"));
     }
-
+    
     @Test
     void execute_ok_removesTheShellBuiltins() {
         assertEquals("undefined", evaluate("typeof exit;"));
@@ -423,7 +423,7 @@ public class McpToolScriptExecutorTest {
         assertEquals("undefined", evaluate("typeof loadWithNewGlobal;"));
         assertEquals("undefined", evaluate("typeof readFully;"));
     }
-
+    
     @Test
     void execute_ok_removesTheJavaClassEntryPoints() {
         assertEquals("undefined", evaluate("typeof Java;"));
@@ -434,7 +434,7 @@ public class McpToolScriptExecutorTest {
         assertEquals("undefined", evaluate("typeof javax;"));
         assertEquals("undefined", evaluate("typeof org;"));
     }
-
+    
     // The engine object is the worst of the injected globals: engine.getFactory().getScriptEngine() is an ordinary
     // method call, not reflection, and returns an engine with no ClassFilter at all.
     @Test
@@ -443,7 +443,7 @@ public class McpToolScriptExecutorTest {
         assertEquals("undefined", evaluate("typeof context;"));
         assertEquals("undefined", evaluate("typeof __noSuchProperty__;"));
     }
-
+    
     @Test
     void execute_ok_locksEveryNameTheGuideReserves() {
         for (String name : McpToolScriptExampleTool.RESERVED_NAMES) {
@@ -451,65 +451,65 @@ public class McpToolScriptExecutorTest {
                     name + " is reserved in the mcp tool script guide but is not locked here");
         }
     }
-
+    
     @Test
     void execute_ng_refusesAnAssignmentToAReservedNameOnTheLineThatMadeIt() {
         McpToolScriptExecutor.Result result = executor().execute("var first = 1;\nvar engine = 'something';\n");
-
+        
         assertFalse(result.ok(), "Assigning to a locked name must stop the run");
         assertTrue(result.errorMessage().contains("engine"),
                 "The failure has to name the variable: " + result.errorMessage());
         assertEquals(2, result.errorLine(),
                 "The failure has to point at the line that made the assignment: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_refusesAnAssignmentToAnUndeclaredVariable() {
         McpToolScriptExecutor.Result result = executor().execute("var pistonId = 1;\npistnoId = 2;\n");
-
+        
         assertFalse(result.ok(), "Assigning to an undeclared variable must stop the run");
         assertTrue(result.errorMessage().contains("pistnoId"),
                 "The failure has to name the variable: " + result.errorMessage());
     }
-
+    
     @Test
     void execute_ok_parsesEveryShippedExampleInStrictMode() throws Exception {
         for (String file : McpToolScriptExampleTool.EXAMPLE_FILES) {
             String source = McpToolScriptExampleTool.loadExample(file);
-
+            
             McpToolScriptExecutor.Result result =
                     executor().execute("function __unused() {\n" + source + "\n}\n");
-
+            
             assertTrue(result.ok(), file + " does not parse in strict mode: " + result.errorMessage());
         }
     }
-
+    
     @Test
     void execute_ng_cannotBuildASecondUnfilteredEngine() {
         McpToolScriptExecutor.Result result =
                 executor().execute("engine.getFactory().getScriptEngine().eval(\"1\");");
-
+        
         assertFalse(result.ok(), "Reaching a second engine must fail");
     }
-
+    
     @Test
     void execute_ng_cannotResolveJavaClasses() {
         assertFalse(executor().execute("Java.type('java.lang.System');").ok());
         assertFalse(executor().execute("({}).getClass();").ok());
     }
-
+    
     @Test
     void execute_ok_cannotRecoverTheRemovedGlobals() {
         assertEquals("undefined", evaluate("typeof eval('this').engine;"));
         assertEquals("undefined", evaluate("typeof eval('this').exit;"));
         assertEquals("undefined", evaluate("typeof eval('this').load;"));
         assertEquals("undefined", evaluate("typeof eval('this').Java;"));
-
+        
         // The Function constructor route does not even reach the global any more: the engine is strict, so the
         // function it builds is strict too, and calling that with no receiver gives undefined rather than the global.
         assertEquals("undefined", evaluate("typeof Function('return this')();"));
     }
-
+    
     // A script that could swap a tool function out could then act on a result no tool ever produced.
     //
     // The engine is strict, so each of these stops the run rather than being quietly ignored. What matters either way
@@ -525,22 +525,22 @@ public class McpToolScriptExecutorTest {
                 "Replacing the tools object must stop the run");
         assertFalse(executor().execute("delete tools.get_class_info;").ok(),
                 "Deleting a tool function must stop the run");
-
+        
         assertEquals("Sample", evaluate(
                 "try { tools.get_class_info = function () { return { name: 'hijacked' }; }; } catch (e) {}"
                         + " tools.get_class_info({ id: 'x' }).name;"));
-
+        
         assertEquals("function", evaluate(
                 "try { tools = {}; } catch (e) {} typeof tools.get_class_info;"));
     }
-
+    
     // Watches for the effect rather than for a name, so it still fires for an escape route nobody has thought of.
     @Test
     void execute_ng_cannotReadALocalFile(@TempDir Path tempDir) throws Exception {
         Path canary = tempDir.resolve("canary.txt");
         Files.writeString(canary, "canary-value", StandardCharsets.UTF_8);
         String path = canary.toAbsolutePath().toString().replace("\\", "\\\\");
-
+        
         for (String attempt : List.of(
                 "readFully('" + path + "');",
                 "load('" + path + "');",
@@ -548,9 +548,9 @@ public class McpToolScriptExecutorTest {
                 "new java.io.File('" + path + "');",
                 "Packages.java.io.File;",
                 "engine.getFactory().getScriptEngine().eval(\"Java.type('java.nio.file.Files')\");")) {
-
+            
             McpToolScriptExecutor.Result result = executor().execute(attempt);
-
+            
             assertFalse(result.ok(), "This should not have run: " + attempt);
             assertFalse(String.valueOf(result.value()).contains("canary-value"),
                     "A script read the canary file: " + attempt);
@@ -558,7 +558,7 @@ public class McpToolScriptExecutorTest {
                     "A script read the canary file: " + attempt);
         }
     }
-
+    
     @Test
     void execute_ng_cannotReachTheNetwork() {
         for (String attempt : List.of(
@@ -566,26 +566,26 @@ public class McpToolScriptExecutorTest {
                 "Java.type('java.net.URL');",
                 "new java.net.URL('http://127.0.0.1:1/');",
                 "engine.getFactory().getScriptEngine().eval(\"Java.type('java.net.URL')\");")) {
-
+            
             assertFalse(executor().execute(attempt).ok(), "This should not have run: " + attempt);
         }
     }
-
+    
     @Test
     void execute_ng_rejectsASourceAboveTheSizeLimit() {
         String script = "var x = '" + "y".repeat(McpServerConfig.MCP_TOOL_SCRIPT_MAX_SOURCE_BYTES) + "';";
-
+        
         McpToolScriptExecutor.Result result = executor().execute(script);
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("above the limit"), result.errorMessage());
     }
-
+    
     @Test
     void execute_ok_truncatesRunawayOutputAndSaysSo() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "for (var i = 0; i < 20000; i++) { print('0123456789012345678901234567890123456789'); } 'done';");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertTrue(result.output().getBytes(StandardCharsets.UTF_8).length
                         <= McpServerConfig.MCP_TOOL_SCRIPT_MAX_STDOUT_BYTES,
@@ -593,44 +593,44 @@ public class McpToolScriptExecutorTest {
         assertTrue(result.errorOutput().contains("truncated"),
                 "A truncated output must say so: " + result.errorOutput());
     }
-
+    
     @Test
     void execute_ng_stopsAScriptThatCallsToolsTooManyTimes() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "for (var i = 0; i < " + (McpServerConfig.MCP_TOOL_SCRIPT_MAX_CALLS + 5)
                         + "; i++) { tools.get_class_info({ id: '' + i }); } 'done';");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("tool function calls"), result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_reportsLimitFailuresWithoutLeakingInternals() {
         McpToolScriptExecutor.Result result = executor().execute(
                 "var s = '" + "y".repeat(McpServerConfig.MCP_TOOL_SCRIPT_MAX_SOURCE_BYTES) + "';");
-
+        
         assertFalse(result.ok());
         assertFalse(result.errorMessage().contains("com.astahpromcp"), result.errorMessage());
         assertFalse(result.errorMessage().contains(".java:"), result.errorMessage());
     }
-
+    
     @Test
     void execute_ng_timesOutAndDoesNotLeaveAccessSuspendedWhenTheScriptStops() throws Exception {
         // A script that waits in an interruptible call, against a one second budget
         McpToolScriptExecutor timeoutExecutor =
                 new McpToolScriptExecutor(interruptibleRegistry(), 1, new FakeTransactionBoundary());
-
+        
         McpToolScriptExecutor.Result result = timeoutExecutor.execute("tools.wait_forever({});");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("timed out"), result.errorMessage());
         assertEquals(ModelChangesKind.UNKNOWN, result.modelChanges(),
                 "The run is still going when the caller is answered, so what it will have changed is not known yet");
-
+        
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "Astah API access should be restored once the interrupted script thread terminates");
     }
-
+    
     // After the timeout the abandoned thread must not start further tool calls: the request thread has stopped
     // waiting, so anything begun now would change the model with nobody to report it to.
     @Test
@@ -638,17 +638,17 @@ public class McpToolScriptExecutorTest {
         AtomicInteger callsAfterTimeout = new AtomicInteger();
         McpToolScriptExecutor timeoutExecutor =
                 new McpToolScriptExecutor(countingAfterWaitRegistry(callsAfterTimeout), 1, new FakeTransactionBoundary());
-
+        
         McpToolScriptExecutor.Result result = timeoutExecutor.execute(
                 "tools.wait_forever({}); for (var i = 0; i < 50; i++) { try { tools.count_me({}); } catch (e) {} }");
-
+        
         assertFalse(result.ok());
         Thread.sleep(1_000);
         assertEquals(0, callsAfterTimeout.get(), "No tool call may start after the run was abandoned");
-
+        
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS));
     }
-
+    
     // The suspension reason is what the next tool call is refused with, so its wording is part of what the client sees.
     // It is read while the script is still running: the reason lifts as soon as the abandoned thread terminates.
     @Test
@@ -656,24 +656,24 @@ public class McpToolScriptExecutorTest {
         CountDownLatch releaseTool = new CountDownLatch(1);
         McpToolScriptExecutor timeoutExecutor = new McpToolScriptExecutor(
                 uninterruptibleRegistry(new CountDownLatch(1), releaseTool), 1, new FakeTransactionBoundary());
-
+        
         try {
             McpToolScriptExecutor.Result result = timeoutExecutor.execute("tools.hold_on({});");
-
+            
             assertFalse(result.ok());
             assertTrue(result.errorMessage().startsWith("MCP tool script execution timed out after 1 seconds."),
                     result.errorMessage());
             String reason = AstahApiLock.suspensionReason();
             assertNotNull(reason, "The script is still running, so access must be suspended");
             assertTrue(reason.startsWith("an mcp tool script that timed out after 1 seconds is still running. "), reason);
-
+            
         } finally {
             releaseTool.countDown();
         }
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "Astah API access should be restored once the abandoned runner terminates");
     }
-
+    
     // The wait can be cut short by the caller as well as by the timeout: a cancelled or disconnected request interrupts
     // the thread waiting for the run. That interrupt does not stop the runner, so the same protection has to be in place,
     // and it has to be in place before this call returns, while it still holds the Astah API lock.
@@ -683,7 +683,7 @@ public class McpToolScriptExecutorTest {
         CountDownLatch releaseTool = new CountDownLatch(1);
         McpToolScriptExecutor executor =
                 new McpToolScriptExecutor(uninterruptibleRegistry(toolRunning, releaseTool), 30, new FakeTransactionBoundary());
-
+        
         AtomicReference<McpToolScriptExecutor.Result> result = new AtomicReference<>();
         AtomicBoolean interruptFlagKept = new AtomicBoolean();
         Thread caller = new Thread(() -> {
@@ -692,11 +692,11 @@ public class McpToolScriptExecutorTest {
         }, "interrupted-caller");
         caller.setDaemon(true);
         caller.start();
-
+        
         assertTrue(toolRunning.await(10, TimeUnit.SECONDS), "The script should have reached the tool call");
         caller.interrupt();
         caller.join(10_000);
-
+        
         assertFalse(caller.isAlive(), "The interrupted caller should have stopped waiting");
         assertFalse(result.get().ok(), "An interrupted wait must be reported as a failure");
         assertTrue(result.get().errorMessage().startsWith("Interrupted while waiting for mcp tool script execution."),
@@ -706,12 +706,12 @@ public class McpToolScriptExecutorTest {
         // What the next tool call is refused with, so its wording is part of what the client sees
         assertTrue(reason.startsWith("an mcp tool script whose caller stopped waiting is still running. "), reason);
         assertTrue(interruptFlagKept.get(), "The caller's interrupt flag must be restored");
-
+        
         releaseTool.countDown();
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "Astah API access should be restored once the abandoned runner terminates");
     }
-
+    
     // The tool call that the interrupted run left behind holds the lock's protection, so nothing else may reach the model.
     @Test
     void execute_ng_startsNoFurtherToolCallsAfterAnInterruptedWait() throws Exception {
@@ -720,24 +720,24 @@ public class McpToolScriptExecutorTest {
         AtomicInteger callsAfterInterrupt = new AtomicInteger();
         McpToolScriptExecutor executor = new McpToolScriptExecutor(
                 uninterruptibleRegistry(toolRunning, releaseTool, callsAfterInterrupt), 30, new FakeTransactionBoundary());
-
+        
         Thread caller = new Thread(
                 () -> executor.execute("tools.hold_on({}); for (var i = 0; i < 50; i++) { try { tools.count_me({}); } catch (e) {} }"),
                 "interrupted-caller");
         caller.setDaemon(true);
         caller.start();
-
+        
         assertTrue(toolRunning.await(10, TimeUnit.SECONDS), "The script should have reached the tool call");
         caller.interrupt();
         caller.join(10_000);
-
+        
         releaseTool.countDown();
         Thread.sleep(1_000);
         assertEquals(0, callsAfterInterrupt.get(), "No tool call may start after the run was abandoned");
-
+        
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS));
     }
-
+    
     // The protection has to be registered before the interrupted call returns, while it still holds the Astah API lock:
     // a request already queued for that lock acquires it the instant this one lets go, and it checks the suspension only
     // once, right after acquiring. Registering the suspension after the release would leave exactly the window this guards.
@@ -747,7 +747,7 @@ public class McpToolScriptExecutorTest {
         CountDownLatch releaseTool = new CountDownLatch(1);
         McpToolScriptExecutor executor =
                 new McpToolScriptExecutor(uninterruptibleRegistry(toolRunning, releaseTool), 30, new FakeTransactionBoundary());
-
+        
         // The script tool and a following editing tool, each holding the Astah API lock exactly as a profile registers them.
         ToolDefinition scriptTool = lockedTool("run_script",
                 (exchange, request) -> ResponseSupport.success(Map.of("ok", executor.execute("tools.hold_on({});").ok())));
@@ -756,7 +756,7 @@ public class McpToolScriptExecutorTest {
             followingToolRuns.incrementAndGet();
             return ResponseSupport.success(Map.of("edited", true));
         });
-
+        
         AtomicBoolean interruptFlagKept = new AtomicBoolean();
         Thread caller = new Thread(() -> {
             call(scriptTool);
@@ -765,47 +765,47 @@ public class McpToolScriptExecutorTest {
         caller.setDaemon(true);
         caller.start();
         assertTrue(toolRunning.await(10, TimeUnit.SECONDS), "The script should have reached the tool call");
-
+        
         // Queued for the lock before the interrupt, so it acquires the lock the moment the interrupted call releases it.
         AtomicReference<McpSchema.CallToolResult> followingResult = new AtomicReference<>();
         Thread queued = new Thread(() -> followingResult.set(call(followingTool)), "queued-for-lock");
         queued.setDaemon(true);
         queued.start();
         assertTrue(awaitQueuedForLock(queued, 10, TimeUnit.SECONDS), "The following tool should be waiting for the lock");
-
+        
         caller.interrupt();
         queued.join(30_000);
-
+        
         assertFalse(queued.isAlive(), "The queued tool should have been answered");
         assertEquals(0, followingToolRuns.get(),
                 "The tool that took the lock next must not run while the abandoned runner may still use the Astah API");
         assertTrue(Boolean.TRUE.equals(followingResult.get().isError()),
                 "The tool that took the lock next must be refused: " + followingResult.get().content());
-
+        
         // The lock wrapper drains the EDT on the way out, and that must not swallow the interrupt it is returning with.
         caller.join(10_000);
         assertFalse(caller.isAlive(), "The interrupted caller should have been answered");
         assertTrue(interruptFlagKept.get(), "The caller's interrupt flag must survive the lock wrapper");
-
+        
         releaseTool.countDown();
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS));
     }
-
+    
     @Test
     void execute_ok_leavesAccessUsable() {
         McpToolScriptExecutor.Result result = executor().execute("1 + 1;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertNull(AstahApiLock.suspensionReason(), "A successful script must not suspend Astah API access");
     }
-
+    
     @Test
     void execute_ok_opensNoTransactionWhenTheScriptOnlyReads() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.get_class_info({ id: '1' }).name;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals(ModelChangesKind.NONE, result.modelChanges());
         assertEquals(0, transaction.beginCount(), "A script that only reads must never open a transaction");
@@ -813,26 +813,26 @@ public class McpToolScriptExecutorTest {
         assertEquals(0, transaction.abortCount());
         assertFalse(transaction.isInTransaction());
     }
-
+    
     @Test
     void execute_ok_toleratesAnUnopenableTransactionWhenTheScriptOnlyReads() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnBegin();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.get_class_info({ id: '1' }).name;");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals(0, transaction.beginCount(), "A script that only reads must never even try to open a transaction");
     }
-
+    
     @Test
     void execute_ok_commitsTheRunWhenAnEditSucceeded() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.edit_class_info({ id: '1' });");
-
+        
         assertTrue(result.ok(), result.errorMessage());
         assertEquals(ModelChangesKind.COMMITTED, result.modelChanges());
         assertEquals(1, transaction.beginCount(), "The first edit opens the shared transaction");
@@ -840,14 +840,14 @@ public class McpToolScriptExecutorTest {
         assertEquals(0, transaction.abortCount());
         assertFalse(transaction.isInTransaction(), "No transaction may be left open");
     }
-
+    
     @Test
     void execute_ng_rollsTheRunBackWhenTheScriptItselfFails() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
-
+        
         McpToolScriptExecutor.Result result = new McpToolScriptExecutor(registry(), 30, transaction)
                 .execute("tools.edit_class_info({ id: '1' }); throw new Error('boom');");
-
+        
         assertFalse(result.ok());
         assertEquals(0, transaction.commitCount(), "A script that threw must not have its edits kept");
         assertEquals(1, transaction.abortCount());
@@ -859,15 +859,15 @@ public class McpToolScriptExecutorTest {
         assertTrue(result.errorMessage().matches("(?s).*column number \\d+\\. Every change the run made was rolled back\\."),
                 result.errorMessage());
     }
-
+    
     // The case a bare "did the script finish?" would get wrong, and the reason the dispatcher keeps the failure.
     @Test
     void execute_ng_rollsTheRunBackWhenTheScriptCaughtTheToolFailure() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
-
+        
         McpToolScriptExecutor.Result result = new McpToolScriptExecutor(registry(), 30, transaction)
                 .execute("tools.edit_class_info({ id: '1' }); try { tools.capture_dgm_img({}); } catch (e) {} 'finished';");
-
+        
         assertFalse(result.ok(), "The script finished, but the run did not");
         assertEquals(0, transaction.commitCount());
         assertEquals(1, transaction.abortCount());
@@ -875,52 +875,52 @@ public class McpToolScriptExecutorTest {
         assertTrue(result.errorMessage().startsWith("'capture_dgm_img'"), result.errorMessage());
         assertTrue(result.errorMessage().contains("rolled back"), result.errorMessage());
     }
-
+    
     // A run the request thread gave up on has already been answered with a timeout failure, so whatever it does afterwards must not reach the project. Only a script that ignores its interrupt gets this far.
     @Test
     void execute_ng_rollsBackARunThatOutlivedItsTimeout() throws Exception {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         McpToolScriptExecutor timeoutExecutor = new McpToolScriptExecutor(registry(), 1, transaction);
-
+        
         McpToolScriptExecutor.Result result = timeoutExecutor.execute(
                 "tools.edit_class_info({ id: '1' });"
                         + " var start = Date.now(); while (Date.now() - start < 2500) { }");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("timed out"), result.errorMessage());
-
+        
         // The abandoned thread is still running the loop; it reaches the end of the run on its own shortly after.
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "The abandoned thread should finish its loop and terminate");
-
+        
         assertEquals(0, transaction.commitCount(),
                 "The caller was told the run failed, so the run must not keep what it did");
         assertEquals(1, transaction.abortCount());
         assertFalse(transaction.isInTransaction());
     }
-
+    
     @Test
     void execute_ng_stopsAPrintLoopOnceItTimesOut() throws Exception {
         McpToolScriptExecutor timeoutExecutor = new McpToolScriptExecutor(registry(), 1, new FakeTransactionBoundary());
-
+        
         McpToolScriptExecutor.Result result = timeoutExecutor.execute("while (true) { print('x'); }");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("timed out"), result.errorMessage());
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "The print loop should stop at its next print once it is interrupted");
     }
-
+    
     // The runner is still interrupted while it closes the transaction of the stopped script
     @Test
     void execute_ng_rollsBackAStoppedPrintLoopEvenWhenTheFirstAbortIsRefused() throws Exception {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnFirstAbort();
         McpToolScriptExecutor timeoutExecutor = new McpToolScriptExecutor(registry(), 1, transaction);
-
+        
         McpToolScriptExecutor.Result result = timeoutExecutor.execute(
                 "tools.edit_class_info({ id: '1' }); while (true) { print('x'); }");
-
+        
         assertFalse(result.ok());
         assertTrue(awaitAccessRestored(10, TimeUnit.SECONDS),
                 "The print loop should stop at its next print once it is interrupted");
@@ -928,16 +928,16 @@ public class McpToolScriptExecutorTest {
         assertEquals(2, transaction.abortCount(), "The refused abort has to be retried");
         assertFalse(transaction.isInTransaction(), "The stopped run must not leave its transaction open");
     }
-
+    
     // Astah keeps the transaction when it refuses a commit, and changes nobody could confirm must not survive it.
     @Test
     void execute_ng_abortsWhenTheCommitIsRefused() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnCommit();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.edit_class_info({ id: '1' });");
-
+        
         assertFalse(result.ok(), "A run whose commit was refused did not succeed");
         assertEquals(1, transaction.abortCount(), "The refused commit has to be rolled back");
         assertFalse(transaction.isInTransaction());
@@ -945,50 +945,50 @@ public class McpToolScriptExecutorTest {
         assertEquals(ModelChangesKind.ROLLED_BACK, result.modelChanges());
         assertTrue(result.errorMessage().contains("rolled back"), result.errorMessage());
     }
-
+    
     // Only an abort seen to succeed may be reported as a rollback.
     @Test
     void execute_ng_reportsTheChangesAsUnknownWhenNeitherTheCommitNorTheAbortWent() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnCommit();
         transaction.failOnAbort();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.edit_class_info({ id: '1' });");
-
+        
         assertFalse(result.ok());
         assertEquals(ModelChangesKind.UNKNOWN, result.modelChanges());
         assertFalse(result.errorMessage().contains("was rolled back"),
                 "An abort that failed must not be reported as a rollback: " + result.errorMessage());
         assertTrue(result.errorMessage().contains("could not be confirmed"), result.errorMessage());
     }
-
+    
     // The net under closeTransaction settles what closeTransaction could not: once it has aborted, the changes are gone.
     @Test
     void execute_ng_reportsARollbackWhenTheNetAbortsWhatTheCloseCouldNot() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnCommit();
         transaction.failOnFirstAbort();
-
+        
         McpToolScriptExecutor.Result result =
                 new McpToolScriptExecutor(registry(), 30, transaction).execute("tools.edit_class_info({ id: '1' });");
-
+        
         assertFalse(result.ok());
         assertFalse(transaction.isInTransaction());
         assertEquals(2, transaction.abortCount());
         assertEquals(ModelChangesKind.ROLLED_BACK, result.modelChanges());
         assertTrue(result.errorMessage().contains("rolled back"), result.errorMessage());
     }
-
+    
     // Someone else holds the transaction: an Astah GUI command mid-flight, or a run that timed out and never let go.
     @Test
     void execute_ng_rollsBackWhenTheTransactionCannotBeOpenedForAnEdit() {
         FakeTransactionBoundary transaction = new FakeTransactionBoundary();
         transaction.failOnBegin();
-
+        
         McpToolScriptExecutor.Result result = new McpToolScriptExecutor(registry(), 30, transaction)
                 .execute("tools.edit_class_info({ id: '1' }); print('ran anyway');");
-
+        
         assertFalse(result.ok());
         assertTrue(result.errorMessage().contains("Retry shortly"), result.errorMessage());
         assertFalse(result.output().contains("ran anyway"), "Nothing after the failed edit may run");
@@ -996,7 +996,7 @@ public class McpToolScriptExecutorTest {
         assertEquals(0, transaction.abortCount());
         assertEquals(ModelChangesKind.NONE, result.modelChanges(), "The edit never got a transaction to change anything in");
     }
-
+    
     @Test
     void execute_ng_rejectsAnEmptyScript() {
         assertFalse(executor().execute("").ok());
@@ -1004,7 +1004,7 @@ public class McpToolScriptExecutorTest {
         assertFalse(executor().execute(null).ok());
         assertEquals(ModelChangesKind.NONE, executor().execute("").modelChanges());
     }
-
+    
     private static AstahToolRegistry interruptibleRegistry() {
         ToolProvider provider = () -> List.of(new ToolDefinition(schema("wait_forever"), ToolDefinition.ResultKind.DTO, (exchange, request) -> {
             try {
@@ -1014,22 +1014,22 @@ public class McpToolScriptExecutorTest {
             }
             return ResponseSupport.success(Map.of("ok", true));
         }));
-
+        
         return AstahToolRegistry.of(provider.createToolDefinitions(), Map.of());
     }
-
+    
     private static ToolDefinition lockedTool(
             String name,
             BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> handler) {
         ToolProvider provider = () -> List.of(new ToolDefinition(schema(name), ToolDefinition.ResultKind.DTO, handler));
         return new ExclusiveToolProvider(provider, 30).createToolDefinitions().get(0);
     }
-
+    
     private static McpSchema.CallToolResult call(ToolDefinition definition) {
         String name = definition.toolSchema().name();
         return definition.toolHandler().apply(null, new McpSchema.CallToolRequest(name, Map.of(), null));
     }
-
+    
     private static boolean awaitQueuedForLock(Thread thread, long timeout, TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
@@ -1038,14 +1038,14 @@ public class McpToolScriptExecutorTest {
             }
             Thread.sleep(10);
         }
-
+        
         return AstahApiLock.LOCK.hasQueuedThread(thread);
     }
-
+    
     private static AstahToolRegistry uninterruptibleRegistry(CountDownLatch running, CountDownLatch release) {
         return uninterruptibleRegistry(running, release, new AtomicInteger());
     }
-
+    
     // A tool that keeps running through its interrupt, so that the runner is still alive while the assertions run:
     // a thread that stops at the first interruptible point would lift the suspension before the test could observe it.
     private static AstahToolRegistry uninterruptibleRegistry(CountDownLatch running, CountDownLatch release, AtomicInteger callsAfterInterrupt) {
@@ -1066,10 +1066,10 @@ public class McpToolScriptExecutorTest {
                     callsAfterInterrupt.incrementAndGet();
                     return ResponseSupport.success(Map.of("ok", true));
                 }));
-
+        
         return AstahToolRegistry.of(provider.createToolDefinitions(), Map.of());
     }
-
+    
     private static AstahToolRegistry countingAfterWaitRegistry(AtomicInteger callsAfterTimeout) {
         ToolProvider provider = () -> List.of(
                 new ToolDefinition(schema("wait_forever"), ToolDefinition.ResultKind.DTO, (exchange, request) -> {
@@ -1084,10 +1084,10 @@ public class McpToolScriptExecutorTest {
                     callsAfterTimeout.incrementAndGet();
                     return ResponseSupport.success(Map.of("ok", true));
                 }));
-
+        
         return AstahToolRegistry.of(provider.createToolDefinitions(), Map.of());
     }
-
+    
     private static boolean awaitAccessRestored(long timeout, TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
@@ -1096,7 +1096,7 @@ public class McpToolScriptExecutorTest {
             }
             Thread.sleep(50);
         }
-
+        
         return AstahApiLock.suspensionReason() == null;
     }
 }

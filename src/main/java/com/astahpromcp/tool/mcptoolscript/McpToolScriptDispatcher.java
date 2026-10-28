@@ -24,18 +24,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //
 // One instance serves one mcp tool script run: the call counter, the first failure and the abandoned flag are per-run state.
 public final class McpToolScriptDispatcher {
-
+    
     private final AstahToolRegistry registry;
     private final AtomicBoolean abandoned = new AtomicBoolean(false);
     private int callCount;
     private String firstFailure;
     private int firstFailureLine = -1;
     private int firstFailureCallIndex = -1;
-
+    
     public McpToolScriptDispatcher(AstahToolRegistry registry) {
         this.registry = registry;
     }
-
+    
     // Called from JavaScript. Both the arguments and the return value are JSON strings.
     // Every failure leaves as an exception so that the script stops at the failing call instead of carrying on with a value that looks like a result; the executor turns it into ScriptResultDTO(ok=false).
     //
@@ -45,7 +45,7 @@ public final class McpToolScriptDispatcher {
     public String invoke(String toolName, String argsJson) {
         try {
             return doInvoke(toolName, argsJson);
-
+            
         } catch (RuntimeException e) {
             // The first failure, not the last: it is where the script left the rails, and whatever failed after it may be no more than a consequence of carrying on past it.
             if (firstFailure == null) {
@@ -54,39 +54,39 @@ public final class McpToolScriptDispatcher {
                 
                 // Read while the exception is still here
                 firstFailureLine = ScriptLine.of(e, McpServerConfig.MCP_TOOL_SCRIPT_SOURCE_NAME);
-
+                
                 // The ordinal answers what the line cannot: how far the run got
                 firstFailureCallIndex = callCount;
             }
             throw e;
         }
     }
-
+    
     private String doInvoke(String toolName, String argsJson) {
         // A run that has already timed out must not start further work: the request thread has given up on this
         // script, so anything begun now would edit the model with nobody waiting for the answer.
         if (abandoned.get()) {
             throw new IllegalStateException("The mcp tool script run was stopped, so '" + toolName + "' was not called.");
         }
-
+        
         // Counted before anything can fail, so that a failure below is attributed to the call that caused it.
         callCount++;
-
+        
         if (callCount > McpServerConfig.MCP_TOOL_SCRIPT_MAX_CALLS) {
             throw new IllegalStateException("The mcp tool script made more than " + McpServerConfig.MCP_TOOL_SCRIPT_MAX_CALLS + " tool function calls. Split the work across several mcp tool script runs.");
         }
-
+        
         ToolDefinition definition = registry.find(toolName);
         if (definition == null) {
             throw new IllegalArgumentException("Unknown tool function '" + toolName + "'.");
         }
-
+        
         // Refuse before running anything. Refusing afterwards would apply the tool's effects and still report a failure.
         NotMcpToolScriptCallableReason reason = registry.notMcpToolScriptCallableReason(toolName);
         if (reason != null) {
             throw new IllegalStateException(reason.message(toolName));
         }
-
+        
         String arguments = argsJson == null ? "{}" : argsJson;
         int argumentBytes = arguments.getBytes(StandardCharsets.UTF_8).length;
         if (argumentBytes > McpServerConfig.MCP_TOOL_SCRIPT_MAX_ARG_BYTES) {
@@ -94,26 +94,26 @@ public final class McpToolScriptDispatcher {
                     + " bytes, above the limit of " + McpServerConfig.MCP_TOOL_SCRIPT_MAX_ARG_BYTES
                     + " bytes. Pass less data per call.");
         }
-
+        
         Map<String, Object> parsedArguments = parseArguments(toolName, arguments);
-
+        
         McpSchema.CallToolRequest request = new McpSchema.CallToolRequest(toolName, parsedArguments, null);
-
+        
         // The exchange is unused: every handler this server builds ignores it (the three factory methods in
         // ToolSupport all bind it as an ignored parameter), and ExclusiveToolProvider only passes it through.
         McpSchema.CallToolResult result = definition.toolHandler().apply(null, request);
         ToolCallStatistics.record(ToolCallStatistics.Route.MCP_TOOL_SCRIPT, toolName, result);
-
+        
         // The lock wrapper drains the EDT after every single tool call before it releases the lock, so on the direct
         // profile one call means one drain. Calling the unwrapped handler skips that, which would let a script read
         // back a value before Astah had finished applying the edit that produced it. Draining here keeps a tool
         // function behaving the same whether it is called directly or from an mcp tool script.
         EdtSupport.drain(toolName, "continuing the mcp tool script");
-
+        
         if (result == null) {
             throw new IllegalStateException("'" + toolName + "' returned no result.");
         }
-
+        
         if (Boolean.TRUE.equals(result.isError())) {
             StringBuilder message = new StringBuilder();
             if (result.content() != null) {
@@ -126,16 +126,16 @@ public final class McpToolScriptDispatcher {
                     }
                 }
             }
-
+            
             throw new RuntimeException(message.isEmpty() ? "'" + toolName + "' failed." : message.toString());
         }
-
+        
         Object structuredContent = result.structuredContent();
         if (structuredContent == null) {
             // Runtime guard for a tool that stopped returning structured content without its result kind changing.
             throw new IllegalStateException("'" + toolName + "' returned no structured content, so it cannot be called from an mcp tool script. Call '" + toolName + "' directly as an MCP tool instead.");
         }
-
+        
         // Wrapped so that every failure leaving this method names the tool function it came from, which is what the run reports when the script catches the exception and the original is gone.
         String resultJson;
         try {
@@ -143,85 +143,85 @@ public final class McpToolScriptDispatcher {
         } catch (RuntimeException e) {
             throw new IllegalStateException("The result of '" + toolName + "' could not be converted to JSON: " + e);
         }
-
+        
         int resultBytes = resultJson.getBytes(StandardCharsets.UTF_8).length;
         if (resultBytes > McpServerConfig.MCP_TOOL_SCRIPT_MAX_RESULT_BYTES) {
             throw new IllegalStateException("The result of '" + toolName + "' is " + resultBytes
                     + " bytes, above the limit of " + McpServerConfig.MCP_TOOL_SCRIPT_MAX_RESULT_BYTES
                     + " bytes. Request less data per call.");
         }
-
+        
         return resultJson;
     }
-
+    
     // Every tool function name, as a JSON array, for the prelude to build the tools object from.
     public String toolNamesJson() {
         return JsonSupport.OBJ_MAPPER.writeValueAsString(List.copyOf(registry.names()));
     }
-
+    
     // Stop accepting calls. Called when the run times out and its thread is abandoned.
     public void abandon() {
         abandoned.set(true);
     }
-
+    
     // Whether the request thread gave up on this run. Set before the timeout is reported to the caller, so a run that reads it as true has already been answered with a failure and must not commit anything.
     public boolean abandoned() {
         return abandoned.get();
     }
-
+    
     public int callCount() {
         return callCount;
     }
-
+    
     // Whether any tool function call of this run failed, including one whose failure the script caught.
     public boolean failed() {
         return firstFailure != null;
     }
-
+    
     // The message of the first tool function call that failed, or null when none did. A caught exception is gone by the time the run ends, so this is what lets the run say what went wrong rather than merely that something did.
     public String firstFailure() {
         return firstFailure;
     }
-
+    
     // The script line of the first tool function call that failed, or -1 when none did.
     public int firstFailureLine() {
         return firstFailureLine;
     }
-
+    
     // The 1-based ordinal of the first tool function call that failed, or -1 when none did
     public int firstFailureCallIndex() {
         return firstFailureCallIndex;
     }
-
+    
     private Map<String, Object> parseArguments(String toolName, String argsJson) {
         JsonNode node;
         try {
             node = JsonSupport.OBJ_MAPPER.readTree(argsJson);
-
+            
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("The arguments of '" + toolName + "' are not valid JSON.");
         }
-
+        
         if (node == null || node.isNull()) {
             return Map.of();
         }
         if (!node.isObject()) {
             throw new IllegalArgumentException("The arguments of '" + toolName + "' must be an object.");
         }
-
+        
         int depth = depthOf(node, 1);
         if (depth > McpServerConfig.MCP_TOOL_SCRIPT_MAX_JSON_DEPTH) {
             throw new IllegalArgumentException("The arguments of '" + toolName + "' are nested " + depth
                     + " levels deep, above the limit of " + McpServerConfig.MCP_TOOL_SCRIPT_MAX_JSON_DEPTH + ".");
         }
-
+        
         Map<String, Object> arguments = new LinkedHashMap<>();
         node.propertyNames().forEach(name ->
                 arguments.put(name, JsonSupport.OBJ_MAPPER.convertValue(node.get(name), Object.class)));
-
+        
         return arguments;
     }
-
+    
     // Nesting depth, computed iteratively-by-recursion but bounded: it stops as soon as the limit is passed, so a deliberately deep document cannot turn this check itself into a stack overflow.
     private static int depthOf(JsonNode node, int currentDepth) {
         if (currentDepth > McpServerConfig.MCP_TOOL_SCRIPT_MAX_JSON_DEPTH) {
@@ -230,7 +230,7 @@ public final class McpToolScriptDispatcher {
         if (!node.isObject() && !node.isArray()) {
             return currentDepth;
         }
-
+        
         int deepest = currentDepth;
         for (JsonNode child : node) {
             int childDepth = depthOf(child, currentDepth + 1);

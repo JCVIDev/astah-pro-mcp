@@ -8,7 +8,7 @@ import java.util.List;
 public record PackageDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Owned elements")
     List<NameIdTypeDTO> ownedElementNameAndIds
 ) {

@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Disabled("ProjectViewManager is not available in non-plugin")
 public class ProjectViewManagerToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ProjectViewManagerTool tool;
     private Method getSelectedElements;
     private Method showInPropertyView;
     private Method showInStructureTree;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -38,45 +38,45 @@ public class ProjectViewManagerToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         IProjectViewManager projectViewManager = astahApi.getViewManager().getProjectViewManager();
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ProjectViewManagerTool(
             projectAccessor,
             projectViewManager,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getSelectedElements() method
         getSelectedElements = TestSupport.getAccessibleMethod(
             ProjectViewManagerTool.class,
             "getSelectedElements",
             NoInputDTO.class);
-
+        
         // showInPropertyView() method
         showInPropertyView = TestSupport.getAccessibleMethod(
             ProjectViewManagerTool.class,
             "showInPropertyView",
             IdDTO.class);
-
+        
         // showInStructureTree() method
         showInStructureTree = TestSupport.getAccessibleMethod(
             ProjectViewManagerTool.class,
             "showInStructureTree",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getSelectedElements_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getSelectedElements()
         // ----------------------------------------
@@ -85,21 +85,21 @@ public class ProjectViewManagerToolTest {
             tool,
             inputDTO,
             ElementListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void showInPropertyView_ok() throws Exception {
         // Get element
         IElement element = TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(element.getId());
-
+        
         // ----------------------------------------
         // Call showInPropertyView()
         // ----------------------------------------
@@ -108,21 +108,21 @@ public class ProjectViewManagerToolTest {
             tool,
             inputDTO,
             ElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void showInStructureTree_ok() throws Exception {
         // Get element
         IElement element = TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(element.getId());
-
+        
         // ----------------------------------------
         // Call showInStructureTree()
         // ----------------------------------------
@@ -131,7 +131,7 @@ public class ProjectViewManagerToolTest {
             tool,
             inputDTO,
             ElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

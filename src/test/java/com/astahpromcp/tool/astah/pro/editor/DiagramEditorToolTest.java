@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private DiagramEditorTool tool;
     private Method insertSvgImage;
@@ -45,7 +45,7 @@ public class DiagramEditorToolTest {
     private Method insertText;
     private Method deleteDiagram;
     private Method deletePresentation;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -58,7 +58,7 @@ public class DiagramEditorToolTest {
         ImageCaptureSupport imageCaptureSupport = mock(ImageCaptureSupport.class);
         when(imageCaptureSupport.createThumbnailContent(anyString()))
             .thenReturn(McpSchema.ImageContent.builder("", "image/png").build());
-
+        
         // Tool
         tool = new DiagramEditorTool(
             projectAccessor,
@@ -68,51 +68,51 @@ public class DiagramEditorToolTest {
             diagramEditorSupport,
             imageConvertSupport,
             imageCaptureSupport);
-
+        
         // insertSvgImage() method
         insertSvgImage = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "insertSvgImage",
             NewSvgImageWithPointDTO.class);
-
+        
         // insertPngOrJpgImage() method
         insertPngOrJpgImage = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "insertPngOrJpgImage",
             NewPngOrJpgImageWithPointDTO.class);
-
+        
         // insertRect() method
         insertRect = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "insertRect",
             NewRectDTO.class);
-
+        
         // insertText() method
         insertText = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "insertText",
             NewTextWithPointDTO.class);
-
+        
         // deleteDiagram() method
         deleteDiagram = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "deleteDiagram",
             DeleteDiagramDTO.class);
-
+        
         // deletePresentation() method
         deletePresentation = TestSupport.getAccessibleMethod(
             DiagramEditorTool.class,
             "deletePresentation",
             DeletePresentationDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Disabled("Astah internal view system components not initialized in test environment, causing NullPointerException in insertSvgImage()")
     @Test
     void insertSvgImage_ok() throws Exception {
@@ -120,19 +120,19 @@ public class DiagramEditorToolTest {
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create SVG code for a simple red circle
         String svgCode = "<svg width=\"100\" height=\"100\" xmlns=\"http://www.w3.org/2000/svg\">" +
                         "<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\" stroke=\"black\" stroke-width=\"2\"/>" +
                         "</svg>";
-
+        
         // Create input DTO
         NewSvgImageWithPointDTO inputDTO = new NewSvgImageWithPointDTO(
             classDiagram.getId(),
             svgCode,
             50,
             60);
-
+        
         // ----------------------------------------
         // Call insertSvgImage()
         // ----------------------------------------
@@ -141,11 +141,11 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Disabled("Astah internal view system components not initialized in test environment, causing NullPointerException in insertPngOrJpgImage()")
     @Test
     void insertPngOrJpgImage_ok_insertsAPngImage() throws Exception {
@@ -153,18 +153,18 @@ public class DiagramEditorToolTest {
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Use a small test PNG image file from test resources
         Path imagePath = Paths.get("src/test/resources/images/test.png").toAbsolutePath();
         String imageUrl = imagePath.toUri().toASCIIString();
-
+        
         // Create input DTO
         NewPngOrJpgImageWithPointDTO inputDTO = new NewPngOrJpgImageWithPointDTO(
             classDiagram.getId(),
             imageUrl,
             100,
             120);
-
+        
         // ----------------------------------------
         // Call insertPngOrJpgImage()
         // ----------------------------------------
@@ -173,11 +173,11 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             RectangleDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Disabled("Astah internal view system components not initialized in test environment, causing NullPointerException in insertPngOrJpgImage()")
     @Test
     void insertPngOrJpgImage_ok_insertsAJpgImage() throws Exception {
@@ -185,18 +185,18 @@ public class DiagramEditorToolTest {
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Use a small test JPG image file from test resources
         Path imagePath = Paths.get("src/test/resources/images/test.jpg").toAbsolutePath();
         String imageUrl = imagePath.toUri().toASCIIString();
-
+        
         // Create input DTO
         NewPngOrJpgImageWithPointDTO inputDTO = new NewPngOrJpgImageWithPointDTO(
             classDiagram.getId(),
             imageUrl,
             150,
             170);
-
+        
         // ----------------------------------------
         // Call insertPngOrJpgImage()
         // ----------------------------------------
@@ -205,18 +205,18 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             RectangleDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void insertRect_ok() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         NewRectDTO inputDTO = new NewRectDTO(
             classDiagram.getId(),
@@ -224,7 +224,7 @@ public class DiagramEditorToolTest {
             20,
             100,
             50);
-
+        
         // ----------------------------------------
         // Call insertRect()
         // ----------------------------------------
@@ -233,31 +233,31 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check the inserted rectangle
         assertEquals(inputDTO.locationX(), (int) outputDTO.drawnRectangle().x());
         assertEquals(inputDTO.locationY(), (int) outputDTO.drawnRectangle().y());
         assertEquals(inputDTO.width(), (int) outputDTO.drawnRectangle().width());
         assertEquals(inputDTO.height(), (int) outputDTO.drawnRectangle().height());
     }
-
+    
     @Test
     void insertText_ok() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         NewTextWithPointDTO inputDTO = new NewTextWithPointDTO(
             classDiagram.getId(),
             "Test\nText",
             10,
             20);
-
+        
         // ----------------------------------------
         // Call insertText()
         // ----------------------------------------
@@ -266,22 +266,22 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void deleteDiagram_ok() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         DeleteDiagramDTO inputDTO = new DeleteDiagramDTO(
             classDiagram.getId());
-
+        
         // ----------------------------------------
         // Call deleteDiagram()
         // ----------------------------------------
@@ -290,33 +290,33 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             DiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the diagram does not exist
         assertNull(TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0"));
     }
-
+    
     @Test
     void deletePresentation_ok() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Get class (node presentation)
         IPresentation classFoo = TestSupport.instance().getPresentationByTypeAndLabel(
             "Class",
             "Foo");
-
+        
         // Create input DTO
         DeletePresentationDTO inputDTO = new DeletePresentationDTO(
             classDiagram.getId(),
             classFoo.getID());
-
+        
         // ----------------------------------------
         // Call deletePresentation()
         // ----------------------------------------
@@ -325,10 +325,10 @@ public class DiagramEditorToolTest {
             tool,
             inputDTO,
             PresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the presentation does not exist
         assertNull(TestSupport.instance().getPresentationByTypeAndLabel(
             "Class",

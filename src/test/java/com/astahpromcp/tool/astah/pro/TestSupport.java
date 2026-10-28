@@ -17,10 +17,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestSupport {
-
+    
     private static TestSupport instance;
     private final ProjectAccessor projectAccessor;
-
+    
     private TestSupport() {
         AstahAPI astahApi = null;
         try {
@@ -30,28 +30,28 @@ public class TestSupport {
         }
         projectAccessor = astahApi.getProjectAccessor();
     }
-
+    
     public static TestSupport instance() {
         if (instance == null) {
             instance = new TestSupport();
         }
         return instance;
     }
-
+    
     public INamedElement getNamedElementByClassAndName(Class<? extends INamedElement> clazz, String name) {
         try {
             INamedElement[] namedElements = projectAccessor.findElements(clazz, name);
-
+            
             if (namedElements.length != 1) {
                 return null;
             }
             return namedElements[0];
-
+            
         } catch (Exception e) {
             return null;
         }
     }
-
+    
     public INamedElement getNamedElementById(String id) {
         try {
             INamedElement[] namedElements = projectAccessor.findElements(new ModelFinder() {
@@ -60,17 +60,17 @@ public class TestSupport {
                     return element.getId().equals(id);
                 }
             });
-
+            
             if (namedElements.length != 1) {
                 return null;
             }
             return namedElements[0];
-
+            
         } catch (Exception e) {
             return null;
         }
     }
-
+    
     public List<INamedElement> getNamedElementsByClass(Class<? extends INamedElement> clazz) {
         try {
             return List.of(projectAccessor.findElements(clazz));
@@ -78,11 +78,11 @@ public class TestSupport {
             return List.of();
         }
     }
-
+    
     public IPresentation getPresentationByTypeAndLabel(String presentationType, String label) {
         try {
             INamedElement[] namedElements = projectAccessor.findElements(IDiagram.class);
-
+            
             List<IPresentation> presentations = new ArrayList<>();
             for (INamedElement namedElement : namedElements) {
                 IDiagram diagram = (IDiagram) namedElement;
@@ -93,21 +93,21 @@ public class TestSupport {
                     }
                 }
             }
-
+            
             if (presentations.size() != 1) {
                 return null;
             }
             return presentations.get(0);
-
+            
         } catch (Exception e) {
             return null;
         }
     }
-
+    
     public IPresentation getPresentationById(String id) {
         try {
             INamedElement[] namedElements = projectAccessor.findElements(IDiagram.class);
-
+            
             List<IPresentation> presentations = new ArrayList<>();
             for (INamedElement namedElement : namedElements) {
                 IDiagram diagram = (IDiagram) namedElement;
@@ -117,31 +117,31 @@ public class TestSupport {
                     }
                 }
             }
-
+            
             if (presentations.size() != 1) {
                 return null;
             }
             return presentations.get(0);
-
+            
         } catch (Exception e) {
             return null;
         }
     }
-
+    
     @SuppressWarnings("unchecked")
     public <T> T invokeToolMethodReturningDto(Method method, Object tool, Object inputDTO, Class<T> resultType) throws Exception {
         return (T) method.invoke(
             tool,
             inputDTO);
     }
-
+    
     @SuppressWarnings("unchecked")
     public List<McpSchema.Content> invokeToolMethodReturningContents(Method method, Object tool, Object inputDTO) throws Exception {
         return (List<McpSchema.Content>) method.invoke(
             tool,
             inputDTO);
     }
-
+    
     @SuppressWarnings("unchecked")
     public <T> T invokeToolMethodReturningDtoAndContents(Method method, Object tool, Object inputDTO, Class<T> resultType) throws Exception {
         Pair<T, ?> pair = (Pair<T, ?>) method.invoke(
@@ -149,14 +149,14 @@ public class TestSupport {
             inputDTO);
         return pair.getLeft();
     }
-
+    
     public static Method getAccessibleMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
             throws NoSuchMethodException {
         Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
         method.setAccessible(true);
         return method;
     }
-
+    
     public static Field getAccessibleField(Class<?> clazz, String fieldName)
             throws NoSuchFieldException {
         Field field = clazz.getDeclaredField(fieldName);

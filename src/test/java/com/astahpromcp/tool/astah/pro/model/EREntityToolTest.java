@@ -26,7 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EREntityToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private TransactionSupport transactionSupport;
     private EREntityTool tool;
@@ -34,7 +34,7 @@ public class EREntityToolTest {
     private Method setLogicalName;
     private Method setPhysicalName;
     private Method setType;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -42,55 +42,55 @@ public class EREntityToolTest {
         transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/EREntityToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new EREntityTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             EREntityTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setLogicalName() method
         setLogicalName = TestSupport.getAccessibleMethod(
             EREntityTool.class,
             "setLogicalName",
             EREntityWithLogicalNameDTO.class);
-
+        
         // setPhysicalName() method
         setPhysicalName = TestSupport.getAccessibleMethod(
             EREntityTool.class,
             "setPhysicalName",
             EREntityWithPhysicalNameDTO.class);
-
+        
         // setType() method
         setType = TestSupport.getAccessibleMethod(
             EREntityTool.class,
             "setType",
             EREntityWithTypeDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER entity
         IEREntity erEntity = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
             "Entity0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erEntity.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -99,17 +99,17 @@ public class EREntityToolTest {
             tool,
             inputDTO,
             EREntityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erEntity.getId(), outputDTO.namedElement().element().id());
         assertEquals(erEntity.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void getInfo_ok_parentRelationshipsHoldThoseWhoseChildIsThisEntity() throws Exception {
         ERModelEditor erModelEditor = projectAccessor.getModelEditorFactory().getERModelEditor();
-
+        
         // A parent entity and a child entity in the package that holds Entity0
         IEREntity entity0 = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
@@ -121,7 +121,7 @@ public class EREntityToolTest {
             erModelEditor.createNonIdentifyingRelationship(parentEntity, childEntity, "Relationship", "relationship"));
         IERSubtypeRelationship subtypeRelationship = transactionSupport.call(() ->
             erModelEditor.createSubtypeRelationship(parentEntity, childEntity, "SubtypeRelationship", "subtype_relationship"));
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -135,35 +135,35 @@ public class EREntityToolTest {
             tool,
             new IdDTO(childEntity.getId()),
             EREntityDTO.class);
-
+        
         // Check output DTO: "parent" and "child" name the entity at the other end
         assertEquals(List.of(relationship.getId()), idsOf(childDTO.parentERRelationships()));
         assertEquals(List.of(subtypeRelationship.getId()), idsOf(childDTO.parentERSubtypeRelationships()));
         assertTrue(childDTO.childERRelationships().isEmpty());
         assertTrue(childDTO.childERSubtypeRelationships().isEmpty());
-
+        
         assertEquals(List.of(relationship.getId()), idsOf(parentDTO.childERRelationships()));
         assertEquals(List.of(subtypeRelationship.getId()), idsOf(parentDTO.childERSubtypeRelationships()));
         assertTrue(parentDTO.parentERRelationships().isEmpty());
         assertTrue(parentDTO.parentERSubtypeRelationships().isEmpty());
     }
-
+    
     private static List<String> idsOf(List<NameIdTypeDTO> elements) {
         return elements.stream().map(NameIdTypeDTO::id).toList();
     }
-
+    
     @Test
     void setLogicalName_ok() throws Exception {
         // Get ER entity
         IEREntity erEntity = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
             "Entity0");
-
+        
         // Create input DTO
         EREntityWithLogicalNameDTO inputDTO = new EREntityWithLogicalNameDTO(
             erEntity.getId(),
             "LogicalName_777");
-
+        
         // ----------------------------------------
         // Call setLogicalName()
         // ----------------------------------------
@@ -172,24 +172,24 @@ public class EREntityToolTest {
             tool,
             inputDTO,
             EREntityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("LogicalName_777", erEntity.getLogicalName());
     }
-
+    
     @Test
     void setPhysicalName_ok() throws Exception {
         // Get ER entity
         IEREntity erEntity = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
             "Entity0");
-
+        
         // Create input DTO
         EREntityWithPhysicalNameDTO inputDTO = new EREntityWithPhysicalNameDTO(
             erEntity.getId(),
             "physical_name_777");
-
+        
         // ----------------------------------------
         // Call setPhysicalName()
         // ----------------------------------------
@@ -198,24 +198,24 @@ public class EREntityToolTest {
             tool,
             inputDTO,
             EREntityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("physical_name_777", erEntity.getPhysicalName());
     }
-
+    
     @Test
     void setType_ok() throws Exception {
         // Get ER entity
         IEREntity erEntity = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
             "Entity0");
-
+        
         // Create input DTO
         EREntityWithTypeDTO inputDTO = new EREntityWithTypeDTO(
             erEntity.getId(),
             "Event");
-
+        
         // ----------------------------------------
         // Call setType()
         // ----------------------------------------
@@ -224,7 +224,7 @@ public class EREntityToolTest {
             tool,
             inputDTO,
             EREntityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("Event", erEntity.getType());

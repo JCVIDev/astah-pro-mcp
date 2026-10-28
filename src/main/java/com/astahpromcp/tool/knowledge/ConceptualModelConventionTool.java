@@ -19,21 +19,21 @@ import java.util.List;
 // Tool that fetches conceptual model convention content and returns it in chunks
 @Slf4j
 public class ConceptualModelConventionTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
     private final Path outputDirectory;
     private final HttpClient httpClient;
-
+    
     public ConceptualModelConventionTool(Path outputDirectory) {
         this(outputDirectory, KnowledgeToolSupport.newHttpClient());
     }
-
+    
     public ConceptualModelConventionTool(Path outputDirectory, HttpClient httpClient) {
         this.outputDirectory = outputDirectory;
         this.httpClient = httpClient;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -44,7 +44,7 @@ public class ConceptualModelConventionTool implements ToolProvider {
                     this::getConceptualModelConventionInfo,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_conceptual_model_conventions",
                     "Return the chunk data of Conceptual Model Conventions. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -57,30 +57,30 @@ public class ConceptualModelConventionTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getConceptualModelConventionInfo(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("Conceptual Model Conventions already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading Conceptual Model Conventions from web pages.");
         List<String> urls = KnowledgeToolSupport.readUrlsFromResource(getClass(), "conceptual-model-conventions-url.txt");
         if (urls.isEmpty()) {
             throw new IOException("Conceptual Model Conventions URL resource not found or is empty.");
         }
-
+        
         String allTextContentString = KnowledgeToolSupport.fetchAllOrFail(httpClient, urls, "Conceptual Model Conventions");
-
+        
         String outputFileName = "conceptual_model_conventions.md";
         Path outputPath = outputDirectory.resolve(outputFileName);
         Files.writeString(outputPath, allTextContentString, StandardCharsets.UTF_8);
         log.info("Conceptual Model Conventions saved to file: {}", outputPath.toAbsolutePath());
-
+        
         return KnowledgeToolSupport.chunkAndCache(allTextContentString, contentCache);
     }
-
+    
     private DocumentChunkDTO getConceptualModelConventionChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

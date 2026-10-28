@@ -10,13 +10,13 @@ import java.util.List;
 
 // Tool for obtaining the result of a comparison that diff_proj started. It never touches the Astah API.
 public class ProjectDiffResultTool implements ToolProvider {
-
+    
     private final ProjectDiffJobs projectDiffJobs;
-
+    
     public ProjectDiffResultTool(ProjectDiffJobs projectDiffJobs) {
         this.projectDiffJobs = projectDiffJobs;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -28,7 +28,7 @@ public class ProjectDiffResultTool implements ToolProvider {
                 DiffResultDTO.class)
         );
     }
-
+    
     private DiffResultDTO getProjectDiffResult(DiffIdDTO param) throws Exception {
         String diffId = param.diffId() == null ? "" : param.diffId().strip();
         if (diffId.isEmpty()) {

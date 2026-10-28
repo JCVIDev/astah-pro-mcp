@@ -21,83 +21,83 @@ import java.util.Set;
 // would block forever. See McpToolScriptDispatcher for the drain that the unwrapped handlers still need.
 @Slf4j
 public final class AstahToolRegistry {
-
+    
     private final Map<String, ToolDefinition> definitions;
     private final Set<String> mcpToolScriptCallableNames;
     private final Map<String, NotMcpToolScriptCallableReason> notMcpToolScriptCallableReasons;
-
+    
     private AstahToolRegistry(Map<String, ToolDefinition> definitions,
-                              Set<String> mcpToolScriptCallableNames,
-                              Map<String, NotMcpToolScriptCallableReason> notMcpToolScriptCallableReasons) {
+            Set<String> mcpToolScriptCallableNames,
+            Map<String, NotMcpToolScriptCallableReason> notMcpToolScriptCallableReasons) {
         this.definitions = definitions;
         this.mcpToolScriptCallableNames = mcpToolScriptCallableNames;
         this.notMcpToolScriptCallableReasons = notMcpToolScriptCallableReasons;
     }
-
+    
     // Build the registry from the given definitions, holding the tools the given names select, with the reasons the manifest declares for the ones published directly.
     public static AstahToolRegistry from(Collection<ToolDefinition> candidates, Set<String> names, Map<String, NotMcpToolScriptCallableReason> declaredReasons) {
         Map<String, ToolDefinition> candidatesByName = new LinkedHashMap<>();
         for (ToolDefinition candidate : candidates) {
             candidatesByName.put(candidate.toolSchema().name(), candidate);
         }
-
+        
         Map<String, ToolDefinition> definitions = new LinkedHashMap<>();
         Map<String, NotMcpToolScriptCallableReason> reasons = new LinkedHashMap<>();
-
+        
         for (String name : names) {
             ToolDefinition definition = candidatesByName.get(name);
             if (definition == null) {
                 continue;
             }
             definitions.put(name, definition);
-
+            
             NotMcpToolScriptCallableReason reason = declaredReasons.get(name);
             if (reason != null) {
                 reasons.put(name, reason);
             }
         }
-
+        
         return of(definitions.values(), reasons);
     }
-
+    
     // Build the registry from exactly the given definitions, with the reason each refused one cannot be called from an mcp tool script.
     public static AstahToolRegistry of(Collection<ToolDefinition> toolDefinitions,
-                                       Map<String, NotMcpToolScriptCallableReason> notMcpToolScriptCallableReasons) {
+            Map<String, NotMcpToolScriptCallableReason> notMcpToolScriptCallableReasons) {
         Map<String, ToolDefinition> definitions = new LinkedHashMap<>();
         for (ToolDefinition definition : toolDefinitions) {
             definitions.put(definition.toolSchema().name(), definition);
         }
-
+        
         Set<String> mcpToolScriptCallable = new LinkedHashSet<>();
         for (String name : definitions.keySet()) {
             if (!notMcpToolScriptCallableReasons.containsKey(name)) {
                 mcpToolScriptCallable.add(name);
             }
         }
-
+        
         return new AstahToolRegistry(
                 Collections.unmodifiableMap(definitions),
                 Collections.unmodifiableSet(mcpToolScriptCallable),
                 Map.copyOf(notMcpToolScriptCallableReasons));
     }
-
+    
     // The definition registered under the given name, or null when there is none
     public ToolDefinition find(String toolName) {
         return definitions.get(toolName);
     }
-
+    
     public Collection<ToolDefinition> all() {
         return definitions.values();
     }
-
+    
     public Set<String> names() {
         return definitions.keySet();
     }
-
+    
     public Set<String> mcpToolScriptCallableNames() {
         return mcpToolScriptCallableNames;
     }
-
+    
     public Collection<ToolDefinition> mcpToolScriptCallableDefinitions() {
         List<ToolDefinition> callable = new ArrayList<>();
         for (String name : mcpToolScriptCallableNames) {
@@ -105,12 +105,12 @@ public final class AstahToolRegistry {
         }
         return Collections.unmodifiableList(callable);
     }
-
+    
     // Why the given tool function cannot be called from an mcp tool script, or null when it can.
     public NotMcpToolScriptCallableReason notMcpToolScriptCallableReason(String toolName) {
         return notMcpToolScriptCallableReasons.get(toolName);
     }
-
+    
     public int size() {
         return definitions.size();
     }

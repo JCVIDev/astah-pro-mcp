@@ -28,9 +28,9 @@ public enum CombinedFragmentKind {
     SEQ("seq"),
     @JsonProperty("strict")
     STRICT("strict");
-
+    
     public final String astahValue;
-
+    
     private CombinedFragmentKind(String astahValue) {
         this.astahValue = astahValue;
     }

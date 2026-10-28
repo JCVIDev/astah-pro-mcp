@@ -10,61 +10,61 @@ import java.util.List;
 public record NamedElementDTO(
     @JsonPropertyDescription("Element info")
     ElementDTO element,
-
+    
     @JsonPropertyDescription("Element type")
     String type,
-
+    
     @JsonPropertyDescription("Element name")
     String name,
-
+    
     @JsonPropertyDescription("Full namespace")
     String nameSpace,
-
+    
     @JsonPropertyDescription("Visibility")
     VisibilityKind visibility,
-
+    
     @JsonPropertyDescription("Alias 1")
     String alias1,
-
+    
     @JsonPropertyDescription("Alias 2")
     String alias2,
-
+    
     @JsonPropertyDescription("Definition")
     String definition,
-
+    
     @JsonPropertyDescription("Client dependencies: Dependencies in which this element depends on the supplier. Usages and realizations are not included.")
     List<DependencyDTO> clientDependencies,
-
+    
     @JsonPropertyDescription("Supplier dependencies: Dependencies in which the client depends on this element. Usages and realizations are not included.")
     List<DependencyDTO> supplierDependencies,
-
+    
     @JsonPropertyDescription("Client realizations: Realizations in which this element realizes the supplier.")
     List<RealizationDTO> clientRealizations,
-
+    
     @JsonPropertyDescription("Supplier realizations: Realizations in which the client realizes this element.")
     List<RealizationDTO> supplierRealizations,
-
+    
     @JsonPropertyDescription("Client usages: Usages in which this element uses the supplier.")
     List<UsageDTO> clientUsages,
-
+    
     @JsonPropertyDescription("Supplier usages: Usages in which the client uses this element.")
     List<UsageDTO> supplierUsages,
-
+    
     @JsonPropertyDescription("Owned diagrams: Diagrams that this element owns directly. Diagrams owned by the elements nested in it are not included.")
     List<NameIdTypeDTO> ownedDiagrams,
-
+    
     @JsonPropertyDescription("Rendered-in diagrams: Diagrams on which this element itself is drawn, each listed once. Diagrams on which it appears only as the base of a lifeline, an instance specification or an object node are not included; get_dgms_of_element returns those too.")
     List<NameIdTypeDTO> renderedInDiagrams,
-
+    
     @JsonPropertyDescription("Constraints")
     List<NameIdTypeDTO> constraints,
-
+    
     @JsonPropertyDescription("Hyperlinks to URL")
     List<UrlHyperlinkDTO> urlHyperlinks,
-
+    
     @JsonPropertyDescription("Hyperlinks to file path")
     List<FilePathHyperlinkDTO> filePathHyperlinks,
-
+    
     @JsonPropertyDescription("Hyperlinks to named element")
     List<NamedElementHyperlinkDTO> namedElementHyperlinks
 ) {
@@ -173,17 +173,17 @@ public record NamedElementDTO(
         USE_CASE_DIAGRAM("UseCaseDiagram", IUseCaseDiagram.class, 4),
         VERTEX("Vertex", IVertex.class, 3),
         UNKNOWN("Unknown", null, -1);
-
+        
         public final String typeName;
         public final Class typeClass;
         private final int hierarchyDepth;
-
+        
         private Type(String typeName, Class typeClass, int hierarchyDepth) {
             this.typeName = typeName;
             this.typeClass = typeClass;
             this.hierarchyDepth = hierarchyDepth;
         }
-
+        
         public static Type getCorrespondingType(Object object) {
             // Return the deepest classifier that matches the Type
             Type bestMatch = Type.UNKNOWN;
@@ -196,11 +196,11 @@ public record NamedElementDTO(
             }
             return bestMatch;
         }
-
+        
         public boolean matches(String typeName) {
             return this.typeName.equals(typeName);
         }
-
+        
         public static Type getCorrespondingType(String typeName) {
             for (Type type : Type.values()) {
                 if (type.matches(typeName)) {

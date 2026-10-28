@@ -12,13 +12,13 @@ import java.util.List;
 // Tool for running an mcp tool script -- JavaScript that drives this server's own tool functions.
 @Slf4j
 public class McpToolScriptTool implements ToolProvider {
-
+    
     private final McpToolScriptExecutor mcpToolScriptExecutor;
-
+    
     public McpToolScriptTool(McpToolScriptExecutor mcpToolScriptExecutor) {
         this.mcpToolScriptExecutor = mcpToolScriptExecutor;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -30,15 +30,15 @@ public class McpToolScriptTool implements ToolProvider {
                 McpToolScriptResultDTO.class)
         );
     }
-
+    
     private McpToolScriptResultDTO runScript(RunMcpToolScriptDTO param) throws Exception {
         if (param.script() == null || param.script().trim().isEmpty()) {
             throw new IllegalArgumentException("The mcp tool script is empty.");
         }
-
+        
         // Note: script errors are reported through the DTO (ok=false), not as a tool error
         McpToolScriptExecutor.Result result = mcpToolScriptExecutor.execute(param.script());
-
+        
         return new McpToolScriptResultDTO(
             result.ok(),
             result.value(),

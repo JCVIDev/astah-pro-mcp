@@ -7,13 +7,13 @@ public enum PropertyChangeKind {
     // Some AI agents tend to specify ENUM literals in lowercase even when they are defined in uppercase, so JSON keys should be defined in lowercase using @JsonProperty.
     @JsonProperty("added")
     ADDED,
-
+    
     @JsonProperty("removed")
     REMOVED,
-
+    
     @JsonProperty("modified")
     MODIFIED,
-
+    
     // The same references in another order
     @JsonProperty("reordered")
     REORDERED

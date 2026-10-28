@@ -27,19 +27,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/presentation/ILinkPresentation.html
 @Slf4j
 public class LinkPresentationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public LinkPresentationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -49,15 +49,14 @@ public class LinkPresentationTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 LinkPresentationDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_points_of_link_prst",
                 "Set all points with the connection points in the rectangles of the specified link presentation (specified by ID), and return the link presentation after it is set along with the updated diagram image in low resolution. Note that it must include the connection points with the rectangle (node presentation). The connection points must be inside the node presentation rectangles, not on their borders. The points may be given in either direction; the returned points may therefore be in the reverse order of the given ones. Note that a node presentation is resized to fit its label when the transaction that created it is committed, so connection points derived from its rectangle while that transaction is still open may fall outside the final rectangle.",
                 this::setAllPoints,
                 LinkPresentationWithPointsDTO.class,
                 LinkPresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_line_style_of_link_prst",
                 "Set the line style of the specified link presentation (specified by ID), and return the link presentation after it is set along with the updated diagram image in low resolution.",
@@ -66,23 +65,23 @@ public class LinkPresentationTool extends AstahToolProvider {
                 LinkPresentationDTO.class)
         );
     }
-
+    
     private LinkPresentationDTO getInfo(IdDTO param) throws Exception {
         ILinkPresentation linkPresentation = astahProToolSupport.getLinkPresentation(param.id());
-
+        
         return LinkPresentationDTOAssembler.toDTO(linkPresentation);
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> setAllPoints(LinkPresentationWithPointsDTO param) throws Exception {
         ILinkPresentation linkPresentation = astahProToolSupport.getLinkPresentation(param.targetLinkPresentationId());
-
+        
         Point2D.Double[] pointArray = new Point2D.Double[param.drawPoints().size()];
         for (int i = 0; i < pointArray.length; i++) {
             PointIntDTO point = param.drawPoints().get(i);
             pointArray[i] = new Point2D.Double(point.x(), point.y());
         }
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             try {
                 linkPresentation.setAllPoints(pointArray);
                 
@@ -93,7 +92,7 @@ public class LinkPresentationTool extends AstahToolProvider {
                 for (int i = 0; i < pointArray.length; i++) {
                     reversedPointArray[i] = pointArray[pointArray.length - 1 - i];
                 }
-
+                
                 try {
                     linkPresentation.setAllPoints(reversedPointArray);
                     
@@ -107,28 +106,28 @@ public class LinkPresentationTool extends AstahToolProvider {
                 }
             }
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(linkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(linkPresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private static String endLabelOf(IPresentation astahEnd) {
         return astahEnd == null ? "unknown" : astahEnd.getLabel();
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> setLineStyle(LinkPresentationWithLineStyleDTO param) throws Exception {
         ILinkPresentation linkPresentation = astahProToolSupport.getLinkPresentation(param.targetLinkPresentationId());
         String lineStyle = param.lineStyle().astahValue;
         if (lineStyle == null) {
             throw new IllegalArgumentException("Specify one of line, line_right_angle, curve or curve_right_angle. 'unknown' only reports a link that has no line style.");
         }
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             linkPresentation.setProperty(Key.LINE_SHAPE, lineStyle);
-
+            
             // Some links (a message on a sequence diagram, for one) silently keep their line style, so check the style took
             if (!lineStyle.equals(linkPresentation.getProperty(Key.LINE_SHAPE))) {
                 throw new IllegalArgumentException(String.format(
@@ -136,11 +135,11 @@ public class LinkPresentationTool extends AstahToolProvider {
                         linkPresentation.getID(), linkPresentation.getType(), lineStyle));
             }
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(linkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(linkPresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

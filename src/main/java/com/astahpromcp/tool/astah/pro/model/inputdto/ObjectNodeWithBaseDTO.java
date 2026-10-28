@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record ObjectNodeWithBaseDTO(
     @JsonPropertyDescription("Target object node identifier")
     String targetObjectNodeId,
-
+    
     @JsonPropertyDescription("Base class identifier")
     String baseClassId
 ) {

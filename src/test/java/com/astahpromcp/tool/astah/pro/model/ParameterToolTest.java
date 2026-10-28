@@ -19,12 +19,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ParameterToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ParameterTool tool;
     private Method setType;
     private Method setTypeExpression;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -32,53 +32,53 @@ public class ParameterToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ParameterToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ParameterTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // setType() method
         setType = TestSupport.getAccessibleMethod(
             ParameterTool.class,
             "setType",
             ParameterWithTypeDTO.class);
-
+        
         // setTypeExpression() method
         setTypeExpression = TestSupport.getAccessibleMethod(
             ParameterTool.class,
             "setTypeExpression",
             ParameterWithTypeExpressionDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void setType_ok() throws Exception {
         // Get parameter
         IParameter parameter = (IParameter) TestSupport.instance().getNamedElementByClassAndName(
             IParameter.class,
             "param0");
-
+        
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         ParameterWithTypeDTO inputDTO = new ParameterWithTypeDTO(
             parameter.getId(),
             clazz.getId());
-
+        
         // Check type before setting
         assertNotEquals(clazz.getId(), parameter.getType().getId());
-
+        
         // ----------------------------------------
         // Call setType()
         // ----------------------------------------
@@ -87,29 +87,29 @@ public class ParameterToolTest {
             tool,
             inputDTO,
             ParameterDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check type after setting
         assertEquals(clazz.getId(), parameter.getType().getId());
     }
-
+    
     @Test
     void setTypeExpression_ok() throws Exception {
         // Get parameter
         IParameter parameter = (IParameter) TestSupport.instance().getNamedElementByClassAndName(
             IParameter.class,
             "param1");
-
+        
         // Create input DTO
         ParameterWithTypeExpressionDTO inputDTO = new ParameterWithTypeExpressionDTO(
             parameter.getId(),
             "long");
-
+        
         // Check type expression before setting
         assertNotEquals("long", parameter.getTypeExpression());
-
+        
         // ----------------------------------------
         // Call setTypeExpression()
         // ----------------------------------------
@@ -118,10 +118,10 @@ public class ParameterToolTest {
             tool,
             inputDTO,
             ParameterDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check type expression after setting
         assertEquals("long", parameter.getTypeExpression());
     }

@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // The comparison of two XMIs, on small XMIs laid out the way Astah writes them
 public class ProjectDiffEngineTest {
-
+    
     private static final Set<String> VERIFIED = Set.of("1.2.0.44/44");
-
+    
     @TempDir
     Path dir;
-
+    
     // A project with two classes, an association whose end has a multiplicity, a package, and a class diagram.
     // The multiplicity is also referred to by an association end role, the way Sample.asta has it.
     private static final String BASE = """
@@ -90,7 +90,7 @@ public class ProjectDiffEngineTest {
               </JUDE:Diagram.presentations>
             </JUDE:Diagram>
             """;
-
+    
     private static String xmi(String content, String exporterVersion) {
         return """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -102,88 +102,95 @@ public class ProjectDiffEngineTest {
                 </XMI>
                 """.formatted(exporterVersion, content);
     }
-
+    
     private record Run(ProjectDiffEngine.Outcome outcome, List<ChangeDTO> changes) {
     }
-
+    
     private Run compare(String base, String target) throws Exception {
         return compare(xmi(base, "1.2.0.44"), xmi(target, "1.2.0.44"), VERIFIED);
     }
-
+    
     private Run compare(String baseXmi, String targetXmi, Set<String> verified) throws Exception {
+        return compare(baseXmi, targetXmi, verified, ASTAH_VERSION);
+    }
+    
+    // The version of the Astah that wrote both XMIs
+    private static final String ASTAH_VERSION = "12.0.0";
+    
+    private Run compare(String baseXmi, String targetXmi, Set<String> verified, String astahVersion) throws Exception {
         Path basePath = write("base.xmi", baseXmi);
         Path targetPath = write("target.xmi", targetXmi);
         List<ChangeDTO> changes = new ArrayList<>();
         ProjectDiffEngine.Outcome outcome = ProjectDiffEngine.compare(
-                new ProjectDiffEngine.Input(basePath, XmiIndex.read(basePath, Long.MAX_VALUE), "Base"),
-                new ProjectDiffEngine.Input(targetPath, XmiIndex.read(targetPath, Long.MAX_VALUE), "Target"),
+                new ProjectDiffEngine.Input(basePath, XmiIndex.read(basePath, Long.MAX_VALUE), "Base", astahVersion),
+                new ProjectDiffEngine.Input(targetPath, XmiIndex.read(targetPath, Long.MAX_VALUE), "Target", astahVersion),
                 verified, changes::add);
         return new Run(outcome, changes);
     }
-
+    
     private Path write(String name, String content) throws IOException {
         Path path = dir.resolve(name);
         Files.writeString(path, content, StandardCharsets.UTF_8);
         return path;
     }
-
+    
     private static int count(Run run, String rule) {
         return run.outcome().normalization().counts().stream().filter(c -> c.rule().equals(rule)).findFirst().orElseThrow().count();
     }
-
+    
     private static PropertyChangeDTO property(ChangeDTO change, String path) {
         return change.properties().stream().filter(p -> p.path().equals(path)).findFirst()
                 .orElseThrow(() -> new AssertionError("no change of " + path + " in " + change.properties()));
     }
-
+    
     private static ChangeDTO only(Run run) {
         assertEquals(1, run.changes().size(), () -> "expected one change: " + run.changes());
         return run.changes().get(0);
     }
-
+    
     @Test
     void compare_ok_findsNothingBetweenTheSameXmi() throws Exception {
         Run run = compare(BASE, BASE);
-
+        
         assertEquals(0, run.outcome().summary().total());
         assertTrue(run.changes().isEmpty());
         assertTrue(run.outcome().normalization().applied());
         assertTrue(run.outcome().warnings().isEmpty());
     }
-
+    
     @Test
     void compare_ok_doesNotCompareTheNameOfTheRootModel() throws Exception {
         Run run = compare(BASE, BASE.replace("name=\"project\"", "name=\"Sample\""));
-
+        
         assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
     }
-
+    
     @Test
     void compare_ok_matchesAMultiplicityAndItsRangeRecreatedWithNewIds() throws Exception {
         // Both IDs change, and the association end role still refers to the multiplicity by its old ID's counterpart
         String target = BASE.replace("\"m1\"", "\"m9\"").replace("\"r1\"", "\"r9\"");
-
+        
         Run run = compare(BASE, target);
-
+        
         assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
         assertEquals(1, count(run, "associationEndMultiplicity"));
         assertEquals(1, count(run, "associationEndMultiplicityRange"));
     }
-
+    
     @Test
     void compare_ok_matchesTheUpdatedVersionTaggedValueOfADiagram() throws Exception {
         Run run = compare(BASE, BASE.replace("\"tv1\"", "\"tv9\""));
-
+        
         assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
         assertEquals(1, count(run, "diagramUpdatedVersion"));
     }
-
+    
     @Test
     void compare_ok_reportsARecreatedMultiplicityWithAnotherValueAsModified() throws Exception {
         String target = BASE.replace("\"m1\"", "\"m9\"").replace("\"r1\"", "\"r9\"").replace("upperValue=\"*\"", "upperValue=\"1\"");
-
+        
         ChangeDTO change = only(compare(BASE, target));
-
+        
         assertEquals(ChangeKind.MODIFIED, change.kind());
         assertEquals("UML:MultiplicityRange", change.type());
         assertEquals("r9", change.xmiId());
@@ -191,18 +198,18 @@ public class ProjectDiffEngineTest {
         PropertyChangeDTO upper = property(change, "@upperValue");
         assertEquals("*", upper.before());
         assertEquals("1", upper.after());
-
+        
         // An anonymous part is placed by the association end above it, and the class at that end
         assertEquals("e1", change.xmlContextOwner().xmiId());
         assertEquals("UML:AssociationEnd", change.xmlContextOwner().type());
         assertEquals("Customer", change.xmlContextOwner().participant());
         assertEquals("UML:StructuralFeature.multiplicity/UML:Multiplicity/UML:Multiplicity.range", change.xmlContextOwner().ownerPath());
     }
-
+    
     @Test
     void compare_ok_keepsAClassDeletedAndRecreatedWithTheSameContents() throws Exception {
         Run run = compare(BASE, BASE.replace("\"c3\"", "\"c8\""));
-
+        
         assertEquals(2, run.changes().size(), () -> run.changes().toString());
         assertEquals(ChangeKind.ADDED, run.changes().get(0).kind());
         assertEquals("c8", run.changes().get(0).xmiId());
@@ -210,34 +217,34 @@ public class ProjectDiffEngineTest {
         assertEquals("c3", run.changes().get(1).xmiId());
         assertEquals("Spare", run.changes().get(1).name());
     }
-
+    
     @Test
     void compare_ok_doesNotMatchWhenMoreThanOneCandidateRemains() throws Exception {
         String twoTags = BASE.replace("<UML:TaggedValue xmi.id=\"tv1\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>",
                 "<UML:TaggedValue xmi.id=\"tv1\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>"
                         + "<UML:TaggedValue xmi.id=\"tv2\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>");
         String target = twoTags.replace("\"tv1\"", "\"tv8\"").replace("\"tv2\"", "\"tv9\"");
-
+        
         Run run = compare(twoTags, target);
-
+        
         assertEquals(0, count(run, "diagramUpdatedVersion"));
         assertEquals(2, run.outcome().summary().added());
         assertEquals(2, run.outcome().summary().removed());
     }
-
+    
     @Test
     void compare_ok_matchesByIdBeforeAnyRule() throws Exception {
         // tv1 keeps its ID; a second tagged value of the same tag is new, and must not be taken for tv1
         String target = BASE.replace("<UML:TaggedValue xmi.id=\"tv1\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>",
                 "<UML:TaggedValue xmi.id=\"tv1\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>"
                         + "<UML:TaggedValue xmi.id=\"tv5\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>");
-
+        
         ChangeDTO change = only(compare(BASE, target));
-
+        
         assertEquals(ChangeKind.ADDED, change.kind());
         assertEquals("tv5", change.xmiId());
     }
-
+    
     @Test
     void compare_ok_reportsAnElementThatMovedWithBothContexts() throws Exception {
         String classElement = """
@@ -249,9 +256,9 @@ public class ProjectDiffEngineTest {
                 .replace("<UML:Package xmi.id=\"pk1\" name=\"sub\">\n      <UML:Namespace.ownedElement>",
                         "<UML:Package xmi.id=\"pk1\" name=\"sub\">\n      <UML:Namespace.ownedElement>" + classElement);
         assertNotEquals(BASE, moved);
-
+        
         ChangeDTO change = only(compare(BASE, moved));
-
+        
         assertEquals("c1", change.xmiId());
         PropertyChangeDTO parent = property(change, ChangeDTOAssembler.PARENT_PATH);
         assertEquals("root", parent.before());
@@ -261,21 +268,21 @@ public class ProjectDiffEngineTest {
         assertEquals("pk1", change.afterContext().xmiId());
         assertEquals("sub", change.afterContext().name());
     }
-
+    
     @Test
     void compare_ok_tellsStylesApartByTheirKey() throws Exception {
         String target = BASE.replace("<JUDE:UPresentation.styleProperty key=\"fill.color\" value=\"#CCCCFF\"/>",
                 "<JUDE:UPresentation.styleProperty key=\"line.color\" value=\"#000000\"/><JUDE:UPresentation.styleProperty key=\"fill.color\" value=\"#CCCCFF\"/>");
-
+        
         ChangeDTO change = only(compare(BASE, target));
-
+        
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         PropertyChangeDTO added = change.properties().get(0);
         assertEquals("JUDE:UPresentation.customStyleMap/JUDE:UPresentation.styleProperty[key=line.color]/@value", added.path());
         assertEquals(PropertyChangeKind.ADDED, added.change());
         assertEquals("#000000", added.after());
     }
-
+    
     // A package that lists association ends by reference, the way Sample.asta does, next to the classes it refers to
     private static String packageListing(String... ids) {
         StringBuilder references = new StringBuilder();
@@ -297,13 +304,13 @@ public class ProjectDiffEngineTest {
                 </UML:Model>
                 """.formatted(references);
     }
-
+    
     private static final String LIST_PATH = "UML:Namespace.ownedElement/UML:AssociationEnd";
-
+    
     @Test
     void compare_ok_reportsAReferenceRemovedFromTheMiddleOfAListAsRemovedOnly() throws Exception {
         ChangeDTO change = only(compare(packageListing("e1", "e2", "e3", "e4"), packageListing("e1", "e3", "e4")));
-
+        
         assertEquals("pk", change.xmiId());
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         PropertyChangeDTO removed = change.properties().get(0);
@@ -312,11 +319,11 @@ public class ProjectDiffEngineTest {
         assertEquals("e2", removed.before());
         assertEquals("Two", removed.beforeRefName());
     }
-
+    
     @Test
     void compare_ok_reportsAReferenceAddedToTheMiddleOfAListAsAddedOnly() throws Exception {
         ChangeDTO change = only(compare(packageListing("e1", "e2", "e4"), packageListing("e1", "e2", "e3", "e4")));
-
+        
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         PropertyChangeDTO added = change.properties().get(0);
         assertEquals(LIST_PATH, added.path());
@@ -324,11 +331,11 @@ public class ProjectDiffEngineTest {
         assertEquals("e3", added.after());
         assertEquals("Three", added.afterRefName());
     }
-
+    
     @Test
     void compare_ok_reportsTheSameReferencesInAnotherOrderAsOneReordering() throws Exception {
         ChangeDTO change = only(compare(packageListing("e1", "e2", "e3"), packageListing("e3", "e1", "e2")));
-
+        
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         PropertyChangeDTO reordered = change.properties().get(0);
         assertEquals(LIST_PATH, reordered.path());
@@ -338,16 +345,35 @@ public class ProjectDiffEngineTest {
         assertEquals("One, Two, Three", reordered.beforeRefName());
         assertEquals("Three, One, Two", reordered.afterRefName());
     }
-
+    
+    @Test
+    void compare_ok_namesNothingWhenNoneOfTheReorderedReferencesHasAName() throws Exception {
+        String base = withoutNames(packageListing("e1", "e2", "e3"));
+        String target = withoutNames(packageListing("e3", "e1", "e2"));
+        
+        ChangeDTO change = only(compare(base, target));
+        
+        PropertyChangeDTO reordered = change.properties().get(0);
+        assertEquals(PropertyChangeKind.REORDERED, reordered.change());
+        assertEquals("e1, e2, e3", reordered.before());
+        // Rather than the separators alone, ", , "
+        assertEquals("", reordered.beforeRefName());
+        assertEquals("", reordered.afterRefName());
+    }
+    
+    private static String withoutNames(String listing) {
+        return listing.replace("name=\"One\"", "name=\"\"").replace("name=\"Two\"", "name=\"\"").replace("name=\"Three\"", "name=\"\"");
+    }
+    
     @Test
     void compare_ok_matchesAListThatRefersToTheSameElementTwice() throws Exception {
         ChangeDTO change = only(compare(packageListing("e1", "e2", "e1", "e3"), packageListing("e1", "e1", "e3")));
-
+        
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         assertEquals(PropertyChangeKind.REMOVED, change.properties().get(0).change());
         assertEquals("e2", change.properties().get(0).before());
     }
-
+    
     @Test
     void compare_ok_readsAListThatRefersToPartsMatchedByTheRulesAsUnchanged() throws Exception {
         String single = "<UML:AssociationEndRole.multiplicity><UML:Multiplicity xmi.idref=\"m1\"/></UML:AssociationEndRole.multiplicity>";
@@ -357,17 +383,17 @@ public class ProjectDiffEngineTest {
         // The multiplicity and its range recreated with new IDs, which the rules match, and the role renamed, so that
         // the role is compared value by value, its list included
         String target = base.replace("\"m1\"", "\"m9\"").replace("\"r1\"", "\"r9\"").replace("name=\"role\"", "name=\"role2\"");
-
+        
         ChangeDTO change = only(compare(base, target));
-
+        
         assertEquals("er1", change.xmiId());
         assertEquals(List.of("@name"), change.properties().stream().map(PropertyChangeDTO::path).toList());
     }
-
+    
     @Test
     void compare_ok_keepsASingleReferenceThatChangedAsModified() throws Exception {
         ChangeDTO change = only(compare(packageListing("e1"), packageListing("e2")));
-
+        
         assertEquals(1, change.properties().size(), () -> change.properties().toString());
         PropertyChangeDTO modified = change.properties().get(0);
         assertEquals(LIST_PATH + "/@xmi.idref", modified.path());
@@ -375,11 +401,11 @@ public class ProjectDiffEngineTest {
         assertEquals("One", modified.beforeRefName());
         assertEquals("Two", modified.afterRefName());
     }
-
+    
     @Test
     void compare_ok_givesAPresentationItsDiagramAndModel() throws Exception {
         ChangeDTO change = only(compare(BASE, BASE.replace("<XMI.field>40.0</XMI.field>", "<XMI.field>80.0</XMI.field>")));
-
+        
         assertEquals("p1", change.xmiId());
         assertEquals("JUDE:ClassifierPresentation", change.type());
         assertEquals("Order", change.name());
@@ -393,80 +419,199 @@ public class ProjectDiffEngineTest {
         assertEquals("40.0", x.before());
         assertEquals("80.0", x.after());
     }
-
+    
     @Test
     void compare_ok_ignoresTheDepthOfMessagesAndTheDataOfImages() throws Exception {
         String target = BASE.replace("depth=\"-4\"", "depth=\"-2\"").replace("rO0ABXNyAAA", "rO0ABXNyBBB");
-
+        
         Run run = compare(BASE, target);
-
+        
         assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
     }
-
+    
     // Showing a communication diagram makes Astah resize its message labels (confirmed with Sample.asta)
     @Test
     void compare_ok_leavesOutTheResizingOfACommunicationMessageLabel() throws Exception {
         String target = BASE.replace("width=\"85.0\"", "width=\"84.697265625\"").replace("<XMI.field>259.03</XMI.field>", "<XMI.field>259.18</XMI.field>");
-
+        
         Run run = compare(BASE, target);
-
+        
         assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
         assertEquals(1, count(run, "communicationMessageLabelSize"));
     }
-
+    
     @Test
     void compare_ok_reportsAMessageLabelResizedBeyondTheTolerance() throws Exception {
         ChangeDTO change = only(compare(BASE, BASE.replace("width=\"85.0\"", "width=\"80.0\"")));
-
+        
         assertEquals("ml1", change.xmiId());
         assertEquals("80.0", property(change, "@width").after());
     }
-
+    
     @Test
     void compare_ok_reportsEveryDifferenceOfAMessageLabelThatAlsoChangedOtherwise() throws Exception {
         String target = BASE.replace("width=\"85.0\"", "width=\"84.697265625\"").replace("label=\"1%3A+go%28%29\"", "label=\"1%3A+stop%28%29\"");
-
+        
         ChangeDTO change = only(compare(BASE, target));
-
+        
         assertEquals("1: stop()", property(change, "@label").after());
         assertEquals("84.697265625", property(change, "@width").after());
     }
-
+    
+    // Two processes that convert the same file saved by an older Astah round its coordinates differently
+    @Test
+    void compare_ok_takesCoordinatesAndSizesThatDifferOnlyByRoundingAsEqual() throws Exception {
+        String target = BASE.replace("<XMI.field>40.0</XMI.field>", "<XMI.field>40.00000000000001</XMI.field>")
+                .replace("width=\"80.0\"", "width=\"79.99999999999999\"");
+        
+        Run run = compare(BASE, target);
+        
+        assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
+        assertEquals(1, count(run, "floatingPointRounding"));
+        assertEquals(0, count(run, "communicationMessageLabelSize"));
+    }
+    
+    @Test
+    void compare_ok_leavesOutTheRoundingOfAPresentationThatAlsoChangedOtherwise() throws Exception {
+        String target = BASE.replace("<XMI.field>40.0</XMI.field>", "<XMI.field>40.00000000000001</XMI.field>")
+                .replace("<XMI.field>20.0</XMI.field>", "<XMI.field>30.0</XMI.field>");
+        
+        ChangeDTO change = only(compare(BASE, target));
+        
+        assertEquals("p1", change.xmiId());
+        assertEquals(List.of("JUDE:JomtPresentation.location/XMI.field[1]"), change.properties().stream().map(PropertyChangeDTO::path).toList());
+        assertEquals(1, change.propertyCount());
+    }
+    
+    @Test
+    void compare_ok_reportsAMoveFarSmallerThanAPixelButBeyondRounding() throws Exception {
+        ChangeDTO change = only(compare(BASE, BASE.replace("<XMI.field>40.0</XMI.field>", "<XMI.field>40.001</XMI.field>")));
+        
+        assertEquals("40.001", property(change, "JUDE:JomtPresentation.location/XMI.field[0]").after());
+    }
+    
+    @Test
+    void compare_ok_doesNotTakeANumberOtherThanACoordinateOrASizeAsRounded() throws Exception {
+        // A label is text, however much it looks like a number
+        String base = BASE.replace("label=\"Order\"", "label=\"1.0\"");
+        assertNotEquals(BASE, base);
+        
+        ChangeDTO change = only(compare(base, base.replace("label=\"1.0\"", "label=\"1.00000000000001\"")));
+        
+        assertEquals("1.0", property(change, "@label").before());
+        assertEquals("1.00000000000001", property(change, "@label").after());
+    }
+    
+    @Test
+    void compare_ok_leavesOutAMessageLabelThatWasResizedAndRounded() throws Exception {
+        String target = BASE.replace("width=\"85.0\"", "width=\"84.697265625\"")
+                .replace("<XMI.field>100.0</XMI.field>", "<XMI.field>100.00000000000001</XMI.field>");
+        
+        Run run = compare(BASE, target);
+        
+        assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
+        // Each value is counted for the first rule that tolerates it, and the label for every rule it needed
+        assertEquals(1, count(run, "floatingPointRounding"));
+        assertEquals(1, count(run, "communicationMessageLabelSize"));
+    }
+    
+    @Test
+    void compare_ok_comparesCoordinatesExactlyInAnXmiVersionNotChecked() throws Exception {
+        String target = BASE.replace("<XMI.field>40.0</XMI.field>", "<XMI.field>40.00000000000001</XMI.field>");
+        
+        Run run = compare(xmi(BASE, "1.2.0.45"), xmi(target, "1.2.0.45"), VERIFIED);
+        
+        ChangeDTO change = only(run);
+        assertEquals("40.00000000000001", property(change, "JUDE:JomtPresentation.location/XMI.field[0]").after());
+        // and the note on the version says so
+        assertTrue(run.outcome().warnings().get(0).contains("were also compared exactly"), run.outcome().warnings().get(0));
+    }
+    
+    private static final String UPDATED_VERSION = "<UML:TaggedValue xmi.id=\"tv1\" tag=\"jude.diagram.updated_version\" value=\"12.0.0\"/>";
+    
+    // A diagram made in the open project and saved has the tagged value in its file once the file is loaded, but not in the open project
+    @Test
+    void compare_ok_leavesOutAnUpdatedVersionThatOnlyOneSideHasOfTheAstahThatReadIt() throws Exception {
+        Run run = compare(BASE, BASE.replace(UPDATED_VERSION, ""));
+        
+        assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
+        assertEquals(0, run.outcome().summary().total());
+        assertEquals(1, count(run, "diagramUpdatedVersion"));
+    }
+    
+    @Test
+    void compare_ok_leavesOutAnUpdatedVersionThatOnlyTheTargetHas() throws Exception {
+        Run run = compare(BASE.replace(UPDATED_VERSION, ""), BASE);
+        
+        assertTrue(run.changes().isEmpty(), () -> run.changes().toString());
+        assertEquals(1, count(run, "diagramUpdatedVersion"));
+    }
+    
+    @Test
+    void compare_ok_keepsAnUpdatedVersionThatOnlyOneSideHasOfAnotherVersion() throws Exception {
+        // The diagram was updated by an Astah of another version, which the loading would not give it
+        String base = BASE.replace(UPDATED_VERSION, UPDATED_VERSION.replace("12.0.0", "11.0.0"));
+        
+        ChangeDTO change = only(compare(base, base.replace(UPDATED_VERSION.replace("12.0.0", "11.0.0"), "")));
+        
+        assertEquals(ChangeKind.REMOVED, change.kind());
+        assertEquals("tv1", change.xmiId());
+        assertEquals("11.0.0", property(change, "@value").before());
+    }
+    
+    @Test
+    void compare_ok_keepsAnUpdatedVersionWhenTheAstahVersionIsNotKnown() throws Exception {
+        ChangeDTO change = only(compare(xmi(BASE, "1.2.0.44"), xmi(BASE.replace(UPDATED_VERSION, ""), "1.2.0.44"), VERIFIED, ""));
+        
+        assertEquals("tv1", change.xmiId());
+    }
+    
+    @Test
+    void compare_ok_keepsTheUpdatedVersionOfADiagramRemoved() throws Exception {
+        int start = BASE.indexOf("<JUDE:Diagram xmi.id=\"d1\"");
+        String withoutDiagram = BASE.substring(0, start) + BASE.substring(BASE.indexOf("</JUDE:Diagram>", start) + "</JUDE:Diagram>".length());
+        
+        Run run = compare(BASE, withoutDiagram);
+        
+        assertTrue(run.changes().stream().anyMatch(change -> change.xmiId().equals("tv1") && change.kind() == ChangeKind.REMOVED), () -> run.changes().toString());
+        assertEquals(0, count(run, "diagramUpdatedVersion"));
+    }
+    
     @Test
     void compare_ok_stillComparesTheDepthOfOtherPresentations() throws Exception {
         ChangeDTO change = only(compare(BASE, BASE.replace("depth=\"3\"", "depth=\"1\"")));
-
+        
         assertEquals("1", property(change, "@depth").after());
     }
-
+    
     @Test
     void compare_ok_showsDecodedNamesAndComparesThemAsWritten() throws Exception {
         ChangeDTO change = only(compare(BASE, BASE.replace("name=\"Order\"", "name=\"New+Order\"")));
-
+        
         PropertyChangeDTO name = property(change, "@name");
         assertEquals("Order", name.before());
         assertEquals("New Order", name.after());
         assertEquals(ValueEncoding.DECODED, name.encoding());
         assertEquals("New Order", change.name());
     }
-
+    
     @Test
     void compare_ok_namesWhatAReferenceRefersTo() throws Exception {
         ChangeDTO change = only(compare(BASE, BASE.replace("<UML:Classifier xmi.idref=\"c2\"/>", "<UML:Classifier xmi.idref=\"c1\"/>")));
-
+        
         PropertyChangeDTO participant = property(change, "UML:AssociationEnd.participant/UML:Classifier/@xmi.idref");
         assertEquals("c2", participant.before());
         assertEquals("Customer", participant.beforeRefName());
         assertEquals("c1", participant.after());
         assertEquals("Order", participant.afterRefName());
     }
-
+    
     @Test
     void compare_ok_doesNotMatchRecreatedPartsOfAnXmiVersionNotChecked() throws Exception {
         String target = BASE.replace("\"m1\"", "\"m9\"").replace("\"r1\"", "\"r9\"");
-
+        
         Run run = compare(xmi(BASE, "1.2.0.45"), xmi(target, "1.2.0.45"), VERIFIED);
-
+        
         assertFalse(run.outcome().normalization().applied());
         // Both sides call for the same note, which is given once, for both
         assertEquals(1, run.outcome().warnings().size(), () -> run.outcome().warnings().toString());
@@ -477,39 +622,39 @@ public class ProjectDiffEngineTest {
         assertEquals(2, run.outcome().summary().removed());
         assertEquals(1, run.outcome().summary().modified());
     }
-
+    
     @Test
     void compare_ok_ordersAddedAndModifiedByTheTargetThenRemovedByTheBase() throws Exception {
         String target = BASE.replace("\"c3\"", "\"c8\"").replace("name=\"Customer\"", "name=\"Client\"");
-
+        
         Run run = compare(BASE, target);
-
+        
         assertEquals(List.of("c2", "c8", "c3"), run.changes().stream().map(ChangeDTO::xmiId).toList());
         assertEquals(List.of(ChangeKind.MODIFIED, ChangeKind.ADDED, ChangeKind.REMOVED), run.changes().stream().map(ChangeDTO::kind).toList());
     }
-
+    
     @Test
     void read_ng_refusesTwoElementsWithTheSameId() throws Exception {
         Path path = write("dup.xmi", xmi(BASE.replace("\"c3\"", "\"c2\""), "1.2.0.44"));
-
+        
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> XmiIndex.read(path, Long.MAX_VALUE));
         assertTrue(e.getMessage().contains("c2"), e.getMessage());
     }
-
+    
     @Test
     void read_ng_refusesAnXmiLargerThanTheLimit() throws Exception {
         Path path = write("big.xmi", xmi(BASE, "1.2.0.44"));
-
+        
         assertThrows(IllegalStateException.class, () -> XmiIndex.read(path, 100));
     }
-
+    
     @Test
     void read_ng_doesNotResolveExternalEntities() throws Exception {
         Path secret = write("secret.txt", "SECRET");
         String withEntity = "<?xml version=\"1.0\"?>\n<!DOCTYPE XMI [<!ENTITY x SYSTEM \"" + secret.toUri() + "\">]>\n"
                 + xmi(BASE.replace("kept+as+is", "&x;"), "1.2.0.44").replaceFirst("<\\?xml[^>]*>", "");
         Path path = write("entity.xmi", withEntity);
-
+        
         // The parser refuses the DTD rather than read the file it names
         assertThrows(IllegalStateException.class, () -> XmiIndex.read(path, Long.MAX_VALUE));
     }

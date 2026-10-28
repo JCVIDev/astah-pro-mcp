@@ -21,14 +21,14 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LinkEndToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private LinkEndTool tool;
     private Method getInfo;
     private Method setAggregation;
     private Method setComposition;
     private Method setNavigability;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -36,55 +36,55 @@ public class LinkEndToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/LinkEndToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new LinkEndTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             LinkEndTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setAggregation() method
         setAggregation = TestSupport.getAccessibleMethod(
             LinkEndTool.class,
             "setAggregation",
             LinkEndWithAggregationDTO.class);
-
+        
         // setComposition() method
         setComposition = TestSupport.getAccessibleMethod(
             LinkEndTool.class,
             "setComposition",
             LinkEndWithCompositionDTO.class);
-
+        
         // setNavigability() method
         setNavigability = TestSupport.getAccessibleMethod(
             LinkEndTool.class,
             "setNavigability",
             LinkEndWithNavigabilityDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get link end
         ILinkEnd linkEnd = (ILinkEnd) TestSupport.instance().getNamedElementByClassAndName(
             ILinkEnd.class,
             "fooLinkEnd");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(linkEnd.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -93,28 +93,28 @@ public class LinkEndToolTest {
             tool,
             inputDTO,
             LinkEndDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(linkEnd.getId(), outputDTO.namedElement().element().id());
         assertEquals(linkEnd.getNavigability(), outputDTO.navigability());
     }
-
+    
     @Test
     void setAggregation_ok() throws Exception {
         // Get link end
         ILinkEnd linkEnd = (ILinkEnd) TestSupport.instance().getNamedElementByClassAndName(
             ILinkEnd.class,
             "fooLinkEnd");
-
+        
         // Create input DTO
         LinkEndWithAggregationDTO inputDTO = new LinkEndWithAggregationDTO(
             linkEnd.getId(),
             true);
-
+        
         // Check aggregation before setting
         assertFalse(linkEnd.isAggregate());
-
+        
         // ----------------------------------------
         // Call setAggregation()
         // ----------------------------------------
@@ -123,29 +123,29 @@ public class LinkEndToolTest {
             tool,
             inputDTO,
             LinkEndDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check aggregation after setting
         assertTrue(linkEnd.isAggregate());
     }
-
+    
     @Test
     void setComposition_ok() throws Exception {
         // Get link end
         ILinkEnd linkEnd = (ILinkEnd) TestSupport.instance().getNamedElementByClassAndName(
             ILinkEnd.class,
             "fooLinkEnd");
-
+        
         // Create input DTO
         LinkEndWithCompositionDTO inputDTO = new LinkEndWithCompositionDTO(
             linkEnd.getId(),
             true);
-
+        
         // Check composition before setting
         assertFalse(linkEnd.isComposite());
-
+        
         // ----------------------------------------
         // Call setComposition()
         // ----------------------------------------
@@ -154,29 +154,29 @@ public class LinkEndToolTest {
             tool,
             inputDTO,
             LinkEndDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check composition after setting
         assertTrue(linkEnd.isComposite());
     }
-
+    
     @Test
     void setNavigability_ok() throws Exception {
         // Get link end
         ILinkEnd linkEnd = (ILinkEnd) TestSupport.instance().getNamedElementByClassAndName(
             ILinkEnd.class,
             "fooLinkEnd");
-
+        
         // Create input DTO
         LinkEndWithNavigabilityDTO inputDTO = new LinkEndWithNavigabilityDTO(
             linkEnd.getId(),
             NavigabilityKind.NAVIGABLE);
-
+        
         // Check navigability before setting
         assertNotEquals("Navigable", linkEnd.getNavigability());
-
+        
         // ----------------------------------------
         // Call setNavigability()
         // ----------------------------------------
@@ -185,22 +185,22 @@ public class LinkEndToolTest {
             tool,
             inputDTO,
             LinkEndDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("Navigable", outputDTO.navigability());
-
+        
         // Check navigability after setting
         assertEquals("Navigable", linkEnd.getNavigability());
     }
-
+    
     @Test
     void setNavigability_unspecifiedAfterNonNavigable_ok() throws Exception {
         // Get link end
         ILinkEnd linkEnd = (ILinkEnd) TestSupport.instance().getNamedElementByClassAndName(
             ILinkEnd.class,
             "fooLinkEnd");
-
+        
         // ----------------------------------------
         // Call setNavigability()
         // ----------------------------------------
@@ -209,11 +209,11 @@ public class LinkEndToolTest {
             tool,
             new LinkEndWithNavigabilityDTO(linkEnd.getId(), NavigabilityKind.NON_NAVIGABLE),
             LinkEndDTO.class);
-
+        
         // Check that non_navigable is told apart from unspecified
         assertEquals("Non_Navigable", nonNavigableOutputDTO.navigability());
         assertEquals("Non_Navigable", linkEnd.getNavigability());
-
+        
         // ----------------------------------------
         // Call setNavigability()
         // ----------------------------------------
@@ -222,12 +222,12 @@ public class LinkEndToolTest {
             tool,
             new LinkEndWithNavigabilityDTO(linkEnd.getId(), NavigabilityKind.UNSPECIFIED),
             LinkEndDTO.class);
-
+        
         // Check that the navigability is cleared
         assertEquals("Unspecified", unspecifiedOutputDTO.navigability());
         assertEquals("Unspecified", linkEnd.getNavigability());
     }
-
+    
     @Test
     void setNavigability_nullNavigabilityKind_ng() throws Exception {
         // Get link end
@@ -235,12 +235,12 @@ public class LinkEndToolTest {
             ILinkEnd.class,
             "fooLinkEnd");
         String navigabilityBefore = linkEnd.getNavigability();
-
+        
         // Create input DTO
         LinkEndWithNavigabilityDTO inputDTO = new LinkEndWithNavigabilityDTO(
             linkEnd.getId(),
             null);
-
+        
         // ----------------------------------------
         // Call setNavigability()
         // ----------------------------------------
@@ -251,11 +251,11 @@ public class LinkEndToolTest {
                 inputDTO,
                 LinkEndDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("navigabilityKind must be one of"));
-
+        
         // Check that the navigability did not change
         assertEquals(navigabilityBefore, linkEnd.getNavigability());
     }

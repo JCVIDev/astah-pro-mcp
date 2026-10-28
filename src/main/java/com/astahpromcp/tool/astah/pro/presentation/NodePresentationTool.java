@@ -30,19 +30,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/presentation/INodePresentation.html
 @Slf4j
 public class NodePresentationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public NodePresentationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -52,29 +52,28 @@ public class NodePresentationTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_node_prst_rectangle",
                 "Return the rectangle of the specified node presentation (specified by ID).",
                 this::getNodePresentationRectangle,
                 IdDTO.class,
                 RectangleDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_node_prst_location",
                 "Set the location (specified by x and y coordinates) of the specified node presentation (specified by ID), and return its rectangle after setting along with the updated diagram image in low resolution.",
                 this::setNodePresentationLocation,
                 NodePresentationWithLocationDTO.class,
                 RectangleDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_node_prst_width",
                 "Set the width of the specified node presentation (specified by ID), and return its rectangle after setting along with the updated diagram image in low resolution.",
                 this::setNodePresentationWidth,
                 NodePresentationWithWidthDTO.class,
                 RectangleDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_node_prst_height",
                 "Set the height of the specified node presentation (specified by ID), and return its rectangle after setting along with the updated diagram image in low resolution.",
@@ -83,28 +82,28 @@ public class NodePresentationTool extends AstahToolProvider {
                 RectangleDTO.class)
         );
     }
-
+    
     private NodePresentationDTO getInfo(IdDTO param) throws Exception {
         INodePresentation nodePresentation = astahProToolSupport.getNodePresentation(param.id());
-
+        
         return NodePresentationDTOAssembler.toDTO(nodePresentation);
     }
-
+    
     private RectangleDTO getNodePresentationRectangle(IdDTO param) throws Exception {
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(param.id());
-
+        
         Rectangle2D rectangle2D = astahNodePresentation.getRectangle();
         return RectangleDTOAssembler.toDTO(rectangle2D);
     }
-
+    
     private Pair<RectangleDTO, List<McpSchema.Content>> setNodePresentationLocation(NodePresentationWithLocationDTO param) throws Exception {
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(param.nodePresentationId());
-
+        
         try {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahNodePresentation.setLocation(new Point2D.Double(param.locationX(), param.locationY()));
             });
-
+            
         } catch (InvalidEditingException e) {
             if (Type.COMBINED_FRAGMENT.matches(astahNodePresentation.getType())) {
                 throw new InvalidEditingException(
@@ -116,26 +115,26 @@ public class NodePresentationTool extends AstahToolProvider {
                     e.getMessage() + " If this presentation cannot be moved or resized on this diagram, delete it and create it again at the location and size you want.");
             }
         }
-
+        
         Rectangle2D rectangle2D = astahNodePresentation.getRectangle();
         RectangleDTO dto = RectangleDTOAssembler.toDTO(rectangle2D);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(astahNodePresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<RectangleDTO, List<McpSchema.Content>> setNodePresentationWidth(NodePresentationWithWidthDTO param) throws Exception {
         if (param.width() <= 0) {
             throw new IllegalArgumentException("The width of a node presentation must be greater than 0: " + param.width());
         }
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(param.nodePresentationId());
-
+        
         try {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahNodePresentation.setWidth(param.width());
             });
-
+            
         } catch (InvalidEditingException e) {
             if (Type.COMBINED_FRAGMENT.matches(astahNodePresentation.getType())) {
                 throw new InvalidEditingException(
@@ -151,26 +150,26 @@ public class NodePresentationTool extends AstahToolProvider {
                     e.getMessage() + " The width may be below the minimum this presentation allows. Try a larger width; deleting the presentation does not get around this.");
             }
         }
-
+        
         Rectangle2D rectangle2D = astahNodePresentation.getRectangle();
         RectangleDTO dto = RectangleDTOAssembler.toDTO(rectangle2D);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(astahNodePresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<RectangleDTO, List<McpSchema.Content>> setNodePresentationHeight(NodePresentationWithHeightDTO param) throws Exception {
         if (param.height() <= 0) {
             throw new IllegalArgumentException("The height of a node presentation must be greater than 0: " + param.height());
         }
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(param.nodePresentationId());
-
+        
         try {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahNodePresentation.setHeight(param.height());
             });
-
+            
         } catch (InvalidEditingException e) {
             if (Type.COMBINED_FRAGMENT.matches(astahNodePresentation.getType())) {
                 throw new InvalidEditingException(
@@ -186,12 +185,12 @@ public class NodePresentationTool extends AstahToolProvider {
                     e.getMessage() + " The height may be below the minimum this presentation allows, or fixed, as for a lifeline on a sequence diagram. Deleting the presentation does not get around this.");
             }
         }
-
+        
         Rectangle2D rectangle2D = astahNodePresentation.getRectangle();
         RectangleDTO dto = RectangleDTOAssembler.toDTO(rectangle2D);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(astahNodePresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

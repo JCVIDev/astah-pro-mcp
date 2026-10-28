@@ -8,7 +8,7 @@ public record LabelIdTypeDTO(
     
     @JsonPropertyDescription("Identifier")
     String id,
-
+    
     @JsonPropertyDescription("Type")
     String type
 ) {

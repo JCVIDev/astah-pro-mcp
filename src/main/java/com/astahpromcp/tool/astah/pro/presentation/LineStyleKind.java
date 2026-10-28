@@ -14,23 +14,23 @@ public enum LineStyleKind {
     CURVE_RIGHT_ANGLE("curve_right_angle"),
     @JsonProperty("unknown")
     UNKNOWN(null);
-
+    
     public final String astahValue;
-
+    
     private LineStyleKind(String astahValue) {
         this.astahValue = astahValue;
     }
-
+    
     public static LineStyleKind getCorrespondingType(String astahValue) {
         if (astahValue == null) {
             return UNKNOWN;
         }
-
+        
         for (LineStyleKind kind : values()) {
             if (astahValue.equals(kind.astahValue)) {
                 return kind;
             }
         }
-        return UNKNOWN;   
+        return UNKNOWN;
     }
 }

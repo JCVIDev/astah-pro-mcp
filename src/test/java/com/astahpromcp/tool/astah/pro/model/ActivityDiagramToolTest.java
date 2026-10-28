@@ -18,12 +18,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ActivityDiagramToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ActivityDiagramTool tool;
     private Method getInfo;
     private Method getActivity;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -31,43 +31,43 @@ public class ActivityDiagramToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ActivityDiagramTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ActivityDiagramTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ActivityDiagramTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // getActivity() method
         getActivity = TestSupport.getAccessibleMethod(
             ActivityDiagramTool.class,
             "getActivity",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get activity diagram
         IActivityDiagram activityDiagram = (IActivityDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IActivityDiagram.class,
             "Activity Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(activityDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -76,21 +76,21 @@ public class ActivityDiagramToolTest {
             tool,
             inputDTO,
             ActivityDiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getActivity_ok() throws Exception {
         // Get activity diagram
         IActivityDiagram activityDiagram = (IActivityDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IActivityDiagram.class,
             "Activity Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(activityDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getActivity()
         // ----------------------------------------
@@ -99,7 +99,7 @@ public class ActivityDiagramToolTest {
             tool,
             inputDTO,
             ActivityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

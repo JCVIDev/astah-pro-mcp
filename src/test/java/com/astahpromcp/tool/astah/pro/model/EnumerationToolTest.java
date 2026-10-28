@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EnumerationToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private EnumerationTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class EnumerationToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/EnumerationToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new EnumerationTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             EnumerationTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get enumeration
         IEnumeration enumeration = (IEnumeration) TestSupport.instance().getNamedElementByClassAndName(
             IEnumeration.class,
             "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(enumeration.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class EnumerationToolTest {
             tool,
             inputDTO,
             EnumerationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AssociationClassToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private AssociationClassTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class AssociationClassToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/AssociationClassToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new AssociationClassTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             AssociationClassTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get association class
         IAssociationClass associationClass = (IAssociationClass) TestSupport.instance().getNamedElementByClassAndName(
             IAssociationClass.class,
             "AssociationClass0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(associationClass.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class AssociationClassToolTest {
             tool,
             inputDTO,
             AssociationClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("AssociationClass0", outputDTO.class_().namedElement().name());

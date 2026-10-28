@@ -12,58 +12,58 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NoThumbnailImageCaptureSupportTest {
-
+    
     // Both collaborators are null on purpose: reaching either of them would mean the capture was attempted after all, and the test would fail with a NullPointerException rather than quietly passing.
     private static NoThumbnailImageCaptureSupport supportThatCannotCapture(Path outputDir) {
         return new NoThumbnailImageCaptureSupport(null, null, outputDir);
     }
-
+    
     @Test
     void createThumbnailContent_ok_answersWithoutCapturingAnything(@TempDir Path outputDir) throws Exception {
         McpSchema.Content content = supportThatCannotCapture(outputDir).createThumbnailContent("any-diagram-id");
-
+        
         assertNotNull(content, "The editing tools pass this into List.of(...), which rejects null");
         McpSchema.ImageContent image = assertInstanceOf(McpSchema.ImageContent.class, content);
         assertEquals("", image.data());
         assertEquals("image/png", image.mimeType());
     }
-
+    
     // The capture writes the exported diagram, a backup and the re-encoded copy for every single edit, which is most of what it costs. Nothing of the sort may happen here.
     @Test
     void createThumbnailContent_ok_writesNothingToDisk(@TempDir Path outputDir) throws Exception {
         NoThumbnailImageCaptureSupport support = supportThatCannotCapture(outputDir);
-
+        
         for (int i = 0; i < 20; i++) {
             support.createThumbnailContent("diagram-" + i);
         }
-
+        
         try (Stream<Path> entries = Files.list(outputDir)) {
             assertEquals(0, entries.count(), "Skipping the capture must not leave files behind");
         }
     }
-
+    
     @Test
     void createThumbnailContent_ok_isCheapEnoughToBeFreeInPractice(@TempDir Path outputDir) throws Exception {
         NoThumbnailImageCaptureSupport support = supportThatCannotCapture(outputDir);
-
+        
         long startNanos = System.nanoTime();
         for (int i = 0; i < 1_000; i++) {
             support.createThumbnailContent("diagram");
         }
         long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000;
-
+        
         // One real capture costs about 300 ms; a thousand of these must not come near that.
         assertTrue(elapsedMillis < 100,
                 "1000 skipped captures took " + elapsedMillis + " ms, so something is still being rendered");
     }
-
+    
     // Only the after-the-edit thumbnail is dropped. A capture the caller actually asked for still goes through the inherited implementation, which is what keeps capture_dgm_img and its siblings working on every profile.
     @Test
     void createThumbnailContent_ok_overridesOnlyTheThumbnail() throws Exception {
         assertEquals(NoThumbnailImageCaptureSupport.class,
                 NoThumbnailImageCaptureSupport.class.getMethod("createThumbnailContent", String.class)
                         .getDeclaringClass());
-
+        
         for (String inherited : new String[]{"createLargeImageContent", "createCroppedImageContent",
                 "createWindowImageContent"}) {
             boolean overridden = Arrays.stream(NoThumbnailImageCaptureSupport.class.getDeclaredMethods())

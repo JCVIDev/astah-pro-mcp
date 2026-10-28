@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 public class RealizationDTOAssembler {
     public static RealizationDTO toDTO(@NonNull IRealization astahRealization) throws Exception {
-
+        
         return new RealizationDTO(
             NamedElementDTOAssembler.toDTO(astahRealization),
             NameIdTypeDTOAssembler.toDTO(astahRealization.getClient()),

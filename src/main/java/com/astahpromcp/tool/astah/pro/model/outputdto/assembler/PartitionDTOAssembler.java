@@ -12,45 +12,45 @@ import java.util.List;
 
 public class PartitionDTOAssembler {
     public static PartitionDTO toDTO(@NonNull IPartition astahPartition) throws Exception {
-
+        
         List<NameIdTypeDTO> activityNodes = new ArrayList<>();
         for (IActivityNode astahActivityNode : astahPartition.getActivityNodes()) {
             activityNodes.add(NameIdTypeDTOAssembler.toDTO(astahActivityNode));
         }
-
+        
         NameIdTypeDTO previousPartition;
         if (astahPartition.getPreviousPartition() != null) {
             previousPartition = NameIdTypeDTOAssembler.toDTO(astahPartition.getPreviousPartition());
         } else {
             previousPartition = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO nextPartition;
         if (astahPartition.getNextPartition() != null) {
             nextPartition = NameIdTypeDTOAssembler.toDTO(astahPartition.getNextPartition());
         } else {
             nextPartition = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO superPartition;
         if (astahPartition.getSuperPartition() != null) {
             superPartition = NameIdTypeDTOAssembler.toDTO(astahPartition.getSuperPartition());
         } else {
             superPartition = NameIdTypeDTO.empty();
         }
-
+        
         List<NameIdTypeDTO> subPartitions = new ArrayList<>();
         for (IPartition astahSubPartition : astahPartition.getSubPartitions()) {
             subPartitions.add(NameIdTypeDTOAssembler.toDTO(astahSubPartition));
         }
-
+        
         NameIdTypeDTO represents;
         if (astahPartition.getRepresents() != null) {
             represents = NameIdTypeDTOAssembler.toDTO(astahPartition.getRepresents());
         } else {
             represents = NameIdTypeDTO.empty();
         }
-
+        
         return new PartitionDTO(
             NamedElementDTOAssembler.toDTO(astahPartition),
             activityNodes,

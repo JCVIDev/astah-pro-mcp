@@ -20,17 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IPartition.html
 @Slf4j
 public class PartitionTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public PartitionTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,16 +40,14 @@ public class PartitionTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 PartitionDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_represents_of_partition",
                 "Set the element (specified by ID) that the specified partition (specified by ID) represents, and return the model element of the partition after it is set. The partition header then shows the name of the represented element instead of the partition's label.",
                 this::setRepresents,
                 PartitionWithRepresentsDTO.class,
                 PartitionDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "remove_represents_from_partition",
                 "Remove the represented element from the specified partition (specified by ID), and return the model element of the partition after it is removed.",
@@ -58,31 +56,31 @@ public class PartitionTool extends AstahToolProvider {
                 PartitionDTO.class)
         );
     }
-
+    
     private PartitionDTO getInfo(IdDTO param) throws Exception {
         IPartition astahPartition = astahProToolSupport.getPartition(param.id());
-
+        
         return PartitionDTOAssembler.toDTO(astahPartition);
     }
-
+    
     private PartitionDTO setRepresents(PartitionWithRepresentsDTO param) throws Exception {
         IPartition astahPartition = astahProToolSupport.getPartition(param.targetPartitionId());
         INamedElement astahRepresents = astahProToolSupport.getNamedElement(param.representsId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahPartition.setRepresents(astahRepresents);
         });
-
+        
         return PartitionDTOAssembler.toDTO(astahPartition);
     }
-
+    
     private PartitionDTO removeRepresents(IdDTO param) throws Exception {
         IPartition astahPartition = astahProToolSupport.getPartition(param.id());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahPartition.setRepresents(null);
         });
-
+        
         return PartitionDTOAssembler.toDTO(astahPartition);
     }
 }

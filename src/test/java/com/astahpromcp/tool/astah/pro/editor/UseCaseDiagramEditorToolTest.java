@@ -18,11 +18,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class UseCaseDiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private UseCaseDiagramEditorTool tool;
     private Method createUseCaseDiagram;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -31,41 +31,41 @@ public class UseCaseDiagramEditorToolTest {
         UseCaseDiagramEditor useCaseDiagramEditor = projectAccessor.getDiagramEditorFactory().getUseCaseDiagramEditor();
         projectAccessor.open("src/test/resources/modelfile/editor/UseCaseDiagramEditorToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new UseCaseDiagramEditorTool(
             projectAccessor,
             transactionSupport,
             useCaseDiagramEditor,
             astahProToolSupport);
-
+        
         // createUseCaseDiagram() method
         createUseCaseDiagram = TestSupport.getAccessibleMethod(
             UseCaseDiagramEditorTool.class,
             "createUseCaseDiagram",
             NewUseCaseDiagramDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createUseCaseDiagram_ok() throws Exception {
         // Get package
         IPackage astahPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewUseCaseDiagramDTO inputDTO = new NewUseCaseDiagramDTO(
             astahPackage.getId(),
             "Test Use Case Diagram"
         );
-
+        
         // ----------------------------------------
         // Call createUseCaseDiagram()
         // ----------------------------------------
@@ -74,7 +74,7 @@ public class UseCaseDiagramEditorToolTest {
             tool,
             inputDTO,
             DiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

@@ -38,12 +38,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BasicDiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private BasicDiagramEditorTool tool;
     private Method createNote;
     private Method createNoteAnchor;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -55,7 +55,7 @@ public class BasicDiagramEditorToolTest {
         ImageCaptureSupport imageCaptureSupport = mock(ImageCaptureSupport.class);
         when(imageCaptureSupport.createThumbnailContent(anyString()))
             .thenReturn(McpSchema.ImageContent.builder("", "image/png").build());
-
+        
         // Tool
         tool = new BasicDiagramEditorTool(
             projectAccessor,
@@ -63,41 +63,41 @@ public class BasicDiagramEditorToolTest {
             astahProToolSupport,
             diagramEditorSupport,
             imageCaptureSupport);
-
+        
         // createNote() method
         createNote = TestSupport.getAccessibleMethod(
             BasicDiagramEditorTool.class,
             "createNote",
             NewNoteDTO.class);
-
+        
         // createNoteAnchor() method
         createNoteAnchor = TestSupport.getAccessibleMethod(
             BasicDiagramEditorTool.class,
             "createNoteAnchor",
             NewNoteAnchorDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createNote_ok_1() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         NewNoteDTO inputDTO = new NewNoteDTO(
             classDiagram.getId(),
             "Test Note",
             100,
             200);
-
+        
         // ----------------------------------------
         // Call createNote()
         // ----------------------------------------
@@ -106,25 +106,25 @@ public class BasicDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createNote_ok_2() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         NewNoteDTO inputDTO = new NewNoteDTO(
             classDiagram.getId(),
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             100,
             200);
-
+        
         // ----------------------------------------
         // Call createNote()
         // ----------------------------------------
@@ -133,20 +133,20 @@ public class BasicDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created note
         INodePresentation createdNote = (INodePresentation) TestSupport.instance().getPresentationById(
             outputDTO.presentation().id());
-
+        
         // Check with the created note
         assertEquals(800.0, createdNote.getWidth(), 0.1);
         assertEquals(100.0, createdNote.getLocation().getX(), 0.1);
         assertEquals(200.0, createdNote.getLocation().getY(), 0.1);
     }
-
+    
     @Test
     void createNote_ng_tooWideOnSequenceDiagram() throws Exception {
         // Get sequence diagram
@@ -154,14 +154,14 @@ public class BasicDiagramEditorToolTest {
             ISequenceDiagram.class,
             "Sequence Diagram0");
         int notesBefore = countNotes(sequenceDiagram);
-
+        
         // Create input DTO
         NewNoteDTO inputDTO = new NewNoteDTO(
             sequenceDiagram.getId(),
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             100,
             200);
-
+        
         // ----------------------------------------
         // Call createNote()
         // ----------------------------------------
@@ -170,7 +170,7 @@ public class BasicDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class));
-
+        
         // Check exception
         String message = exception.getCause().getMessage();
         assertTrue(message.startsWith("The note cannot be created on this diagram as it is."), message);
@@ -178,18 +178,18 @@ public class BasicDiagramEditorToolTest {
         assertTrue(message.contains(String.format("at most %.1f points wide", BasicDiagramEditorTool.NOTE_MAX_WIDTH)), message);
         InvalidEditingException cause = assertInstanceOf(InvalidEditingException.class, exception.getCause().getCause());
         assertEquals(InvalidEditingException.UNSUPPORTED_ELEMENT_ERROR_KEY, cause.getKey());
-
+        
         // Check no note is created
         assertEquals(notesBefore, countNotes(sequenceDiagram));
     }
-
+    
     @Test
     void createNote_ok_wrappedOnSequenceDiagram() throws Exception {
         // Get sequence diagram
         ISequenceDiagram sequenceDiagram = (ISequenceDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ISequenceDiagram.class,
             "Sequence Diagram0");
-
+        
         // Create input DTO, with line breaks that keep every line within the limit
         NewNoteDTO inputDTO = new NewNoteDTO(
             sequenceDiagram.getId(),
@@ -198,7 +198,7 @@ public class BasicDiagramEditorToolTest {
                 + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             100,
             200);
-
+        
         // ----------------------------------------
         // Call createNote()
         // ----------------------------------------
@@ -207,35 +207,35 @@ public class BasicDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check with the created note
         INodePresentation createdNote = (INodePresentation) TestSupport.instance().getPresentationById(outputDTO.presentation().id());
         assertTrue(createdNote.getWidth() <= BasicDiagramEditorTool.NOTE_MAX_WIDTH, "width=" + createdNote.getWidth());
     }
-
+    
     @Test
     void createNoteAnchor_ok() throws Exception {
         // Get class diagram
         IClassDiagram astahClassDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Get note
         INodePresentation astahNote = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Note",
             "Note0");
-
+        
         // Get class (node presentation)
         INodePresentation astahClassFoo = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Class",
             "Foo");
-
+        
         // Create input DTO
         NewNoteAnchorDTO inputDTO = new NewNoteAnchorDTO(
             astahClassDiagram.getId(),
             astahNote.getID(),
             astahClassFoo.getID());
-
+        
         // ----------------------------------------
         // Call createNoteAnchor()
         // ----------------------------------------
@@ -244,42 +244,42 @@ public class BasicDiagramEditorToolTest {
             tool,
             inputDTO,
             LinkPresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createNoteAnchor_ng_noteOnAnotherDiagram() throws Exception {
         INodePresentation[] elsewhere = drawNoteAndClassOnAnotherDiagram();
-
+        
         assertNoteAnchorRejected(
             elsewhere[0],
             getNodePresentation("Class", "Foo"),
             "'Another Class Diagram'");
     }
-
+    
     @Test
     void createNoteAnchor_ng_targetOnAnotherDiagram() throws Exception {
         INodePresentation[] elsewhere = drawNoteAndClassOnAnotherDiagram();
-
+        
         assertNoteAnchorRejected(
             getNodePresentation("Note", "Note0"),
             elsewhere[1],
             "'Another Class Diagram'");
     }
-
+    
     @Test
     void createNoteAnchor_ng_bothOnAnotherDiagram() throws Exception {
         INodePresentation[] elsewhere = drawNoteAndClassOnAnotherDiagram();
-
+        
         // Astah would draw the anchor on the target diagram, where neither end is
         assertNoteAnchorRejected(
             elsewhere[0],
             elsewhere[1],
             "'Another Class Diagram'");
     }
-
+    
     @Test
     void createNoteAnchor_ng_notANote() throws Exception {
         assertNoteAnchorRejected(
@@ -287,16 +287,16 @@ public class BasicDiagramEditorToolTest {
             getNodePresentation("Note", "Note0"),
             "is not a note");
     }
-
+    
     @Test
     void createNoteAnchor_ng_alreadyAnchored() throws Exception {
         INodePresentation note = getNodePresentation("Note", "Note0");
         INodePresentation foo = getNodePresentation("Class", "Foo");
         String anchorId = invokeCreateNoteAnchor(note, foo).presentation().id();
-
+        
         assertNoteAnchorRejected(note, foo, anchorId);
     }
-
+    
     @Test
     void createNoteAnchor_ng_alreadyAnchoredFromTheOtherNote() throws Exception {
         INodePresentation note = getNodePresentation("Note", "Note0");
@@ -307,11 +307,11 @@ public class BasicDiagramEditorToolTest {
                 new NewNoteDTO(getClassDiagram0().getId(), "Other Note", 100, 300),
                 NodePresentationDTO.class).presentation().id());
         String anchorId = invokeCreateNoteAnchor(note, otherNote).presentation().id();
-
+        
         // A note anchor has no direction, so the reversed pair is the same anchor
         assertNoteAnchorRejected(otherNote, note, anchorId);
     }
-
+    
     @Test
     void createNote_ok_succeedsWithANoticeWhenOnlyTheThumbnailFails(@TempDir Path workspace) throws Exception {
         // A plain file where the image output directory must go makes every thumbnail fail, on every platform.
@@ -323,13 +323,13 @@ public class BasicDiagramEditorToolTest {
             astahProToolSupport,
             new DiagramEditorSupport(projectAccessor),
             new ImageCaptureSupport(astahProToolSupport, new SystemPropertySupport(), imageOutputDir));
-
+        
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
         int notesBefore = countNotes(classDiagram);
-
+        
         // ----------------------------------------
         // Call create_note through its tool handler
         // ----------------------------------------
@@ -338,7 +338,7 @@ public class BasicDiagramEditorToolTest {
             "noteContent", "Test Note",
             "locationX", 100,
             "locationY", 200));
-
+        
         // Check the result and the diagram
         assertFalse(result.isError(), "Only the thumbnail failed, so the call must succeed: " + result.content());
         assertNotNull(result.structuredContent(), "The created note must still be returned");
@@ -346,25 +346,25 @@ public class BasicDiagramEditorToolTest {
         assertTrue(notice.contains("do not repeat it"), "The notice must keep the client from creating the note again: " + notice);
         assertEquals(notesBefore + 1, countNotes(classDiagram), "The note must be created exactly once");
     }
-
+    
     private void assertNoteAnchorRejected(INodePresentation note, INodePresentation target, String expectedMessagePart) throws Exception {
         int noteLinksBefore = note.getLinks().length;
         int targetLinksBefore = target.getLinks().length;
-
+        
         // ----------------------------------------
         // Call createNoteAnchor()
         // ----------------------------------------
         Exception exception = assertThrows(Exception.class, () -> invokeCreateNoteAnchor(note, target));
-
+        
         // Check exception
         IllegalArgumentException cause = assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(cause.getMessage().contains(expectedMessagePart), cause.getMessage());
-
+        
         // Check no note anchor is created
         assertEquals(noteLinksBefore, note.getLinks().length);
         assertEquals(targetLinksBefore, target.getLinks().length);
     }
-
+    
     private LinkPresentationDTO invokeCreateNoteAnchor(INodePresentation note, INodePresentation target) throws Exception {
         return TestSupport.instance().invokeToolMethodReturningDtoAndContents(
             createNoteAnchor,
@@ -372,7 +372,7 @@ public class BasicDiagramEditorToolTest {
             new NewNoteAnchorDTO(getClassDiagram0().getId(), note.getID(), target.getID()),
             LinkPresentationDTO.class);
     }
-
+    
     private INodePresentation[] drawNoteAndClassOnAnotherDiagram() throws Exception {
         return new TransactionSupport(projectAccessor.getTransactionManager()).call(() -> {
             IClass clazz = projectAccessor.getModelEditorFactory().getBasicModelEditor().createClass(projectAccessor.getProject(), "Elsewhere");
@@ -384,26 +384,26 @@ public class BasicDiagramEditorToolTest {
             };
         });
     }
-
+    
     private static IClassDiagram getClassDiagram0() {
         return (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
     }
-
+    
     private static INodePresentation getNodePresentation(String type, String label) {
         return (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(type, label);
     }
-
+    
     private static McpSchema.CallToolResult call(BasicDiagramEditorTool tool, String toolName, Map<String, Object> arguments) {
         ToolDefinition definition = tool.createToolDefinitions().stream()
             .filter(candidate -> candidate.toolSchema().name().equals(toolName))
             .findFirst()
             .orElseThrow(() -> new AssertionError("No tool function is named " + toolName));
-
+        
         return definition.toolHandler().apply(null, new McpSchema.CallToolRequest(toolName, arguments, null));
     }
-
+    
     private static int countNotes(IDiagram diagram) throws Exception {
         int notes = 0;
         for (IPresentation presentation : diagram.getPresentations()) {

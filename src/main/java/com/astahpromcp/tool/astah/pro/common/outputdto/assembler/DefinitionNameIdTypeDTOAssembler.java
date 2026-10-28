@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 public class DefinitionNameIdTypeDTOAssembler {
     public static DefinitionNameIdTypeDTO toDTO(@NonNull INamedElement namedElement) throws Exception {
-
+        
         return new DefinitionNameIdTypeDTO(
             namedElement.getDefinition(),
             namedElement.getName(),

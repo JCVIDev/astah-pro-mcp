@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record GateDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Interaction use")
     NameIdTypeDTO interactionUse,
-
+    
     @JsonPropertyDescription("Message")
     NameIdTypeDTO message
 ) {

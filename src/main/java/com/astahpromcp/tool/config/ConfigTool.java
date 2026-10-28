@@ -16,7 +16,7 @@ public class ConfigTool implements ToolProvider {
     
     public ConfigTool() {
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -28,7 +28,7 @@ public class ConfigTool implements ToolProvider {
                 WorkspaceDirectoryPathDTO.class)
         );
     }
-
+    
     private WorkspaceDirectoryPathDTO getWorkspaceDirectoryPath(NoInputDTO param) throws Exception {
         return new WorkspaceDirectoryPathDTO(McpServerConfig.WORKSPACE_DIR.toString());
     }

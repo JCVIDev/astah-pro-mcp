@@ -3,8 +3,8 @@ package com.astahpromcp.tool.astah.pro.guide;
 import com.astahpromcp.tool.ToolDefinition;
 import com.astahpromcp.tool.ToolProvider;
 import com.astahpromcp.tool.ToolSupport;
-import com.astahpromcp.tool.astah.pro.common.outputdto.GuideDTO;
 import com.astahpromcp.tool.common.inputdto.NoInputDTO;
+import com.astahpromcp.tool.common.outputdto.GuideDTO;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import com.change_vision.jude.api.inf.model.INamedElement;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +14,13 @@ import java.util.List;
 
 @Slf4j
 public class AstahProMcpGuideTool implements ToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
-
+    
     public AstahProMcpGuideTool(ProjectAccessor projectAccessor) {
         this.projectAccessor = projectAccessor;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -32,13 +32,13 @@ public class AstahProMcpGuideTool implements ToolProvider {
                     NoInputDTO.class,
                     GuideDTO.class)
             );
-
+            
         } catch (Exception e) {
             log.error("Failed to create astah pro mcp guide tools", e);
             return List.of();
         }
     }
-
+    
     private GuideDTO getGuide(NoInputDTO param) throws Exception {
         // If the Astah project is not open, create a new one.
         if (!projectAccessor.hasProject()) {
@@ -48,7 +48,7 @@ public class AstahProMcpGuideTool implements ToolProvider {
                 throw new RuntimeException("Failed to create project (root package).", e);
             }
         }
-
+        
         // getPrimitiveTypes() yields a null where a primitive type has been renamed, and reading a name from that null would fail this guide, so the nulls are skipped.
         List<String> primitiveTypeNames = new ArrayList<>();
         for (INamedElement primitiveType : projectAccessor.getPrimitiveTypes()) {
@@ -57,7 +57,7 @@ public class AstahProMcpGuideTool implements ToolProvider {
             }
         }
         primitiveTypeNames.sort(null);
-
+        
         String primitiveTypes = "";
         for (String primitiveTypeName : primitiveTypeNames) {
             primitiveTypes += primitiveTypeName + System.lineSeparator();
@@ -73,7 +73,7 @@ IMPORTANT POINTS to Keep in Mind:
 * Astah has only one project open at a time, and that project is shared by all agents and subagents. You may create new Astah projects freely, but even when work is split across multiple working directories (for example, git worktrees), NEVER duplicate an existing Astah project file into any of them.
 * When you create a new diagram, you MUST create and refine a preliminary layout of that diagram first, by calling the preliminary layout steps tool and performing the work in strict accordance with the steps it returns. Do this after you have decided what the diagram is to show - the elements to appear on it and the relationships between them - and immediately before you begin working out where on the diagram its presentations are to be placed. Do not do it while what the diagram is to show is still undecided, and do not do it once you have begun deciding where a presentation goes. Whether the diagram itself has been created by then makes no difference to this timing. Lay the diagram out in accordance with the preliminary layout once that layout has been finalized.
 * As part of drawing a new diagram, create a note in the upper-left corner of the diagram that describes what the diagram is meant to illustrate. This note describes the diagram as a whole rather than any particular element, so NEVER connect it to an element with a note anchor.
-* As part of drawing a new diagram, insert an SVG illustrative graphic in the upper-right corner of the diagram that represents the content of the diagram. If your edits make an existing illustrative graphic no longer represent the content of the diagram, replace it with one inserted in the same way.
+* As part of drawing a new diagram, insert an SVG illustrative graphic in the upper-right corner of the diagram that represents the content of the diagram. Draw it as a sophisticated, text-free illustration of the subject, never as a cheap-looking one. Write colors as #RRGGBB, because rgba(), hsl() and var() are rendered black. If your edits make an existing illustrative graphic no longer represent the content of the diagram, replace it with one inserted in the same way.
 * Immediately after creating a new class, interface, or enumeration element, describe the responsibility of that element in the element's definition field.
 * When you place new elements on the diagram or your edits resize existing ones, as a final check, be sure to re-verify that the placement coordinates of those elements are appropriate and properly aligned (e.g., centered alignment, top-edge alignment, etc.), and always make any necessary fine adjustments to their coordinates.
 * When creating a presentation on a diagram that corresponds to a model, you must provide not only the diagram information but also the information of the corresponding model. In contrast, some presentations, such as notes, need no corresponding model information when they are created.  

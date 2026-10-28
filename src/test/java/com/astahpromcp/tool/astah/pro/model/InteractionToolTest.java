@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InteractionToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private InteractionTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class InteractionToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/InteractionToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new InteractionTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             InteractionTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get interaction
         IInteraction interaction = (IInteraction) TestSupport.instance().getNamedElementByClassAndName(
             IInteraction.class,
             "");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(interaction.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class InteractionToolTest {
             tool,
             inputDTO,
             InteractionDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

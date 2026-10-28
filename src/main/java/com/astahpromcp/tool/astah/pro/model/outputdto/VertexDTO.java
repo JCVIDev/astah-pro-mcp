@@ -8,10 +8,10 @@ import java.util.List;
 public record VertexDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Incoming transitions")
     List<NameIdTypeDTO> incomingTransitions,
-
+    
     @JsonPropertyDescription("Outgoing transitions")
     List<NameIdTypeDTO> outgoingTransitions
 ) {

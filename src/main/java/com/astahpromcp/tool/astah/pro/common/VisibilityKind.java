@@ -12,9 +12,9 @@ public enum VisibilityKind {
     PRIVATE("private"),
     @JsonProperty("package")
     PACKAGE("package");
-
+    
     public final String astahValue;
-
+    
     private VisibilityKind(String astahValue) {
         this.astahValue = astahValue;
     }

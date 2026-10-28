@@ -8,14 +8,14 @@ import java.util.List;
 
 @Slf4j
 public abstract class AstahToolProvider implements ToolProvider {
-
+    
     protected abstract List<ToolDefinition> createTools();
-
+    
     @Override
     public final List<ToolDefinition> createToolDefinitions() {
         try {
             return List.copyOf(createTools());
-
+            
         } catch (Exception e) {
             log.error("Failed to create tools of {}", name(), e);
             return List.of();

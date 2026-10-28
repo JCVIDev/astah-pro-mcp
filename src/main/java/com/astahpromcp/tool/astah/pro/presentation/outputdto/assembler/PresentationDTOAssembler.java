@@ -13,37 +13,37 @@ import com.change_vision.jude.api.inf.model.INamedElement;
 
 public class PresentationDTOAssembler {
     public static PresentationDTO toDTO(@NonNull IPresentation astahPresentation) throws Exception {
-
+        
         NameIdTypeDTO renderedInDiagram;
         if (astahPresentation.getDiagram() != null && astahPresentation.getDiagram() instanceof INamedElement) {
             renderedInDiagram = NameIdTypeDTOAssembler.toDTO((INamedElement)astahPresentation.getDiagram());
         } else {
             renderedInDiagram = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO correspondingModelElement = correspondingModelElementOf(astahPresentation);
-
+        
         String fillColor;
         if (astahPresentation.getProperty(Key.FILL_COLOR) != null) {
             fillColor = astahPresentation.getProperty(Key.FILL_COLOR);
         } else {
             fillColor = "";
         }
-
+        
         String lineColor;
         if (astahPresentation.getProperty(Key.LINE_COLOR) != null) {
             lineColor = astahPresentation.getProperty(Key.LINE_COLOR);
         } else {
             lineColor = "";
         }
-
+        
         String fontColor;
         if (astahPresentation.getProperty(Key.FONT_COLOR) != null) {
             fontColor = astahPresentation.getProperty(Key.FONT_COLOR);
         } else {
             fontColor = "";
         }
-
+        
         // For a return message, () is appended to the end, so return the model name.
         String label;
         if (astahPresentation.getModel() instanceof IMessage astahMessage && astahMessage.isReturnMessage()) {
@@ -51,8 +51,8 @@ public class PresentationDTOAssembler {
         } else {
             label = astahPresentation.getLabel() != null ? astahPresentation.getLabel() : "";
         }
-
-        return  new PresentationDTO(
+        
+        return new PresentationDTO(
             astahPresentation.getID(),
             label,
             renderedInDiagram,
@@ -62,7 +62,7 @@ public class PresentationDTOAssembler {
             lineColor,
             fontColor);
     }
-
+    
     public static NameIdTypeDTO correspondingModelElementOf(@NonNull IPresentation astahPresentation) throws Exception {
         if (astahPresentation.getModel() != null && astahPresentation.getModel() instanceof INamedElement) {
             return NameIdTypeDTOAssembler.toDTO((INamedElement)astahPresentation.getModel());

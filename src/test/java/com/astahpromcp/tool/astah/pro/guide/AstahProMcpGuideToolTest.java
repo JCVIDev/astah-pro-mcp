@@ -1,8 +1,8 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 import com.astahpromcp.tool.astah.pro.TestSupport;
-import com.astahpromcp.tool.astah.pro.common.outputdto.GuideDTO;
 import com.astahpromcp.tool.common.inputdto.NoInputDTO;
+import com.astahpromcp.tool.common.outputdto.GuideDTO;
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import org.junit.jupiter.api.AfterEach;
@@ -14,39 +14,39 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AstahProMcpGuideToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private AstahProMcpGuideTool tool;
     private Method getGuide;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
         projectAccessor = astahApi.getProjectAccessor();
         projectAccessor.open("src/test/resources/modelfile/guide/AstahProMcpGuideToolTest.asta");
-
+        
         // Tool
         tool = new AstahProMcpGuideTool(projectAccessor);
-
+        
         // getGuide() method
         getGuide = TestSupport.getAccessibleMethod(
             AstahProMcpGuideTool.class,
             "getGuide",
             NoInputDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getGuide_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getGuide()
         // ----------------------------------------
@@ -55,7 +55,7 @@ public class AstahProMcpGuideToolTest {
             tool,
             inputDTO,
             GuideDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

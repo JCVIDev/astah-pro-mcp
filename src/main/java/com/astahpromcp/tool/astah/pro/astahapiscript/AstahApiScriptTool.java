@@ -13,13 +13,13 @@ import java.util.List;
 // Tool for running an astah api script -- JavaScript with the raw Astah API bound -- inside the running Astah.
 @Slf4j
 public class AstahApiScriptTool extends AstahToolProvider {
-
+    
     private final AstahApiScriptExecutor astahApiScriptExecutor;
-
+    
     public AstahApiScriptTool(ProjectAccessor projectAccessor) {
         this.astahApiScriptExecutor = new AstahApiScriptExecutor(projectAccessor);
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -31,15 +31,15 @@ public class AstahApiScriptTool extends AstahToolProvider {
                 ScriptResultDTO.class)
         );
     }
-
+    
     private ScriptResultDTO runScript(RunAstahApiScriptDTO param) throws Exception {
         if (param.script() == null || param.script().trim().isEmpty()) {
             throw new IllegalArgumentException("The astah api script is empty.");
         }
-
+        
         // Note: script errors are reported through the DTO (ok=false), not as a tool error
         AstahApiScriptExecutor.Result result = astahApiScriptExecutor.execute(param.script());
-
+        
         return new ScriptResultDTO(
             result.ok(),
             result.value(),

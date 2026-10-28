@@ -46,14 +46,14 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/MindmapEditor.html
 @Slf4j
 public class MindmapEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final MindmapEditor mindmapEditor;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageConvertSupport imageConvertSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public MindmapEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, MindmapEditor mindmapEditor, AstahProToolSupport astahProToolSupport, ImageConvertSupport imageConvertSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -62,7 +62,7 @@ public class MindmapEditorTool extends AstahToolProvider {
         this.imageConvertSupport = imageConvertSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -72,77 +72,77 @@ public class MindmapEditorTool extends AstahToolProvider {
                 this::createMindmapDiagram,
                 NewDiagramInPackageDTO.class,
                 DiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_to_floating_topic",
                 "Change the specified topic (specified by presentation ID) to a floating topic on the specified mind map diagram (specified by ID), and return the node presentation of the changed topic along with the updated diagram image in low resolution. A floating topic is a separate topic from the root topic.",
                 this::changeToFloatingTopic,
                 ChangeToFloatingTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_floating_topic",
                 "Create a new floating topic at the specified point (specified by x and y coordinates) on the specified mind map diagram (specified by ID), and return the newly created node presentation of the floating topic along with the updated diagram image in low resolution. A floating topic is a separate topic from the root topic.",
                 this::createFloatingTopic,
                 NewFloatingTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_topic",
                 "Create a new topic under the specified parent topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the newly created node presentation of the topic along with the updated diagram image in low resolution.",
                 this::createTopic,
                 NewTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_link_between_topics",
                 "Create a new link between the specified source topic (specified by presentation ID) and the specified target topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the newly created link presentation of the link along with the updated diagram image in low resolution.",
                 this::createTopicLink,
                 NewLinkBetweenTopicsDTO.class,
                 LinkPresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_parent_of_topic",
                 "Change the parent topic (specified by presentation ID) on the specified topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the node presentation of the changed topic along with the updated diagram image in low resolution.",
                 this::changeParentOfTopic,
                 ChangeParentOfTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "move_topic_within_sibling_order",
                 "Move the specified topic (specified by presentation ID) within the order of its sibling topics on the specified mind map diagram (specified by ID), and return the node presentation of the moved topic along with the updated diagram image in low resolution.",
                 this::moveTopicWithinSiblingOrder,
                 MoveTopicWithinSiblingOrderDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "insert_svg_img_into_topic",
                 "Insert an SVG image (specified by SVG code) into the specified topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the node presentation of the image-inserted topic along with the updated diagram image in low resolution.",
                 this::insertSvgImageIntoTopic,
                 NewSvgImageIntoTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "insert_png_or_jpg_img_into_topic",
                 "Insert a PNG or JPG image (specified by image URL) into the specified topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the node presentation of the image-inserted topic along with the updated diagram image in low resolution.",
                 this::insertPngOrJpgImageIntoTopic,
                 NewPngOrJpgImageIntoTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "delete_child_topics",
                 "Delete the child topics of the specified topic (specified by presentation ID) from the specified mind map diagram (specified by ID), and return the node presentation of the parent topic information of the deleted child topics along with the updated diagram image in low resolution.",
                 this::deleteChildTopics,
                 DeleteChildTopicsDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "delete_img_from_topic",
                 "Delete the image from the specified topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the node presentation of the image-deleted topic along with the updated diagram image in low resolution.",
                 this::deleteImageFromTopic,
                 DeleteImageFromTopicDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_boundary_of_topic",
                 "Set the boundary visibility of the specified topic (specified by presentation ID) on the specified mind map diagram (specified by ID), and return the node presentation of the root topic within the set boundary along with the updated diagram image in low resolution. A boundary is an outline that collectively encloses a specific topic and its subordinate topics. It is used to make a particular group of topics stand out or to emphasize it. A boundary cannot be shown on the root topic of the diagram or on a floating topic.",
@@ -151,213 +151,213 @@ public class MindmapEditorTool extends AstahToolProvider {
                 NodePresentationDTO.class)
         );
     }
-
+    
     private DiagramDTO createMindmapDiagram(NewDiagramInPackageDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.targetPackageId());
-
-        IMindMapDiagram createdAstahMindmapDiagram = txnAstah.call( () -> {
+        
+        IMindMapDiagram createdAstahMindmapDiagram = txnAstah.call(() -> {
             return mindmapEditor.createMindmapDiagram(astahPackage, param.newDiagramName());
         });
-
+        
         return DiagramDTOAssembler.toDTO(createdAstahMindmapDiagram);
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> changeToFloatingTopic(ChangeToFloatingTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.changeToFloatingTopic(astahTopic);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createFloatingTopic(NewFloatingTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        INodePresentation astahFloatingTopic = txnAstah.call( () -> {
+        
+        INodePresentation astahFloatingTopic = txnAstah.call(() -> {
             return mindmapEditor.createFloatingTopic(
                 param.newFloatingTopicLabel(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahFloatingTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createTopic(NewTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentTopic = astahProToolSupport.getNodePresentation(param.parentTopicId());
         if (!Type.TOPIC.matches(astahParentTopic.getType()) || !astahMindMapDiagram.equals(astahParentTopic.getDiagram())) {
             throw new IllegalArgumentException(String.format(
                 "The parent topic must be a topic on the target mind map diagram (actual type: %s, actual diagram: %s).",
                 astahParentTopic.getType(), astahParentTopic.getDiagram().getName()));
         }
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        INodePresentation astahTopic = txnAstah.call( () -> {
+        
+        INodePresentation astahTopic = txnAstah.call(() -> {
             return mindmapEditor.createTopic(astahParentTopic, param.newTopicLabel());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createTopicLink(NewLinkBetweenTopicsDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahSourceTopic = astahProToolSupport.getNodePresentation(param.sourceTopicId());
         INodePresentation astahTargetTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        ILinkPresentation astahLink = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLink = txnAstah.call(() -> {
             return mindmapEditor.createMMLinkPresentation(astahSourceTopic, astahTargetTopic);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLink);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> changeParentOfTopic(ChangeParentOfTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTargetTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
         INodePresentation astahNewParentTopic = astahProToolSupport.getNodePresentation(param.newParentTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.moveTo(astahTargetTopic, astahNewParentTopic);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> moveTopicWithinSiblingOrder(MoveTopicWithinSiblingOrderDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTargetTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
         INodePresentation astahParentTopic = astahTargetTopic.getParent();
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.moveTo(
                 astahTargetTopic,
                 astahParentTopic,
                 param.newSiblingIndex());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> insertSvgImageIntoTopic(NewSvgImageIntoTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
+        
         ParsedSvg svg = imageConvertSupport.parseSvg(param.imageSvgCode());
         imageConvertSupport.requireInsertableSize(svg);
-
+        
         Image image = imageConvertSupport.rasterize(svg, svg.naturalWidth(), svg.naturalHeight());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.setImage(astahTopic, image);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> insertPngOrJpgImageIntoTopic(NewPngOrJpgImageIntoTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
+        
         Image image = imageConvertSupport.urlToImage(param.imageUrl());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.setImage(astahTopic, image);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> deleteChildTopics(DeleteChildTopicsDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTargetParentTopic = astahProToolSupport.getNodePresentation(param.targetParentTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.deleteChildren(astahTargetParentTopic);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetParentTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> deleteImageFromTopic(DeleteImageFromTopicDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTargetTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.deleteImage(astahTargetTopic);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> setBoundaryOfTopic(TopicWithBoundaryVisibilityDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.targetDiagramId());
         INodePresentation astahTargetTopic = astahProToolSupport.getNodePresentation(param.targetTopicId());
-
+        
         boolean isRootTopic = astahTargetTopic.equals(astahMindMapDiagram.getRoot());
         boolean isFloatingTopic = Arrays.asList(astahMindMapDiagram.getFloatingTopics()).contains(astahTargetTopic);
         if (param.boundaryVisibility() && (isRootTopic || isFloatingTopic)) {
@@ -365,17 +365,17 @@ public class MindmapEditorTool extends AstahToolProvider {
                 "A boundary cannot be shown on %s: %s(%s). Astah does not draw a boundary on the root topic or on a floating topic. Show it on a topic that has a parent topic instead.",
                 isRootTopic ? "the root topic" : "a floating topic", astahTargetTopic.getLabel(), astahTargetTopic.getID()));
         }
-
+        
         mindmapEditor.setDiagram(astahMindMapDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             mindmapEditor.setBoundaryVisibility(astahTargetTopic, param.boundaryVisibility());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetTopic);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

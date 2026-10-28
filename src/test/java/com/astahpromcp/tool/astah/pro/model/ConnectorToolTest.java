@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ConnectorTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class ConnectorToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ConnectorToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ConnectorTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ConnectorTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "connector0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(connector.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,22 +68,22 @@ public class ConnectorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(connector.getId(), outputDTO.namedElement().element().id());
     }
-
+    
     @Test
     void getInfo_ok_portToPort() throws Exception {
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "connector0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(connector.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -92,7 +92,7 @@ public class ConnectorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertFalse(outputDTO.ports().get(0).id().isEmpty());
@@ -102,17 +102,17 @@ public class ConnectorToolTest {
         assertFalse(outputDTO.partsWithPort().get(0).id().isEmpty());
         assertFalse(outputDTO.partsWithPort().get(1).id().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_portToPart() throws Exception {
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "connector1");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(connector.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -121,7 +121,7 @@ public class ConnectorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertFalse(outputDTO.ports().get(0).id().isEmpty());
@@ -131,17 +131,17 @@ public class ConnectorToolTest {
         assertFalse(outputDTO.partsWithPort().get(0).id().isEmpty());
         assertTrue(outputDTO.partsWithPort().get(1).id().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_partToPort() throws Exception {
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "connector2");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(connector.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -150,7 +150,7 @@ public class ConnectorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ports().get(0).id().isEmpty());
@@ -160,24 +160,24 @@ public class ConnectorToolTest {
         assertTrue(outputDTO.partsWithPort().get(0).id().isEmpty());
         assertFalse(outputDTO.partsWithPort().get(1).id().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_partToPart() throws Exception {
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "connector3");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(connector.getId());
-
+        
         // Call getInfo()
         ConnectorDTO outputDTO = TestSupport.instance().invokeToolMethodReturningDto(
             getInfo,
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.ports().get(0).id().isEmpty());

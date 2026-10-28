@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record InstanceSpecificationWithClassifierDTO(
     @JsonPropertyDescription("Target classifier identifier")
     String targetClassifierId,
-
+    
     @JsonPropertyDescription("Target instance specification identifier")
     String targetInstanceSpecificationId
 ) {

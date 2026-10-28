@@ -19,9 +19,9 @@ var outputCharLimit = 18000;
 var classifiers = tools.retrieve_classifiers_within_pkg({ id: packageId }).value;
 
 if (classifiers.length > maxClassifiers) {
-  throw 'The package holds ' + classifiers.length + ' classifiers, more than the ' + maxClassifiers
-    + ' one run can ask about. Run list-elements-by-package.js to pick a smaller package, put its ID'
-    + ' in packageId, and run this again.';
+    throw 'The package holds ' + classifiers.length + ' classifiers, more than the ' + maxClassifiers
+        + ' one run can ask about. Run list-elements-by-package.js to pick a smaller package, put its ID'
+        + ' in packageId, and run this again.';
 }
 
 
@@ -37,21 +37,21 @@ var nameCounts = {};
 var labels = {};
 
 for (var i = 0; i < classifiers.length; i++) {
-  var classifier = classifiers[i];
-  var baseName = classifier.name === '' ? '(unnamed)' : classifier.name;
-  var nameKey = 'name:' + baseName;
-
-  ids.push(classifier.id);
-  baseNames[classifier.id] = baseName;
-  nameCounts[nameKey] = nameCounts.hasOwnProperty(nameKey) ? nameCounts[nameKey] + 1 : 1;
+    var classifier = classifiers[i];
+    var baseName = classifier.name === '' ? '(unnamed)' : classifier.name;
+    var nameKey = 'name:' + baseName;
+    
+    ids.push(classifier.id);
+    baseNames[classifier.id] = baseName;
+    nameCounts[nameKey] = nameCounts.hasOwnProperty(nameKey) ? nameCounts[nameKey] + 1 : 1;
 }
 
 for (var l = 0; l < classifiers.length; l++) {
-  var item = classifiers[l];
-  var itemName = baseNames[item.id];
-  labels[item.id] = nameCounts['name:' + itemName] === 1
-    ? itemName
-    : itemName + ' (' + item.namespace + ', ' + item.id + ')';
+    var item = classifiers[l];
+    var itemName = baseNames[item.id];
+    labels[item.id] = nameCounts['name:' + itemName] === 1
+        ? itemName
+        : itemName + ' (' + item.namespace + ', ' + item.id + ')';
 }
 
 // edges[from][to] names the kinds of reference running that way, and only within the package: what
@@ -61,28 +61,28 @@ for (var l = 0; l < classifiers.length; l++) {
 var edges = {};
 
 for (var n = 0; n < ids.length; n++) {
-  // The Target arrays are what this classifier references. Following those alone finds every
-  // circle, because the Source arrays hold the same references seen from the other end.
-  var answer = tools.retrieve_classifiers_that_ref_or_be_refed_by({ id: ids[n] });
-  var outgoing = {};
-
-  for (var k = 0; k < kinds.length; k++) {
-    var referenced = answer[kinds[k] + 'TargetClassifier'];
-
-    for (var r = 0; r < referenced.length; r++) {
-      var to = referenced[r].id;
-      if (!labels.hasOwnProperty(to)) { continue; }
-
-      // Self-references are excluded.
-      if (to === ids[n]) { continue; }
-
-      outgoing[to] = outgoing.hasOwnProperty(to)
-        ? outgoing[to] + ', ' + kinds[k]
-        : kinds[k];
+    // The Target arrays are what this classifier references. Following those alone finds every
+    // circle, because the Source arrays hold the same references seen from the other end.
+    var answer = tools.retrieve_classifiers_that_ref_or_be_refed_by({ id: ids[n] });
+    var outgoing = {};
+    
+    for (var k = 0; k < kinds.length; k++) {
+        var referenced = answer[kinds[k] + 'TargetClassifier'];
+        
+        for (var r = 0; r < referenced.length; r++) {
+            var to = referenced[r].id;
+            if (!labels.hasOwnProperty(to)) { continue; }
+            
+            // Self-references are excluded.
+            if (to === ids[n]) { continue; }
+            
+            outgoing[to] = outgoing.hasOwnProperty(to)
+                ? outgoing[to] + ', ' + kinds[k]
+                : kinds[k];
+        }
     }
-  }
-
-  edges[ids[n]] = outgoing;
+    
+    edges[ids[n]] = outgoing;
 }
 
 
@@ -94,33 +94,33 @@ for (var n = 0; n < ids.length; n++) {
 // cameFrom holds the way to each classifier reached, and says which ones have been reached already.
 // The queue is walked by index rather than shifted, because shift() re-indexes the whole array.
 function shortestCircleThrough(startId) {
-  var cameFrom = {};
-  var queue = [startId];
-
-  for (var q = 0; q < queue.length; q++) {
-    var from = queue[q];
-
-    for (var to in edges[from]) {
-      if (!edges[from].hasOwnProperty(to)) { continue; }
-
-      // Back at the start, so walk cameFrom to lay the circle out, in reverse.
-      if (to === startId) {
-        var circle = [];
-        for (var at = from; at !== startId; at = cameFrom[at]) { circle.push(at); }
-        circle.push(startId);
-        circle.reverse();
-
-        return circle;
-      }
-
-      if (!cameFrom.hasOwnProperty(to)) {
-        cameFrom[to] = from;
-        queue.push(to);
-      }
+    var cameFrom = {};
+    var queue = [startId];
+    
+    for (var q = 0; q < queue.length; q++) {
+        var from = queue[q];
+        
+        for (var to in edges[from]) {
+            if (!edges[from].hasOwnProperty(to)) { continue; }
+            
+            // Back at the start, so walk cameFrom to lay the circle out, in reverse.
+            if (to === startId) {
+                var circle = [];
+                for (var at = from; at !== startId; at = cameFrom[at]) { circle.push(at); }
+                circle.push(startId);
+                circle.reverse();
+                
+                return circle;
+            }
+            
+            if (!cameFrom.hasOwnProperty(to)) {
+                cameFrom[to] = from;
+                queue.push(to);
+            }
+        }
     }
-  }
-
-  return null;
+    
+    return null;
 }
 
 
@@ -143,22 +143,22 @@ var seen = {};
 var cyclicClassifierCount = 0;
 
 for (var s = 0; s < ids.length; s++) {
-  var found = shortestCircleThrough(ids[s]);
-  if (found === null) { continue; }
-
-  cyclicClassifierCount++;
-
-  var smallestAt = 0;
-  for (var t = 1; t < found.length; t++) {
-    if (found[t] < found[smallestAt]) { smallestAt = t; }
-  }
-
-  var rotated = found.slice(smallestAt).concat(found.slice(0, smallestAt));
-  var key = rotated.join('>');
-  if (seen.hasOwnProperty(key)) { continue; }
-
-  seen[key] = true;
-  circles.push(rotated);
+    var found = shortestCircleThrough(ids[s]);
+    if (found === null) { continue; }
+    
+    cyclicClassifierCount++;
+    
+    var smallestAt = 0;
+    for (var t = 1; t < found.length; t++) {
+        if (found[t] < found[smallestAt]) { smallestAt = t; }
+    }
+    
+    var rotated = found.slice(smallestAt).concat(found.slice(0, smallestAt));
+    var key = rotated.join('>');
+    if (seen.hasOwnProperty(key)) { continue; }
+    
+    seen[key] = true;
+    circles.push(rotated);
 }
 
 
@@ -169,44 +169,44 @@ for (var s = 0; s < ids.length; s++) {
 var lines = [];
 
 for (var p = 0; p < circles.length; p++) {
-  var circle = circles[p];
-  var text = '  ';
-
-  for (var m = 0; m < circle.length; m++) {
-    var start = circle[m];
-    var end = circle[(m + 1) % circle.length];
-    text += labels[start] + ' -' + edges[start][end] + '-> ';
-  }
-
-  lines.push({ hops: circle.length, text: text + labels[circle[0]] });
+    var circle = circles[p];
+    var text = '  ';
+    
+    for (var m = 0; m < circle.length; m++) {
+        var start = circle[m];
+        var end = circle[(m + 1) % circle.length];
+        text += labels[start] + ' -' + edges[start][end] + '-> ';
+    }
+    
+    lines.push({ hops: circle.length, text: text + labels[circle[0]] });
 }
 
 // The tightest circles are the ones worth breaking first, so the shortest are printed first. A tie is settled by the text.
 lines.sort(function (a, b) {
-  if (a.hops !== b.hops) { return a.hops - b.hops; }
-  return a.text < b.text ? -1 : a.text > b.text ? 1 : 0;
+    if (a.hops !== b.hops) { return a.hops - b.hops; }
+    return a.text < b.text ? -1 : a.text > b.text ? 1 : 0;
 });
 
 if (lines.length === 0) {
-  print('No circular reference among the ' + ids.length + ' classifier(s) of the package.');
+    print('No circular reference among the ' + ids.length + ' classifier(s) of the package.');
 } else {
-  var header = cyclicClassifierCount + ' of the ' + ids.length + ' classifier(s) of the package sit'
-    + ' on a circular reference, on ' + lines.length + ' distinct shortest circle(s):';
-  print(header);
-
-  var outputChars = header.length + 1;
-  var printed = 0;
-
-  for (printed = 0; printed < lines.length; printed++) {
-    if (outputChars + lines[printed].text.length + 1 > outputCharLimit) { break; }
-
-    outputChars += lines[printed].text.length + 1;
-    print(lines[printed].text);
-  }
-
-  if (printed < lines.length) {
-    print('The output stopped short of the limit the server puts on it, leaving '
-      + (lines.length - printed) + ' circle(s) unprinted. Put the ID of a smaller package in'
-      + ' packageId to see them.');
-  }
+    var header = cyclicClassifierCount + ' of the ' + ids.length + ' classifier(s) of the package sit'
+        + ' on a circular reference, on ' + lines.length + ' distinct shortest circle(s):';
+    print(header);
+    
+    var outputChars = header.length + 1;
+    var printed = 0;
+    
+    for (printed = 0; printed < lines.length; printed++) {
+        if (outputChars + lines[printed].text.length + 1 > outputCharLimit) { break; }
+        
+        outputChars += lines[printed].text.length + 1;
+        print(lines[printed].text);
+    }
+    
+    if (printed < lines.length) {
+        print('The output stopped short of the limit the server puts on it, leaving '
+            + (lines.length - printed) + ' circle(s) unprinted. Put the ID of a smaller package in'
+            + ' packageId to see them.');
+    }
 }

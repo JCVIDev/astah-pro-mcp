@@ -1,6 +1,7 @@
 package com.astahpromcp.tool.projectdiff.outputdto.assembler;
 
 import com.astahpromcp.tool.projectdiff.engine.Comparison;
+import com.astahpromcp.tool.projectdiff.engine.ToleratedDifference;
 import com.astahpromcp.tool.projectdiff.outputdto.ChangeDTO;
 import com.astahpromcp.tool.projectdiff.outputdto.ChangeKind;
 import com.astahpromcp.tool.projectdiff.outputdto.ContextDTO;
@@ -25,28 +26,29 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ChangeDTOAssembler {
-
+    
     // The path of the value that says from which element to which an element moved in the XMI
     public static final String PARENT_PATH = "(parent)";
-
+    
     // Where a reference sits, for the references that give a presentation or a model element its context
     private static final String DIAGRAM_REFERENCE = "JUDE:UPresentation.diagram/";
     private static final String MODEL_REFERENCE = "JUDE:UPresentation.semanticModel/";
     private static final String STEREOTYPE_REFERENCE = "UML:ModelElement.stereotype/";
     private static final String PARTICIPANT_REFERENCE = "UML:AssociationEnd.participant/";
-
+    
     // One side of the comparison: its index, the full values of its changed elements, and the name the project goes by
     public record Side(XmiIndex index, Map<String, List<XmiProperty>> properties, String projectName) {
     }
-
-    public static ChangeDTO toDTO(@NonNull Comparison.Item item, @NonNull Comparison comparison, @NonNull Side base, @NonNull Side target) {
+    
+    // tolerate says whether a modified value that differs only as far as a tolerated difference allows value by value is taken as unchanged (see ToleratedDifference)
+    public static ChangeDTO toDTO(@NonNull Comparison.Item item, @NonNull Comparison comparison, @NonNull Side base, @NonNull Side target, boolean tolerate) {
         return switch (item.kind()) {
             case ADDED -> toWholeDTO(target, target.index().get(item.targetIndex()), ChangeKind.ADDED);
             case REMOVED -> toWholeDTO(base, base.index().get(item.baseIndex()), ChangeKind.REMOVED);
-            case MODIFIED -> toModifiedDTO(item, comparison, base, target);
+            case MODIFIED -> toModifiedDTO(item, comparison, base, target, tolerate);
         };
     }
-
+    
     // An element only one side has, with every value it holds
     private static ChangeDTO toWholeDTO(Side side, XmiIndex.Element element, ChangeKind kind) {
         List<PropertyChangeDTO> properties = new ArrayList<>();
@@ -59,7 +61,7 @@ public class ChangeDTOAssembler {
                 properties.add(new PropertyChangeDTO(property.path(), PropertyChangeKind.REMOVED, shown.value(), "", refName, "", shown.encoding(), false));
             }
         }
-
+        
         return new ChangeDTO(
             kind,
             element.id(),
@@ -76,19 +78,19 @@ public class ChangeDTOAssembler {
             properties.size(),
             properties);
     }
-
+    
     // An element both sides have, with the values that differ
-    private static ChangeDTO toModifiedDTO(Comparison.Item item, Comparison comparison, Side base, Side target) {
+    private static ChangeDTO toModifiedDTO(Comparison.Item item, Comparison comparison, Side base, Side target, boolean tolerate) {
         XmiIndex.Element before = base.index().get(item.baseIndex());
         XmiIndex.Element after = target.index().get(item.targetIndex());
-
+        
         // The lists of references are compared as lists (compareReferenceLists); every other value by its path
         ReferenceLists beforeLists = ReferenceLists.of(base.properties().getOrDefault(before.id(), List.of()));
         ReferenceLists afterLists = ReferenceLists.of(target.properties().getOrDefault(after.id(), List.of()));
         ReferenceLists.keepSingleReferencesApart(beforeLists, afterLists);
         Map<String, XmiProperty> beforeValues = byPath(beforeLists.others());
         Map<String, XmiProperty> afterValues = byPath(afterLists.others());
-
+        
         List<PropertyChangeDTO> properties = new ArrayList<>();
         if (item.moved()) {
             properties.add(new PropertyChangeDTO(PARENT_PATH, PropertyChangeKind.MODIFIED,
@@ -98,29 +100,34 @@ public class ChangeDTOAssembler {
                     after.parent() < 0 ? "" : displayName(target, target.index().get(after.parent())),
                     ValueEncoding.RAW, false));
         }
-
+        
         for (XmiProperty value : afterValues.values()) {
             XmiProperty old = beforeValues.get(value.path());
             XmiValueCodec.Decoded shownAfter = display(after, value);
             String afterRefName = value.reference() ? displayNameOf(target, value.value()) : "";
-
+            
             if (old == null) {
                 properties.add(new PropertyChangeDTO(value.path(), PropertyChangeKind.ADDED, "", shownAfter.value(), "", afterRefName, shownAfter.encoding(), false));
                 continue;
             }
-
+            
             // A reference is the same when it refers to the element the rules paired with the one the base refers to
             String comparable = value.reference() ? comparison.baseIdOf(value.value()) : value.value();
             if (Objects.equals(old.value(), comparable) && old.reference() == value.reference()) {
                 continue;
             }
-
+            // A coordinate or size that differs only by rounding is the same, even in a presentation that changed otherwise
+            if (tolerate && !old.reference() && !value.reference()
+                    && ToleratedDifference.toleratedValue(before, after, value.path(), old.value(), value.value())) {
+                continue;
+            }
+            
             XmiValueCodec.Decoded shownBefore = display(before, old);
             String beforeRefName = old.reference() ? displayNameOf(base, old.value()) : "";
             properties.add(new PropertyChangeDTO(value.path(), PropertyChangeKind.MODIFIED, shownBefore.value(), shownAfter.value(),
                     beforeRefName, afterRefName, combined(shownBefore.encoding(), shownAfter.encoding()), false));
         }
-
+        
         for (XmiProperty old : beforeValues.values()) {
             if (!afterValues.containsKey(old.path())) {
                 XmiValueCodec.Decoded shownBefore = display(before, old);
@@ -128,14 +135,14 @@ public class ChangeDTOAssembler {
                 properties.add(new PropertyChangeDTO(old.path(), PropertyChangeKind.REMOVED, shownBefore.value(), "", beforeRefName, "", shownBefore.encoding(), false));
             }
         }
-
+        
         // The lists in the order the target has them, then the ones only the base has
         Set<String> listPaths = new LinkedHashSet<>(afterLists.listPaths());
         listPaths.addAll(beforeLists.listPaths());
         for (String listPath : listPaths) {
             compareReferenceList(listPath, beforeLists.members(listPath), afterLists.members(listPath), comparison, base, target, properties);
         }
-
+        
         return new ChangeDTO(
             ChangeKind.MODIFIED,
             after.id(),
@@ -152,13 +159,13 @@ public class ChangeDTOAssembler {
             properties.size(),
             properties);
     }
-
+    
     // A list of references of both sides, compared as a list of the elements it refers to (ReferenceLists): the same
     // references in another order show as one reordered value; otherwise the references the base has and the target
     // lacks show as removed, and the ones the target adds as added, in the order of the lists. Their path is the path of
     // the list, without the index of a member.
     private static void compareReferenceList(String listPath, List<XmiProperty> beforeRefs, List<XmiProperty> afterRefs, Comparison comparison,
-                                             Side base, Side target, List<PropertyChangeDTO> properties) {
+            Side base, Side target, List<PropertyChangeDTO> properties) {
         List<String> beforeIds = beforeRefs.stream().map(XmiProperty::value).toList();
         List<String> afterIds = afterRefs.stream().map(XmiProperty::value).toList();
         // A reference is the same when it refers to the element the rules paired with the one the base refers to
@@ -166,13 +173,13 @@ public class ChangeDTOAssembler {
         if (beforeIds.equals(comparableAfter)) {
             return;
         }
-
+        
         if (sameCounts(beforeIds, comparableAfter)) {
             properties.add(new PropertyChangeDTO(listPath, PropertyChangeKind.REORDERED, String.join(", ", beforeIds), String.join(", ", afterIds),
                     namesOf(base, beforeIds), namesOf(target, afterIds), ValueEncoding.RAW, false));
             return;
         }
-
+        
         for (ReferenceLists.Edit edit : ReferenceLists.align(beforeIds, comparableAfter)) {
             if (edit.removed()) {
                 String id = beforeIds.get(edit.index());
@@ -183,7 +190,7 @@ public class ChangeDTOAssembler {
             }
         }
     }
-
+    
     // Whether two lists hold the same IDs the same number of times
     private static boolean sameCounts(List<String> a, List<String> b) {
         if (a.size() != b.size()) {
@@ -200,22 +207,26 @@ public class ChangeDTOAssembler {
         }
         return true;
     }
-
+    
+    // The names of the elements, in order, separated by ', '.
     private static String namesOf(Side side, List<String> ids) {
         List<String> names = new ArrayList<>(ids.size());
+        boolean named = false;
         for (String id : ids) {
-            names.add(displayNameOf(side, id));
+            String name = displayNameOf(side, id);
+            names.add(name);
+            named |= !name.isEmpty();
         }
-        return String.join(", ", names);
+        return named ? String.join(", ", names) : "";
     }
-
+    
     private static XmiValueCodec.Decoded display(XmiIndex.Element owner, XmiProperty property) {
         if (property.reference()) {
             return new XmiValueCodec.Decoded(property.value(), ValueEncoding.RAW);
         }
         return XmiValueCodec.decode(owner.tag(), owner.diagram(), property.path(), property.value());
     }
-
+    
     // The two values sit at the same position; unknown wins over decoded, and decoded over raw
     private static ValueEncoding combined(ValueEncoding before, ValueEncoding after) {
         if (before == ValueEncoding.UNKNOWN || after == ValueEncoding.UNKNOWN) {
@@ -226,7 +237,7 @@ public class ChangeDTOAssembler {
         }
         return ValueEncoding.RAW;
     }
-
+    
     private static Map<String, XmiProperty> byPath(List<XmiProperty> properties) {
         Map<String, XmiProperty> propertiesByPath = new LinkedHashMap<>();
         for (XmiProperty property : properties) {
@@ -234,7 +245,7 @@ public class ChangeDTOAssembler {
         }
         return propertiesByPath;
     }
-
+    
     // The name to show for an element: its name, or a presentation's label. The root model is shown by the project's
     // name, because the XMI's root name is only the name of the file the project was copied to.
     private static String displayName(Side side, XmiIndex.Element element) {
@@ -249,12 +260,12 @@ public class ChangeDTOAssembler {
         }
         return "";
     }
-
+    
     private static String displayNameOf(Side side, String id) {
         int index = side.index().indexOf(id);
         return index < 0 ? "" : displayName(side, side.index().get(index));
     }
-
+    
     // The ancestor that gives an element its context: for a model element, the nearest one with a name attribute; for a presentation, its parent
     private static ContextDTO contextOf(Side side, XmiIndex.Element element) {
         XmiIndex index = side.index();
@@ -262,7 +273,7 @@ public class ChangeDTOAssembler {
         if (!element.ownerPath().isEmpty()) {
             path.addFirst(element.ownerPath());
         }
-
+        
         int current = element.parent();
         if (!isPresentation(element)) {
             // Skip the parts that have no name attribute of their own, such as a multiplicity and its range
@@ -278,7 +289,7 @@ public class ChangeDTOAssembler {
         if (current < 0) {
             return ContextDTO.empty();
         }
-
+        
         XmiIndex.Element ancestor = index.get(current);
         String name = displayName(side, ancestor);
         String participant = "";
@@ -292,11 +303,11 @@ public class ChangeDTOAssembler {
             participant,
             String.join("/", path));
     }
-
+    
     private static boolean isPresentation(XmiIndex.Element element) {
         return element.tag().startsWith("JUDE:") && !element.diagram();
     }
-
+    
     private static ElementRefDTO diagramOf(Side side, XmiIndex.Element element) {
         if (!isPresentation(element)) {
             return ElementRefDTO.empty();
@@ -314,11 +325,11 @@ public class ChangeDTOAssembler {
         }
         return ElementRefDTO.empty();
     }
-
+    
     private static ElementRefDTO modelOf(Side side, XmiIndex.Element element) {
         return isPresentation(element) ? referenced(side, element, MODEL_REFERENCE) : ElementRefDTO.empty();
     }
-
+    
     // The first element the given element refers to under the given path
     private static ElementRefDTO referenced(Side side, XmiIndex.Element element, String pathPrefix) {
         for (int i = 0; i < element.refPaths().length; i++) {
@@ -329,7 +340,7 @@ public class ChangeDTOAssembler {
         }
         return ElementRefDTO.empty();
     }
-
+    
     private static List<String> stereotypesOf(Side side, XmiIndex.Element element) {
         List<String> names = new ArrayList<>();
         for (int i = 0; i < element.refPaths().length; i++) {

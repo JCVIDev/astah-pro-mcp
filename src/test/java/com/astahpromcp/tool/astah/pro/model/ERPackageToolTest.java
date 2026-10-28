@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERPackageToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERPackageTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class ERPackageToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERPackageToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERPackageTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERPackageTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER package
         IERPackage erPackage = (IERPackage) TestSupport.instance().getNamedElementByClassAndName(
             IERPackage.class,
             "package0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erPackage.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class ERPackageToolTest {
             tool,
             inputDTO,
             ERPackageDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erPackage.getId(), outputDTO.pkg().namedElement().element().id());

@@ -11,12 +11,12 @@ import java.util.List;
 
 public class ConstraintDTOAssembler {
     public static ConstraintDTO toDTO(@NonNull IConstraint astahConstraint) throws Exception {
-
+        
         List<ElementDTO> constrainedElements = new ArrayList<>();
         for (IElement astahElement : astahConstraint.getConstrainedElement()) {
             constrainedElements.add(ElementDTOAssembler.toDTO(astahElement));
         }
-
+        
         return new ConstraintDTO(
             NamedElementDTOAssembler.toDTO(astahConstraint),
             constrainedElements,

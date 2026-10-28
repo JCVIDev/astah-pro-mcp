@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IERAttribute.html
 @Slf4j
 public class ERAttributeTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ERAttributeTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,57 +41,56 @@ public class ERAttributeTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ERAttributeDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_er_datatype_of_er_attr",
                 "Set the ER datatype (specified by ID) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setDatatype,
                 ERAttributeWithERDatatypeDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_er_domain_of_er_attr",
                 "Set the ER domain (specified by ID) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setDomain,
                 ERAttributeWithERDomainDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_default_value_of_er_attr",
                 "Set the default value (specified by string) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setDefaultValue,
                 ERAttributeWithDefaultValueDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_length_precision_of_er_attr",
                 "Set the length/precision (specified by string) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set. Whether you can specify length and precision depends on the data type. For example, when the data type is CHAR, only the length can be specified; if both length and precision are specified, an error will occur.",
                 this::setLengthPrecision,
                 ERAttributeWithLengthPrecisionDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_logical_name_of_er_attr",
                 "Set the logical name (specified by string) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setLogicalName,
                 ERAttributeWithLogicalNameDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_physical_name_of_er_attr",
                 "Set the physical name (specified by string) of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setPhysicalName,
                 ERAttributeWithPhysicalNameDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_primary_key_of_er_attr",
                 "Set the primary key of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
                 this::setPrimaryKey,
                 ERAttributeWithPrimaryKeyDTO.class,
                 ERAttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_not_null_of_er_attr",
                 "Set the NOT NULL of the specified ER attribute (specified by ID), and return the model element of the ER attribute after it is set.",
@@ -100,92 +99,92 @@ public class ERAttributeTool extends AstahToolProvider {
                 ERAttributeDTO.class)
         );
     }
-
+    
     private ERAttributeDTO getInfo(IdDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.id());
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setDatatype(ERAttributeWithERDatatypeDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
         IERDatatype astahERDatatype = astahProToolSupport.getERDatatype(param.erDatatypeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setDatatype(astahERDatatype);
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setDomain(ERAttributeWithERDomainDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
         IERDomain astahERDomain = astahProToolSupport.getERDomain(param.erDomainId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setDomain(astahERDomain);
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setDefaultValue(ERAttributeWithDefaultValueDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setDefaultValue(param.defaultValue());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setLengthPrecision(ERAttributeWithLengthPrecisionDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setLengthPrecision(param.lengthPrecision());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setLogicalName(ERAttributeWithLogicalNameDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setLogicalName(param.logicalName());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setPhysicalName(ERAttributeWithPhysicalNameDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setPhysicalName(param.physicalName());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setPrimaryKey(ERAttributeWithPrimaryKeyDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setPrimaryKey(param.isPrimaryKey());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
-
+    
     private ERAttributeDTO setNotNull(ERAttributeWithNotNullDTO param) throws Exception {
         IERAttribute astahERAttribute = astahProToolSupport.getERAttribute(param.targetERAttributeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERAttribute.setNotNull(param.isNotNull());
         });
-
+        
         return ERAttributeDTOAssembler.toDTO(astahERAttribute);
     }
 }

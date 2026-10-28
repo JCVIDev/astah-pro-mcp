@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class ERDiagramGuide {
-
+    
     private ERDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 IMPORTANT POINTS to Keep in Mind:
@@ -97,7 +97,7 @@ ERSubtypeRelationship ---> "foreign keys" ERAttribute
 @enduml
 ```
         """;
-
+        
         return contents;
     }
 }

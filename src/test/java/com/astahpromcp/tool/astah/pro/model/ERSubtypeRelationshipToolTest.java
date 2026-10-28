@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERSubtypeRelationshipToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERSubtypeRelationshipTool tool;
     private Method getInfo;
@@ -30,7 +30,7 @@ public class ERSubtypeRelationshipToolTest {
     private Method setDiscriminatorAttr;
     private Method setLogicalName;
     private Method setPhysicalName;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -38,61 +38,61 @@ public class ERSubtypeRelationshipToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERSubtypeRelationshipToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERSubtypeRelationshipTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERSubtypeRelationshipTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setConclusive() method
         setConclusive = TestSupport.getAccessibleMethod(
             ERSubtypeRelationshipTool.class,
             "setConclusive",
             ERSubtypeRelationshipWithConclusiveDTO.class);
-
+        
         // setDiscriminatorAttr() method
         setDiscriminatorAttr = TestSupport.getAccessibleMethod(
             ERSubtypeRelationshipTool.class,
             "setDiscriminatorAttr",
             ERSubtypeRelationshipWithDiscriminatorAttrDTO.class);
-
+        
         // setLogicalName() method
         setLogicalName = TestSupport.getAccessibleMethod(
             ERSubtypeRelationshipTool.class,
             "setLogicalName",
             ERSubtypeRelationshipWithLogicalNameDTO.class);
-
+        
         // setPhysicalName() method
         setPhysicalName = TestSupport.getAccessibleMethod(
             ERSubtypeRelationshipTool.class,
             "setPhysicalName",
             ERSubtypeRelationshipWithPhysicalNameDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER subtype relationship
         IERSubtypeRelationship erSubtypeRelationship = (IERSubtypeRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERSubtypeRelationship.class,
             "Subtype0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erSubtypeRelationship.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -101,13 +101,13 @@ public class ERSubtypeRelationshipToolTest {
             tool,
             inputDTO,
             ERSubtypeRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erSubtypeRelationship.getId(), outputDTO.namedElement().element().id());
         assertEquals(erSubtypeRelationship.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void setConclusive_ok() throws Exception {
         // Get ER subtype relationship
@@ -115,12 +115,12 @@ public class ERSubtypeRelationshipToolTest {
             IERSubtypeRelationship.class,
             "Subtype0");
         boolean nextValue = !erSubtypeRelationship.isConclusive();
-
+        
         // Create input DTO
         ERSubtypeRelationshipWithConclusiveDTO inputDTO = new ERSubtypeRelationshipWithConclusiveDTO(
             erSubtypeRelationship.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setConclusive()
         // ----------------------------------------
@@ -129,28 +129,28 @@ public class ERSubtypeRelationshipToolTest {
             tool,
             inputDTO,
             ERSubtypeRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erSubtypeRelationship.isConclusive());
     }
-
+    
     @Test
     void setDiscriminatorAttr_ok() throws Exception {
         // Get ER subtype relationship
         IERSubtypeRelationship erSubtypeRelationship = (IERSubtypeRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERSubtypeRelationship.class,
             "Subtype0");
-
+        
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERSubtypeRelationshipWithDiscriminatorAttrDTO inputDTO = new ERSubtypeRelationshipWithDiscriminatorAttrDTO(
             erSubtypeRelationship.getId(),
             erAttribute.getId());
-
+        
         // ----------------------------------------
         // Call setDiscriminatorAttr()
         // ----------------------------------------
@@ -159,25 +159,25 @@ public class ERSubtypeRelationshipToolTest {
             tool,
             inputDTO,
             ERSubtypeRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(erSubtypeRelationship.getDiscriminatorAttribute());
         assertEquals(erAttribute.getId(), erSubtypeRelationship.getDiscriminatorAttribute().getId());
     }
-
+    
     @Test
     void setLogicalName_ok() throws Exception {
         // Get ER subtype relationship
         IERSubtypeRelationship erSubtypeRelationship = (IERSubtypeRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERSubtypeRelationship.class,
             "Subtype0");
-
+        
         // Create input DTO
         ERSubtypeRelationshipWithLogicalNameDTO inputDTO = new ERSubtypeRelationshipWithLogicalNameDTO(
             erSubtypeRelationship.getId(),
             "LogicalName_777");
-
+        
         // ----------------------------------------
         // Call setLogicalName()
         // ----------------------------------------
@@ -186,24 +186,24 @@ public class ERSubtypeRelationshipToolTest {
             tool,
             inputDTO,
             ERSubtypeRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("LogicalName_777", erSubtypeRelationship.getLogicalName());
     }
-
+    
     @Test
     void setPhysicalName_ok() throws Exception {
         // Get ER subtype relationship
         IERSubtypeRelationship erSubtypeRelationship = (IERSubtypeRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERSubtypeRelationship.class,
             "Subtype0");
-
+        
         // Create input DTO
         ERSubtypeRelationshipWithPhysicalNameDTO inputDTO = new ERSubtypeRelationshipWithPhysicalNameDTO(
             erSubtypeRelationship.getId(),
             "physical_name_777");
-
+        
         // ----------------------------------------
         // Call setPhysicalName()
         // ----------------------------------------
@@ -212,10 +212,10 @@ public class ERSubtypeRelationshipToolTest {
             tool,
             inputDTO,
             ERSubtypeRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("physical_name_777", erSubtypeRelationship.getPhysicalName());
     }
-
+    
 }

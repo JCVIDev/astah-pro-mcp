@@ -23,13 +23,13 @@ public class ConstraintTool extends AstahToolProvider {
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ConstraintTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -39,8 +39,7 @@ public class ConstraintTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ConstraintDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_specification_of_constraint",
                 "Set the specification (specified by string) of the specified constraint (specified by ID), and return the model element of the constraint after it is set.",
@@ -49,20 +48,20 @@ public class ConstraintTool extends AstahToolProvider {
                 ConstraintDTO.class)
         );
     }
-
+    
     private ConstraintDTO getInfo(IdDTO param) throws Exception {
         IConstraint astahConstraint = astahProToolSupport.getConstraint(param.id());
-
+        
         return ConstraintDTOAssembler.toDTO(astahConstraint);
     }
-
+    
     private ConstraintDTO setSpecification(ConstraintWithSpecificationDTO param) throws Exception {
         IConstraint astahConstraint = astahProToolSupport.getConstraint(param.id());
         
-        txnAstah.run( () -> {
+        txnAstah.run(() -> {
             astahConstraint.setSpecification(param.specificationContents());
         });
-
+        
         return ConstraintDTOAssembler.toDTO(astahConstraint);
     }
 }

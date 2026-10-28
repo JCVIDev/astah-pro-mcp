@@ -16,12 +16,12 @@ import java.util.Map;
 
 public class ElementDTOAssembler {
     public static ElementDTO toDTO(@NonNull IElement astahElement) throws Exception {
-
+        
         List<String> stereotypes = new ArrayList<>();
         for (String stereotype : astahElement.getStereotypes()) {
             stereotypes.add(stereotype);
         }
-
+        
         Map<String, String> taggedValues = new HashMap<>();
         for (ITaggedValue taggedValue : astahElement.getTaggedValues()) {
             taggedValues.put(taggedValue.getKey(), taggedValue.getValue());
@@ -35,7 +35,7 @@ public class ElementDTOAssembler {
                 correspondingPresentationIds.add(presentation.getID());
             }
         }
-
+        
         return new ElementDTO(
                 astahElement.getId(),
                 astahElement.getTypeModifier(),

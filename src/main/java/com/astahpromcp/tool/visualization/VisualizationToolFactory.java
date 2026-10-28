@@ -9,20 +9,20 @@ import java.util.List;
 // Factory for creating visualization tools
 @Slf4j
 public class VisualizationToolFactory {
-
+    
     public VisualizationToolFactory() {
         // No dependencies
     }
-
+    
     public List<ToolProvider> createToolProviders() {
         try {
             ImageConvertSupport imageConvertSupport = new ImageConvertSupport();
-
+            
             return List.of(
                     new PlantumlTool(),
                     new GraphvizTool(imageConvertSupport)
             );
-
+            
         } catch (Exception e) {
             log.warn("Error creating visualization tools", e);
             return List.of();

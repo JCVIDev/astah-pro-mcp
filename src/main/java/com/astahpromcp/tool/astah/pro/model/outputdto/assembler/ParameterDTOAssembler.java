@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ParameterDTOAssembler {
     public static ParameterDTO toDTO(@NonNull IParameter astahParameter) throws Exception {
-
+        
         NameIdTypeDTO type;
         if (astahParameter.getType() != null) {
             type = NameIdTypeDTOAssembler.toDTO(astahParameter.getType());

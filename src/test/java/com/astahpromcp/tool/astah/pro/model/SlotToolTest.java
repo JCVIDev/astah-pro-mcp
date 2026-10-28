@@ -18,12 +18,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SlotToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private SlotTool tool;
     private Method getInfo;
     private Method setValue;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -31,43 +31,43 @@ public class SlotToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/SlotToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new SlotTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             SlotTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setValue() method
         setValue = TestSupport.getAccessibleMethod(
             SlotTool.class,
             "setValue",
             SlotWithValueDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get slot
         ISlot slot = (ISlot) TestSupport.instance().getNamedElementByClassAndName(
             ISlot.class,
             "attribute0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(slot.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -76,26 +76,26 @@ public class SlotToolTest {
             tool,
             inputDTO,
             SlotDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setValue_ok() throws Exception {
         // Get slot
         ISlot slot = (ISlot) TestSupport.instance().getNamedElementByClassAndName(
             ISlot.class,
             "attribute0");
-
+        
         // Create input DTO
         SlotWithValueDTO inputDTO = new SlotWithValueDTO(
             slot.getId(),
             "new value");
-
+        
         // Check value before setting
         assertNotEquals("new value", slot.getValue());
-
+        
         // ----------------------------------------
         // Call setValue()
         // ----------------------------------------
@@ -104,10 +104,10 @@ public class SlotToolTest {
             tool,
             inputDTO,
             SlotDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check value after setting
         assertEquals("new value", slot.getValue());
     }

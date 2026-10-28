@@ -20,17 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IFlow.html
 @Slf4j
 public class FlowTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public FlowTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,15 +40,14 @@ public class FlowTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 FlowDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_action_of_flow",
                 "Set the action of the specified flow (specified by ID), and return the model element of the flow after it is set.",
                 this::setAction,
                 FlowWithActionDTO.class,
                 FlowDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_guard_of_flow",
                 "Set the guard of the specified flow (specified by ID), and return the model element of the flow after it is set.",
@@ -57,30 +56,30 @@ public class FlowTool extends AstahToolProvider {
                 FlowDTO.class)
         );
     }
-
+    
     private FlowDTO getInfo(IdDTO param) throws Exception {
         IFlow astahFlow = astahProToolSupport.getFlow(param.id());
-
+        
         return FlowDTOAssembler.toDTO(astahFlow);
     }
-
+    
     private FlowDTO setAction(FlowWithActionDTO param) throws Exception {
         IFlow astahFlow = astahProToolSupport.getFlow(param.targetFlowId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahFlow.setAction(param.action());
         });
-
+        
         return FlowDTOAssembler.toDTO(astahFlow);
     }
-
+    
     private FlowDTO setGuard(FlowWithGuardDTO param) throws Exception {
         IFlow astahFlow = astahProToolSupport.getFlow(param.targetFlowId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahFlow.setGuard(param.guard());
         });
-
+        
         return FlowDTOAssembler.toDTO(astahFlow);
     }
 }

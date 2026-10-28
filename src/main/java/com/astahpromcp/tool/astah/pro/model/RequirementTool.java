@@ -20,17 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IRequirement.html
 @Slf4j
 public class RequirementTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public RequirementTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,15 +40,14 @@ public class RequirementTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 RequirementDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_req_id",
                 "Set the requirement identifier (specified by string) of the specified requirement (specified by ID), and return the model element of the requirement after it is set.",
                 this::setRequirementId,
                 RequirementWithIdDTO.class,
                 RequirementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_req_text",
                 "Set the requirement text (specified by string) of the specified requirement (specified by ID), and return the model element of the requirement after it is set.",
@@ -57,30 +56,30 @@ public class RequirementTool extends AstahToolProvider {
                 RequirementDTO.class)
         );
     }
-
+    
     private RequirementDTO getInfo(IdDTO param) throws Exception {
         IRequirement astahRequirement = astahProToolSupport.getRequirement(param.id());
-
+        
         return RequirementDTOAssembler.toDTO(astahRequirement);
     }
-
+    
     private RequirementDTO setRequirementId(RequirementWithIdDTO param) throws Exception {
         IRequirement astahRequirement = astahProToolSupport.getRequirement(param.id());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahRequirement.setRequirementID(param.requirementId());
         });
-
+        
         return RequirementDTOAssembler.toDTO(astahRequirement);
     }
-
+    
     private RequirementDTO setRequirementText(RequirementWithTextDTO param) throws Exception {
         IRequirement astahRequirement = astahProToolSupport.getRequirement(param.id());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahRequirement.setRequirementText(param.requirementText());
         });
-
+        
         return RequirementDTOAssembler.toDTO(astahRequirement);
     }
 }

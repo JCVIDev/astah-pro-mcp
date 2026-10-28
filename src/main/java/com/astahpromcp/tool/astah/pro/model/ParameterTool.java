@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IParameter.html
 @Slf4j
 public class ParameterTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ParameterTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,7 +41,7 @@ public class ParameterTool extends AstahToolProvider {
                 this::setType,
                 ParameterWithTypeDTO.class,
                 ParameterDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_type_expression_of_param",
                 "Set the type expression (specified by string) of the specified parameter (specified by ID), and return the model element of the parameter after it is set. If it is not a primitive type, obtain or create the type and then set it to the parameter type. For example, 'int' and 'string' are primitive types, whereas 'Integer', 'String' and 'List<int>' require creating a type with that exact name before they can be used.",
@@ -50,32 +50,32 @@ public class ParameterTool extends AstahToolProvider {
                 ParameterDTO.class)
         );
     }
-
+    
     private ParameterDTO setType(ParameterWithTypeDTO param) throws Exception {
         IParameter astahParameter = astahProToolSupport.getParameter(param.targetParameterId());
         IClass astahType = astahProToolSupport.getClassOrPrimitiveType(param.parameterTypeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahParameter.setType(astahType);
         });
-
+        
         return ParameterDTOAssembler.toDTO(astahParameter);
     }
-
+    
     private ParameterDTO setTypeExpression(ParameterWithTypeExpressionDTO param) throws Exception {
         IParameter astahParameter = astahProToolSupport.getParameter(param.targetParameterId());
-
+        
         try {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahParameter.setTypeExpression(param.typeExpression());
             });
-
+            
         } catch (InvalidEditingException e) {
             throw new InvalidEditingException(
                 e.getKey(),
                 e.getMessage() + " If the type is not a primitive type, create a model element with that exact name before setting it (for example, 'String' and 'List<int>').");
         }
-
+        
         return ParameterDTOAssembler.toDTO(astahParameter);
     }
 }

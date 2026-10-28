@@ -8,16 +8,16 @@ import java.util.List;
 // Factory for creating info tools
 @Slf4j
 public class InfoToolFactory {
-
+    
     public InfoToolFactory() {
     }
-
+    
     public List<ToolProvider> createToolProviders() {
         try {
             return List.of(
                     new InfoTool()
             );
-
+            
         } catch (Exception e) {
             log.warn("Error creating info tools", e);
             return List.of();

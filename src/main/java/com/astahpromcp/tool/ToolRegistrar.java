@@ -13,14 +13,14 @@ import java.util.function.BiFunction;
 
 @Slf4j
 public final class ToolRegistrar {
-
+    
     private ToolRegistrar() {
     }
-
+    
     // Register all tools with the MCP server builder
     public static void registerAll(McpServer.SyncSpecification<?> builder,
-                                   Collection<ToolProvider> providers) {
-
+            Collection<ToolProvider> providers) {
+        
         int totalTools = 0;
         for (ToolProvider provider : providers) {
             log.info("Tool provider: {}", provider.name());
@@ -30,11 +30,11 @@ public final class ToolRegistrar {
             } catch (Exception e) {
                 throw new IllegalStateException("Tool provider " + provider.name() + " failed to build its tool definitions", e);
             }
-
+            
             if (definitions == null || definitions.isEmpty()) {
                 throw new IllegalStateException("Tool provider " + provider.name() + " returned no tool definitions");
             }
-
+            
             for (ToolDefinition definition : definitions) {
                 log.info("Registering tool: {}", definition.toolSchema().name());
                 try {
@@ -47,11 +47,11 @@ public final class ToolRegistrar {
         }
         log.info("Total tool count: {}", totalTools);
     }
-
+    
     static BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> withCallSummary(
             String toolName,
             BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> handler) {
-
+        
         return (exchange, request) -> {
             long start = System.nanoTime();
             McpSchema.CallToolResult result = null;
@@ -65,7 +65,7 @@ public final class ToolRegistrar {
             }
         };
     }
-
+    
     // How a call ended, for the summary line. A handler that threw leaves no result.
     static String outcomeOf(McpSchema.CallToolResult result) {
         if (result == null) {

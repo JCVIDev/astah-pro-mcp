@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ICommunicationDiagram.html
 @Slf4j
 public class CommunicationDiagramTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public CommunicationDiagramTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,7 +41,7 @@ public class CommunicationDiagramTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 CommunicationDiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_interaction_of_communication_dgm",
                 "Return model element information about the interaction of the specified communication diagram (specified by ID).",
@@ -50,17 +50,17 @@ public class CommunicationDiagramTool extends AstahToolProvider {
                 InteractionDTO.class)
         );
     }
-
+    
     private CommunicationDiagramDTO getInfo(IdDTO param) throws Exception {
         ICommunicationDiagram astahCommunicationDiagram = astahProToolSupport.getCommunicationDiagram(param.id());
-
+        
         return CommunicationDiagramDTOAssembler.toDTO(astahCommunicationDiagram);
     }
-
+    
     private InteractionDTO getInteraction(IdDTO param) throws Exception {
         ICommunicationDiagram astahCommunicationDiagram = astahProToolSupport.getCommunicationDiagram(param.id());
         IInteraction astahInteraction = astahCommunicationDiagram.getInteraction();
-
+        
         return InteractionDTOAssembler.toDTO(astahInteraction);
     }
 }

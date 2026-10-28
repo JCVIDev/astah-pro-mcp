@@ -16,23 +16,34 @@ import com.astahpromcp.tool.astah.pro.project.outputdto.SourceTargetNameIdTypeLi
 import com.astahpromcp.tool.common.inputdto.NoInputDTO;
 import com.astahpromcp.tool.visualization.outputdto.PlantumlDTO;
 import com.change_vision.jude.api.inf.AstahAPI;
+import com.change_vision.jude.api.inf.editor.BasicModelEditor;
 import com.change_vision.jude.api.inf.editor.ITransactionManager;
 import com.change_vision.jude.api.inf.model.IClass;
 import com.change_vision.jude.api.inf.model.INamedElement;
 import com.change_vision.jude.api.inf.model.IPackage;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
+import net.sourceforge.plantuml.BlockUml;
+import net.sourceforge.plantuml.SourceStringReader;
+import net.sourceforge.plantuml.classdiagram.ClassDiagram;
+import net.sourceforge.plantuml.core.Diagram;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ProjectInfoToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ProjectInfoTool tool;
     private Method getAllNamedElements;
@@ -48,110 +59,110 @@ public class ProjectInfoToolTest {
     private Method retrieveClassifiersWithinPackage;
     private Method retrievePackageStructureAsPlantuml;
     private Method retrieveRelationshipsAsPlantuml;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
         projectAccessor = astahApi.getProjectAccessor();
         projectAccessor.open("src/test/resources/modelfile/project/ProjectInfoToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ProjectInfoTool(
             projectAccessor,
             astahProToolSupport);
-
+        
         // getAllNamedElements() method
         getAllNamedElements = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getAllNamedElements",
             NoInputDTO.class);
-
+        
         // getNamedElementsChunk() method
         getNamedElementsChunk = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getNamedElementsChunk",
             SnapshotChunkDTO.class);
-
+        
         // getAllPresentations() method
         getAllPresentations = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getAllPresentations",
             NoInputDTO.class);
-
+        
         // getPresentationsChunk() method
         getPresentationsChunk = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getPresentationsChunk",
             SnapshotChunkDTO.class);
-
+        
         // getAllDefinitions() method
         getAllDefinitions = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getAllDefinitions",
             NoInputDTO.class);
-
+        
         // getDefinitionsChunk() method
         getDefinitionsChunk = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getDefinitionsChunk",
             SnapshotChunkDTO.class);
-
+        
         // getAllConstraintsAndConditions() method
         getAllConstraintsAndConditions = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "getAllConstraintsAndConditions",
             NoInputDTO.class);
-
+        
         // retrieveClassifiersThatReferenceOrBeReferencedBy() method
         retrieveClassifiersThatReferenceOrBeReferencedBy = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "retrieveClassifiersThatReferenceOrBeReferencedBy",
             IdDTO.class);
-
+        
         // searchWithinNamedElements() method
         searchWithinNamedElements = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "searchWithinNamedElements",
             SearchDTO.class);
-
+        
         // searchWithinPresentations() method
         searchWithinPresentations = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "searchWithinPresentations",
             SearchDTO.class);
-
+        
         // retrieveClassifiersWithinPackage() method
         retrieveClassifiersWithinPackage = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "retrieveClassifiersWithinPackage",
             IdDTO.class);
-
+        
         // retrievePackageStructureAsPlantuml() method
         retrievePackageStructureAsPlantuml = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "retrievePackageStructureAsPlantuml",
             NoInputDTO.class);
-
+        
         // retrieveRelationshipsAsPlantuml() method
         retrieveRelationshipsAsPlantuml = TestSupport.getAccessibleMethod(
             ProjectInfoTool.class,
             "retrieveRelationshipsAsPlantuml",
             NoInputDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getAllNamedElements_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAllNamedElements()
         // ----------------------------------------
@@ -160,28 +171,28 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             AllNameIdTypeInfoDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getAllNamedElements_ok_sameSnapshotIdWhileTheModelIsUnchanged() throws Exception {
         AllNameIdTypeInfoDTO first = getInfoOfAllNamedElements();
         AllNameIdTypeInfoDTO second = getInfoOfAllNamedElements();
-
+        
         // Check output DTO
         assertEquals(first.snapshotId(), second.snapshotId());
         assertEquals(first.firstChunk(), second.firstChunk());
     }
-
+    
     @Test
     void getNamedElementsChunk_ok() throws Exception {
         AllNameIdTypeInfoDTO info = getInfoOfAllNamedElements();
-
+        
         // Create input DTO
         SnapshotChunkDTO inputDTO = new SnapshotChunkDTO(info.snapshotId(), 0);
-
+        
         // ----------------------------------------
         // Call getNamedElementsChunk()
         // ----------------------------------------
@@ -190,37 +201,37 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             NameIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertEquals(info.firstChunk(), outputDTO.value());
     }
-
+    
     @Test
     void getNamedElementsChunk_ok_changeTheListDoesNotShow() throws Exception {
         AllNameIdTypeInfoDTO info = getInfoOfAllNamedElements();
-
+        
         // A definition is not part of the list of names, identifiers and types
         INamedElement element = projectAccessor.findElements(IClass.class)[0];
         inTransaction(() -> element.setDefinition("Changed after the snapshot."));
-
+        
         NameIdTypeListDTO outputDTO = TestSupport.instance().invokeToolMethodReturningDto(
             getNamedElementsChunk,
             tool,
             new SnapshotChunkDTO(info.snapshotId(), 0),
             NameIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertEquals(info.firstChunk(), outputDTO.value());
     }
-
+    
     @Test
     void getNamedElementsChunk_ng_modelEditedSinceTheSnapshot() throws Exception {
         AllNameIdTypeInfoDTO info = getInfoOfAllNamedElements();
-
+        
         // Another agent adds a class between the two calls
         inTransaction(() -> projectAccessor.getModelEditorFactory().getBasicModelEditor()
             .createClass(projectAccessor.getProject(), "AddedAfterTheSnapshot"));
-
+        
         Exception exception = assertThrows(Exception.class, () -> {
             TestSupport.instance().invokeToolMethodReturningDto(
                 getNamedElementsChunk,
@@ -228,18 +239,18 @@ public class ProjectInfoToolTest {
                 new SnapshotChunkDTO(info.snapshotId(), 0),
                 NameIdTypeListDTO.class);
         });
-
+        
         // Check the error
         assertListChangedError(exception, "get_info_of_all_named_elements");
     }
-
+    
     @Test
     void getNamedElementsChunk_ng_anotherProjectOpened() throws Exception {
         AllNameIdTypeInfoDTO info = getInfoOfAllNamedElements();
-
+        
         projectAccessor.close();
         projectAccessor.open("src/test/resources/modelfile/project/ProjectAccessorToolTest.asta");
-
+        
         Exception exception = assertThrows(Exception.class, () -> {
             TestSupport.instance().invokeToolMethodReturningDto(
                 getNamedElementsChunk,
@@ -247,15 +258,15 @@ public class ProjectInfoToolTest {
                 new SnapshotChunkDTO(info.snapshotId(), 0),
                 NameIdTypeListDTO.class);
         });
-
+        
         // Check the error
         assertListChangedError(exception, "get_info_of_all_named_elements");
     }
-
+    
     @Test
     void getNamedElementsChunk_ng_chunkIndexOutOfRange() throws Exception {
         AllNameIdTypeInfoDTO info = getInfoOfAllNamedElements();
-
+        
         Exception exception = assertThrows(Exception.class, () -> {
             TestSupport.instance().invokeToolMethodReturningDto(
                 getNamedElementsChunk,
@@ -263,17 +274,17 @@ public class ProjectInfoToolTest {
                 new SnapshotChunkDTO(info.snapshotId(), info.totalChunks()),
                 NameIdTypeListDTO.class);
         });
-
+        
         // Check the error
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("'chunkIndex' is " + info.totalChunks()), exception.getCause().getMessage());
     }
-
+    
     @Test
     void getAllPresentations_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAllPresentations()
         // ----------------------------------------
@@ -282,11 +293,11 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             AllLabelIdTypeInfoDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getPresentationsChunk_ok() throws Exception {
         AllLabelIdTypeInfoDTO info = TestSupport.instance().invokeToolMethodReturningDto(
@@ -294,10 +305,10 @@ public class ProjectInfoToolTest {
             tool,
             new NoInputDTO(),
             AllLabelIdTypeInfoDTO.class);
-
+        
         // Create input DTO
         SnapshotChunkDTO inputDTO = new SnapshotChunkDTO(info.snapshotId(), 0);
-
+        
         // ----------------------------------------
         // Call getPresentationsChunk()
         // ----------------------------------------
@@ -306,11 +317,11 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             LabelIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertEquals(info.firstChunk(), outputDTO.value());
     }
-
+    
     @Test
     void getPresentationsChunk_ng_labelChangedSinceTheSnapshot() throws Exception {
         AllLabelIdTypeInfoDTO info = TestSupport.instance().invokeToolMethodReturningDto(
@@ -318,7 +329,7 @@ public class ProjectInfoToolTest {
             tool,
             new NoInputDTO(),
             AllLabelIdTypeInfoDTO.class);
-
+        
         // Renaming a class that is drawn on a diagram changes the label of its presentation
         INamedElement drawnClass = null;
         for (INamedElement element : projectAccessor.findElements(IClass.class)) {
@@ -330,7 +341,7 @@ public class ProjectInfoToolTest {
         assertNotNull(drawnClass, "The test project has no class drawn on a diagram.");
         INamedElement renamedClass = drawnClass;
         inTransaction(() -> renamedClass.setName(renamedClass.getName() + "Renamed"));
-
+        
         Exception exception = assertThrows(Exception.class, () -> {
             TestSupport.instance().invokeToolMethodReturningDto(
                 getPresentationsChunk,
@@ -338,16 +349,16 @@ public class ProjectInfoToolTest {
                 new SnapshotChunkDTO(info.snapshotId(), 0),
                 LabelIdTypeListDTO.class);
         });
-
+        
         // Check the error
         assertListChangedError(exception, "get_info_of_all_prsts");
     }
-
+    
     @Test
     void getAllDefinitions_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAllDefinitions()
         // ----------------------------------------
@@ -356,11 +367,11 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             AllDefinitionNameIdTypeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getDefinitionsChunk_ok() throws Exception {
         AllDefinitionNameIdTypeDTO info = TestSupport.instance().invokeToolMethodReturningDto(
@@ -368,10 +379,10 @@ public class ProjectInfoToolTest {
             tool,
             new NoInputDTO(),
             AllDefinitionNameIdTypeDTO.class);
-
+        
         // Create input DTO
         SnapshotChunkDTO inputDTO = new SnapshotChunkDTO(info.snapshotId(), 0);
-
+        
         // ----------------------------------------
         // Call getDefinitionsChunk()
         // ----------------------------------------
@@ -380,11 +391,11 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             DefinitionNameIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertEquals(info.firstChunk(), outputDTO.value());
     }
-
+    
     @Test
     void getDefinitionsChunk_ng_definitionChangedSinceTheSnapshot() throws Exception {
         AllDefinitionNameIdTypeDTO info = TestSupport.instance().invokeToolMethodReturningDto(
@@ -392,10 +403,10 @@ public class ProjectInfoToolTest {
             tool,
             new NoInputDTO(),
             AllDefinitionNameIdTypeDTO.class);
-
+        
         INamedElement element = projectAccessor.findElements(IClass.class)[0];
         inTransaction(() -> element.setDefinition("Changed after the snapshot."));
-
+        
         Exception exception = assertThrows(Exception.class, () -> {
             TestSupport.instance().invokeToolMethodReturningDto(
                 getDefinitionsChunk,
@@ -403,16 +414,16 @@ public class ProjectInfoToolTest {
                 new SnapshotChunkDTO(info.snapshotId(), 0),
                 DefinitionNameIdTypeListDTO.class);
         });
-
+        
         // Check the error
         assertListChangedError(exception, "get_info_of_all_definitions");
     }
-
+    
     @Test
     void getAllConstraintsAndConditions_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAllConstraintsAndConditions()
         // ----------------------------------------
@@ -421,22 +432,22 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             ReportDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.contents());
     }
-
+    
     @Test
     void retrieveClassifiersThatReferenceOrBeReferencedBy_ok() throws Exception {
         // Get classifier
         IClass classifier = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Baz");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(classifier.getId());
-
+        
         // ----------------------------------------
         // Call retrieveClassifiersThatReferenceOrBeReferencedBy()
         // ----------------------------------------
@@ -445,7 +456,7 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             SourceTargetNameIdTypeListDTO.class);
-
+        
         // Get classifier
         IClass quux01 = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
@@ -492,7 +503,7 @@ public class ProjectInfoToolTest {
         IClass quux15 = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Quux15");
-
+        
         IClass quuy01 = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Quuy01");
@@ -541,10 +552,10 @@ public class ProjectInfoToolTest {
         IClass quuy16 = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Quuy16");
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         NameIdTypeDTO quux01DTO = NameIdTypeDTOAssembler.toDTO(quux01);
         NameIdTypeDTO quux02DTO = NameIdTypeDTOAssembler.toDTO(quux02);
         NameIdTypeDTO quux03DTO = NameIdTypeDTOAssembler.toDTO(quux03);
@@ -560,7 +571,7 @@ public class ProjectInfoToolTest {
         NameIdTypeDTO quux13DTO = NameIdTypeDTOAssembler.toDTO(quux13);
         NameIdTypeDTO quux14DTO = NameIdTypeDTOAssembler.toDTO(quux14);
         NameIdTypeDTO quux15DTO = NameIdTypeDTOAssembler.toDTO(quux15);
-
+        
         List<NameIdTypeDTO> associationSourceClassifier = outputDTO.associationSourceClassifier();
         assertTrue(associationSourceClassifier.contains(quux01DTO));
         assertTrue(associationSourceClassifier.contains(quux02DTO));
@@ -570,20 +581,20 @@ public class ProjectInfoToolTest {
         assertTrue(associationSourceClassifier.contains(quux06DTO));
         assertTrue(associationSourceClassifier.contains(quux07DTO));
         assertTrue(associationSourceClassifier.contains(quux08DTO));
-
+        
         List<NameIdTypeDTO> inheritanceSourceClassifier = outputDTO.inheritanceSourceClassifier();
         assertTrue(inheritanceSourceClassifier.contains(quux09DTO));
-
+        
         List<NameIdTypeDTO> dependencySourceClassifier = outputDTO.dependencySourceClassifier();
         assertTrue(dependencySourceClassifier.contains(quux10DTO));
         assertTrue(dependencySourceClassifier.contains(quux11DTO));
-
+        
         List<NameIdTypeDTO> typeUsageSourceClassifier = outputDTO.typeUsageSourceClassifier();
         assertTrue(typeUsageSourceClassifier.contains(quux12DTO));
         assertTrue(typeUsageSourceClassifier.contains(quux13DTO));
         assertTrue(typeUsageSourceClassifier.contains(quux14DTO));
         assertTrue(typeUsageSourceClassifier.contains(quux15DTO));
-
+        
         NameIdTypeDTO quuy01DTO = NameIdTypeDTOAssembler.toDTO(quuy01);
         NameIdTypeDTO quuy02DTO = NameIdTypeDTOAssembler.toDTO(quuy02);
         NameIdTypeDTO quuy03DTO = NameIdTypeDTOAssembler.toDTO(quuy03);
@@ -600,7 +611,7 @@ public class ProjectInfoToolTest {
         NameIdTypeDTO quuy14DTO = NameIdTypeDTOAssembler.toDTO(quuy14);
         NameIdTypeDTO quuy15DTO = NameIdTypeDTOAssembler.toDTO(quuy15);
         NameIdTypeDTO quuy16DTO = NameIdTypeDTOAssembler.toDTO(quuy16);
-
+        
         List<NameIdTypeDTO> associationTargetClassifier = outputDTO.associationTargetClassifier();
         assertTrue(associationTargetClassifier.contains(quuy01DTO));
         assertTrue(associationTargetClassifier.contains(quuy02DTO));
@@ -610,29 +621,29 @@ public class ProjectInfoToolTest {
         assertTrue(associationTargetClassifier.contains(quuy06DTO));
         assertTrue(associationTargetClassifier.contains(quuy07DTO));
         assertTrue(associationTargetClassifier.contains(quuy08DTO));
-
+        
         List<NameIdTypeDTO> inheritanceTargetClassifier = outputDTO.inheritanceTargetClassifier();
         assertTrue(inheritanceTargetClassifier.contains(quuy09DTO));
-
+        
         List<NameIdTypeDTO> dependencyTargetClassifier = outputDTO.dependencyTargetClassifier();
         assertTrue(dependencyTargetClassifier.contains(quuy10DTO));
         assertTrue(dependencyTargetClassifier.contains(quuy11DTO));
-
+        
         List<NameIdTypeDTO> typeUsageTargetClassifier = outputDTO.typeUsageTargetClassifier();
         assertTrue(typeUsageTargetClassifier.contains(quuy12DTO));
         assertTrue(typeUsageTargetClassifier.contains(quuy13DTO));
         assertTrue(typeUsageTargetClassifier.contains(quuy14DTO));
         assertTrue(typeUsageTargetClassifier.contains(quuy15DTO));
-
+        
         List<NameIdTypeDTO> realizationTargetClassifier = outputDTO.realizationTargetClassifier();
         assertTrue(realizationTargetClassifier.contains(quuy16DTO));
     }
-
+    
     @Test
     void searchWithinNamedElements_ok_1() throws Exception {
         // Create input DTO
         SearchDTO inputDTO = new SearchDTO("test");
-
+        
         // ----------------------------------------
         // Call searchWithinNamedElements()
         // ----------------------------------------
@@ -641,18 +652,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             NameIdTypeDefinitionListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(6, outputDTO.value().size());
     }
-
+    
     @Test
     void searchWithinNamedElements_ok_2() throws Exception {
         // Create input DTO
         SearchDTO inputDTO = new SearchDTO("テスト");
-
+        
         // ----------------------------------------
         // Call searchWithinNamedElements()
         // ----------------------------------------
@@ -661,18 +672,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             NameIdTypeDefinitionListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(5, outputDTO.value().size());
     }
-
+    
     @Test
     void searchWithinNamedElements_ok_emptyStringTargetsAll() throws Exception {
         // Create input DTO with empty string
         SearchDTO inputDTO = new SearchDTO("");
-
+        
         // ----------------------------------------
         // Call searchWithinNamedElements()
         // ----------------------------------------
@@ -681,18 +692,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             NameIdTypeDefinitionListDTO.class);
-
+        
         // Check output DTO: an empty search string targets all named elements
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(projectAccessor.findElements(INamedElement.class).length, outputDTO.value().size());
     }
-
+    
     @Test
     void searchWithinPresentations_ok_1() throws Exception {
         // Create input DTO
         SearchDTO inputDTO = new SearchDTO("note");
-
+        
         // ----------------------------------------
         // Call searchWithinPresentations()
         // ----------------------------------------
@@ -701,18 +712,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             LabelIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(3, outputDTO.value().size());
     }
-
+    
     @Test
     void searchWithinPresentations_ok_2() throws Exception {
         // Create input DTO
         SearchDTO inputDTO = new SearchDTO("ノート");
-
+        
         // ----------------------------------------
         // Call searchWithinPresentations()
         // ----------------------------------------
@@ -721,18 +732,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             LabelIdTypeListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(2, outputDTO.value().size());
     }
-
+    
     @Test
     void searchWithinPresentations_ok_emptyStringTargetsAll() throws Exception {
         // Create input DTO with empty string
         SearchDTO inputDTO = new SearchDTO("");
-
+        
         // ----------------------------------------
         // Call searchWithinPresentations()
         // ----------------------------------------
@@ -741,23 +752,23 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             LabelIdTypeListDTO.class);
-
+        
         // Check output DTO: an empty search string targets all presentations
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertFalse(outputDTO.value().isEmpty());
     }
-
+    
     @Test
     void retrieveClassifiersWithinPackage_ok() throws Exception {
         // Get package
         IPackage package_ = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "package0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(package_.getId());
-
+        
         // ----------------------------------------
         // Call retrieveClassifiersWithinPackage()
         // ----------------------------------------
@@ -766,18 +777,18 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             NameIdTypeNamespaceListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.value());
         assertEquals(6, outputDTO.value().size());
     }
-
+    
     @Test
     void retrievePackageStructureAsPlantuml_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call retrievePackageStructureAsPlantuml()
         // ----------------------------------------
@@ -786,12 +797,80 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             PlantumlDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.plantumlCode());
+        
+        // The code must be one PlantUML can read
+        assertInstanceOf(ClassDiagram.class, parsePlantuml(outputDTO.plantumlCode()), outputDTO.plantumlCode());
     }
-
+    
+    // In braces after the class enclosing it, a nested class would be read as a member of that class and lost as a classifier
+    @Test
+    void retrievePackageStructureAsPlantuml_ok_declaresNestedClassesAsClassifiersOfTheirOwn() throws Exception {
+        createEmptyProject();
+        inTransaction(() -> {
+            BasicModelEditor editor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
+            IClass outer = editor.createClass(projectAccessor.getProject(), "Outer");
+            IClass inner = editor.createClass(outer, "Inner");
+            editor.createInterface(inner, "Innermost");
+            // A nested class of the same name, declared in the same package
+            IClass outer2 = editor.createClass(projectAccessor.getProject(), "Outer2");
+            editor.createClass(outer2, "Inner");
+        });
+        
+        String plantumlCode = retrievePackageStructure();
+        
+        assertClassDiagramWithEntities(plantumlCode, 5);
+        assertEquals(
+            Set.of("Outer +-- Inner", "Inner +-- Innermost", "Outer2 +-- Inner"),
+            nestingsOf(plantumlCode),
+            plantumlCode);
+        assertTrue(plantumlCode.contains("interface \"Innermost\" as "), plantumlCode);
+    }
+    
+    @Test
+    void retrievePackageStructureAsPlantuml_ok_writesADoubleQuoteInANameSoThatTheNameStaysWhole() throws Exception {
+        createEmptyProject();
+        inTransaction(() -> {
+            BasicModelEditor editor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
+            editor.createClass(projectAccessor.getProject(), "A\"B");
+            editor.createEnumeration(projectAccessor.getProject(), "E\"F");
+            IPackage astahPackage = editor.createPackage(projectAccessor.getProject(), "P\"Q");
+            editor.createClass(astahPackage, "C");
+        });
+        
+        String plantumlCode = retrievePackageStructure();
+        
+        assertClassDiagramWithEntities(plantumlCode, 3);
+        assertTrue(plantumlCode.contains("class \"A<U+0022>B\" as "), plantumlCode);
+        assertTrue(plantumlCode.contains("enum \"E<U+0022>F\" as "), plantumlCode);
+        assertTrue(plantumlCode.contains("package \"P<U+0022>Q\""), plantumlCode);
+    }
+    
+    // PlantUML cannot read what follows a package declared without braces.
+    @Test
+    void retrievePackageStructureAsPlantuml_ok_givesAnEmptyPackageItsBraces() throws Exception {
+        createEmptyProject();
+        inTransaction(() -> {
+            BasicModelEditor editor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
+            editor.createPackage(projectAccessor.getProject(), "Empty");
+            IPackage onlyDiagram = editor.createPackage(projectAccessor.getProject(), "OnlyDiagram");
+            projectAccessor.getDiagramEditorFactory().getClassDiagramEditor().createClassDiagram(onlyDiagram, "Diagram");
+            IPackage outer = editor.createPackage(projectAccessor.getProject(), "Outer");
+            editor.createPackage(outer, "EmptyInside");
+            editor.createClass(outer, "X");
+            editor.createClass(projectAccessor.getProject(), "Y");
+        });
+        
+        String plantumlCode = retrievePackageStructure();
+        
+        assertInstanceOf(ClassDiagram.class, parsePlantuml(plantumlCode), plantumlCode);
+        assertTrue(plantumlCode.contains("class \"X\" as "), plantumlCode);
+        assertTrue(plantumlCode.contains("class \"Y\" as "), plantumlCode);
+    }
+    
     @Test
     void retrieveRelationshipsAsPlantuml_ok() throws Exception {
         // Get classifiers used as endpoints of Baz's relationships
@@ -800,17 +879,17 @@ public class ProjectInfoToolTest {
         IClass quuy10 = (IClass) TestSupport.instance().getNamedElementByClassAndName(IClass.class, "Quuy10");
         IClass quuy11 = (IClass) TestSupport.instance().getNamedElementByClassAndName(IClass.class, "Quuy11");
         IClass quuy16 = (IClass) TestSupport.instance().getNamedElementByClassAndName(IClass.class, "Quuy16");
-
+        
         // Node names are fully-qualified names
         String bazFqn = baz.getFullName(".");
         String quuy09Fqn = quuy09.getFullName(".");
         String quuy10Fqn = quuy10.getFullName(".");
         String quuy11Fqn = quuy11.getFullName(".");
         String quuy16Fqn = quuy16.getFullName(".");
-
+        
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call retrieveRelationshipsAsPlantuml()
         // ----------------------------------------
@@ -819,35 +898,35 @@ public class ProjectInfoToolTest {
             tool,
             inputDTO,
             PlantumlDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.plantumlCode());
-
+        
         String plantumlCode = outputDTO.plantumlCode();
         assertTrue(plantumlCode.startsWith("@startuml"));
         assertTrue(plantumlCode.contains("@enduml"));
-
+        
         // Generalization, realization, dependency and usage are output using fully-qualified names
         assertTrue(plantumlCode.contains("\"" + bazFqn + "\" --|> \"" + quuy09Fqn + "\""));
         assertTrue(plantumlCode.contains("\"" + bazFqn + "\" ..|> \"" + quuy16Fqn + "\""));
         assertTrue(plantumlCode.contains("\"" + bazFqn + "\" ..> \"" + quuy10Fqn + "\""));
         assertTrue(plantumlCode.contains("\"" + bazFqn + "\" ..> \"" + quuy11Fqn + "\""));
-
+        
         // Associations without a navigable end are output using fully-qualified names
         assertUndirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy01"));
         assertUndirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy05"));
         assertUndirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy07"));
-
+        
         // Associations whose end on the Quuy side is navigable get an arrowhead on that side
         assertDirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy02"));
         assertDirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy03"));
         assertDirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy06"));
         assertDirectedAssociation(plantumlCode, bazFqn, fullNameOf("Quuy08"));
-
+        
         // An association whose both ends are navigable is output as a single bidirectional relationship
         assertBidirectionalAssociation(plantumlCode, bazFqn, fullNameOf("Quuy04"));
-
+        
         // Each association is reachable from the classes on both of its ends, but must be output only once
         List<String> relationshipLines = plantumlCode.lines()
             .filter(line -> !line.isBlank() && !line.startsWith("@"))
@@ -857,12 +936,37 @@ public class ProjectInfoToolTest {
             new LinkedHashSet<>(relationshipLines).size(),
             "The PlantUML code contains duplicated relationship lines: " + plantumlCode);
     }
-
+    
+    // A double quote left as it is would end the quoted name, and PlantUML would read the whole line as the name of one element
+    @Test
+    void retrieveRelationshipsAsPlantuml_ok_writesADoubleQuoteInANameSoThatTheNameStaysWhole() throws Exception {
+        createEmptyProject();
+        inTransaction(() -> {
+            BasicModelEditor editor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
+            IClass subtype = editor.createClass(projectAccessor.getProject(), "A\"B");
+            IClass supertype = editor.createClass(projectAccessor.getProject(), "C");
+            editor.createGeneralization(subtype, supertype, "");
+        });
+        String subtypeFqn = projectAccessor.findElements(IClass.class, "A\"B")[0].getFullName(".");
+        String supertypeFqn = projectAccessor.findElements(IClass.class, "C")[0].getFullName(".");
+        
+        String plantumlCode = TestSupport.instance().invokeToolMethodReturningDto(
+            retrieveRelationshipsAsPlantuml,
+            tool,
+            new NoInputDTO(),
+            PlantumlDTO.class).plantumlCode();
+        
+        assertClassDiagramWithEntities(plantumlCode, 2);
+        assertTrue(
+            plantumlCode.contains("\"" + subtypeFqn.replace("\"", "<U+0022>") + "\" --|> \"" + supertypeFqn + "\""),
+            plantumlCode);
+    }
+    
     private static String fullNameOf(String className) throws Exception {
         return ((IClass) TestSupport.instance().getNamedElementByClassAndName(IClass.class, className))
             .getFullName(".");
     }
-
+    
     // The direction of an association without a navigable end carries no meaning, so either orientation is correct
     private AllNameIdTypeInfoDTO getInfoOfAllNamedElements() throws Exception {
         return TestSupport.instance().invokeToolMethodReturningDto(
@@ -871,7 +975,7 @@ public class ProjectInfoToolTest {
             new NoInputDTO(),
             AllNameIdTypeInfoDTO.class);
     }
-
+    
     // Edit the model in a transaction of its own, as another agent would between two calls
     private void inTransaction(ModelEdit edit) throws Exception {
         ITransactionManager transactionManager = projectAccessor.getTransactionManager();
@@ -884,24 +988,67 @@ public class ProjectInfoToolTest {
             throw e;
         }
     }
-
+    
     @FunctionalInterface
     private interface ModelEdit {
         void run() throws Exception;
     }
-
+    
+    // A project of its own, holding nothing but what the test builds in it
+    private void createEmptyProject() throws Exception {
+        projectAccessor.close();
+        projectAccessor.create();
+    }
+    
+    private String retrievePackageStructure() throws Exception {
+        return TestSupport.instance().invokeToolMethodReturningDto(
+            retrievePackageStructureAsPlantuml,
+            tool,
+            new NoInputDTO(),
+            PlantumlDTO.class).plantumlCode();
+    }
+    
+    private static Diagram parsePlantuml(String plantumlCode) {
+        List<BlockUml> blocks = new SourceStringReader(plantumlCode).getBlocks();
+        assertEquals(1, blocks.size(), plantumlCode);
+        return blocks.get(0).getDiagram();
+    }
+    
+    // PlantUML describes a class diagram by the number of classifiers it read, which tells whether each declaration was read as one
+    private static void assertClassDiagramWithEntities(String plantumlCode, int entities) {
+        Diagram diagram = parsePlantuml(plantumlCode);
+        assertInstanceOf(ClassDiagram.class, diagram, plantumlCode);
+        assertEquals("(" + entities + " entities)", diagram.getDescription().getDescription(), plantumlCode);
+    }
+    
+    // The nesting connectors in the code, each written with the names of the two classifiers it ties
+    private static Set<String> nestingsOf(String plantumlCode) {
+        Map<String, String> namesByAlias = new HashMap<>();
+        Matcher declaration = Pattern.compile("^\\s*(?:class|interface|enum) \"(.*)\" as (\\w+)$", Pattern.MULTILINE).matcher(plantumlCode);
+        while (declaration.find()) {
+            namesByAlias.put(declaration.group(2), declaration.group(1));
+        }
+        
+        Set<String> nestings = new HashSet<>();
+        Matcher nesting = Pattern.compile("^\\s*(\\w+) \\+-- (\\w+)$", Pattern.MULTILINE).matcher(plantumlCode);
+        while (nesting.find()) {
+            nestings.add(namesByAlias.get(nesting.group(1)) + " +-- " + namesByAlias.get(nesting.group(2)));
+        }
+        return nestings;
+    }
+    
     private static void assertListChangedError(Exception exception, String infoToolName) {
         assertInstanceOf(IllegalStateException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("call '" + infoToolName + "' again"), exception.getCause().getMessage());
     }
-
+    
     private static void assertUndirectedAssociation(String plantumlCode, String fqn1, String fqn2) {
         assertTrue(
             plantumlCode.contains("\"" + fqn1 + "\" --- \"" + fqn2 + "\"")
                 || plantumlCode.contains("\"" + fqn2 + "\" --- \"" + fqn1 + "\""),
             "The association between " + fqn1 + " and " + fqn2 + " is not output: " + plantumlCode);
     }
-
+    
     // An arrowhead on the target side is written either as "source --> target" or as "target <-- source"
     private static void assertDirectedAssociation(String plantumlCode, String sourceFqn, String targetFqn) {
         assertTrue(
@@ -909,7 +1056,7 @@ public class ProjectInfoToolTest {
                 || plantumlCode.contains("\"" + targetFqn + "\" <-- \"" + sourceFqn + "\""),
             "The association from " + sourceFqn + " to " + targetFqn + " is not output: " + plantumlCode);
     }
-
+    
     // Arrowheads on both sides are written as "<-->", and either orientation is correct
     private static void assertBidirectionalAssociation(String plantumlCode, String fqn1, String fqn2) {
         assertTrue(

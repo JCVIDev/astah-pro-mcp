@@ -8,31 +8,31 @@ import java.util.List;
 public record OperationDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Is Abstract")
     boolean isAbstract,
-
+    
     @JsonPropertyDescription("Is Leaf")
     boolean isLeaf,
-
+    
     @JsonPropertyDescription("Is Static")
     boolean isStatic,
-
+    
     @JsonPropertyDescription("Parameters")
     List<ParameterDTO> parameters,
-
+    
     @JsonPropertyDescription("Return type")
     NameIdTypeDTO returnType,
-
+    
     @JsonPropertyDescription("Return type expression: The string representation of a return type, consisting of the return type name and its modifiers.")
     String returnTypeExpression,
-
+    
     @JsonPropertyDescription("Preconditions")
     List<String> preconditions,
-
+    
     @JsonPropertyDescription("Postconditions")
     List<String> postconditions,
-
+    
     @JsonPropertyDescription("Body condition")
     String bodyCondition
 ) {

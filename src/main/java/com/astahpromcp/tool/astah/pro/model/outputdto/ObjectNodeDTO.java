@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record ObjectNodeDTO(
     @JsonPropertyDescription("Activity node info")
     ActivityNodeDTO activityNode,
-
+    
     @JsonPropertyDescription("Base class")
     NameIdTypeDTO baseClass
 ) {

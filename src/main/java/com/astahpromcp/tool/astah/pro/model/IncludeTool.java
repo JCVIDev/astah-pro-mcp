@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IInclude.html
 @Slf4j
 public class IncludeTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public IncludeTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class IncludeTool extends AstahToolProvider {
                 IncludeDTO.class)
         );
     }
-
+    
     private IncludeDTO getInfo(IdDTO param) throws Exception {
         IInclude astahInclude = astahProToolSupport.getInclude(param.id());
-
+        
         return IncludeDTOAssembler.toDTO(astahInclude);
     }
 }

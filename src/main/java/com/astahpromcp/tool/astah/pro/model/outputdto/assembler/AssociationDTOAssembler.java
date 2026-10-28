@@ -9,11 +9,11 @@ import lombok.NonNull;
 
 public class AssociationDTOAssembler {
     public static AssociationDTO toDTO(@NonNull IAssociation astahAssociation) throws Exception {
-
+        
         IAttribute[] memberEnds = astahAssociation.getMemberEnds();
         IAttribute associationEndA = memberEnds[0];
         IAttribute associationEndB = memberEnds[1];
-
+        
         return new AssociationDTO(
             NamedElementDTOAssembler.toDTO(astahAssociation),
             NameIdTypeDTOAssembler.toDTO(associationEndA),

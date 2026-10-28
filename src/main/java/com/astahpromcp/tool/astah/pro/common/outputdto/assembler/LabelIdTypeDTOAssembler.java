@@ -14,7 +14,7 @@ public class LabelIdTypeDTOAssembler {
         } else {
             label = astahPresentation.getLabel() != null ? astahPresentation.getLabel() : "";
         }
-
+        
         return new LabelIdTypeDTO(
             label,
             astahPresentation.getID() != null ? astahPresentation.getID() : "",

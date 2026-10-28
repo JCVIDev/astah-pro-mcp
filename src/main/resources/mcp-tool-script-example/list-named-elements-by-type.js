@@ -20,23 +20,23 @@ var wantedNames = [];
 var total = 0;
 
 for (var i = 0; i < info.totalChunks; i++) {
-  // Chunk 0 is the one the info call already returned, so take it from there rather than fetching it twice.
-  var chunk = i === 0
-    ? info.firstChunk
-    : tools.get_chunk_of_all_named_elements({ snapshotId: info.snapshotId, chunkIndex: i }).value;
-
-  // Each entry is { name, id, type }.
-  for (var e = 0; e < chunk.length; e++) {
-    var element = chunk[e];
-
-    counts[element.type] = (counts[element.type] || 0) + 1;
-    total++;
-
-    if (element.type === wantedType) {
-      // A named element is allowed to have no name at all, so give the nameless ones something to show.
-      wantedNames.push(element.name === '' ? '(unnamed)' : element.name);
+    // Chunk 0 is the one the info call already returned, so take it from there rather than fetching it twice.
+    var chunk = i === 0
+        ? info.firstChunk
+        : tools.get_chunk_of_all_named_elements({ snapshotId: info.snapshotId, chunkIndex: i }).value;
+    
+    // Each entry is { name, id, type }.
+    for (var e = 0; e < chunk.length; e++) {
+        var element = chunk[e];
+        
+        counts[element.type] = (counts[element.type] || 0) + 1;
+        total++;
+        
+        if (element.type === wantedType) {
+            // A named element is allowed to have no name at all, so give the nameless ones something to show.
+            wantedNames.push(element.name === '' ? '(unnamed)' : element.name);
+        }
     }
-  }
 }
 
 
@@ -48,15 +48,15 @@ for (var i = 0; i < info.totalChunks; i++) {
 // comes back in one round trip, and only the tally below reaches you instead of every name and ID in it.
 var types = [];
 for (var type in counts) {
-  if (counts.hasOwnProperty(type)) {
-    types.push(type);
-  }
+    if (counts.hasOwnProperty(type)) {
+        types.push(type);
+    }
 }
 types.sort();
 
 print(total + ' named elements in ' + info.totalChunks + ' chunk(s), by type:');
 for (var t = 0; t < types.length; t++) {
-  print('  ' + types[t] + ': ' + counts[types[t]]);
+    print('  ' + types[t] + ': ' + counts[types[t]]);
 }
 
 
@@ -73,8 +73,8 @@ print('');
 print(wantedType + ' (' + wantedNames.length + '):');
 
 for (var w = 0; w < wantedNames.length && w < nameLimit; w++) {
-  print('  ' + wantedNames[w]);
+    print('  ' + wantedNames[w]);
 }
 if (wantedNames.length > nameLimit) {
-  print('  ... and ' + (wantedNames.length - nameLimit) + ' more');
+    print('  ... and ' + (wantedNames.length - nameLimit) + ' more');
 }

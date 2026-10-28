@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MindMapDiagramToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private MindMapDiagramTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class MindMapDiagramToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/MindMapDiagramToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new MindMapDiagramTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             MindMapDiagramTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get mind map diagram
         IMindMapDiagram mindMapDiagram = (IMindMapDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IMindMapDiagram.class,
             "Mindmap0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(mindMapDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class MindMapDiagramToolTest {
             tool,
             inputDTO,
             MindMapDiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotEquals("", outputDTO.rootTopic().id());

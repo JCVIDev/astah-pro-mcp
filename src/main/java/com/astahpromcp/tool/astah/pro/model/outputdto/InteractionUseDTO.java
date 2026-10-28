@@ -8,13 +8,13 @@ import java.util.List;
 public record InteractionUseDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Argument")
     String argument,
-
+    
     @JsonPropertyDescription("Sequence diagram refers to")
     NameIdTypeDTO sequenceDiagram,
-
+    
     @JsonPropertyDescription("Gates")
     List<NameIdTypeDTO> gates
 ) {

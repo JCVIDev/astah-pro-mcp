@@ -24,9 +24,9 @@ public enum PseudostateKind {
     SHALLOW_HISTORY("ShallowHistoryPseudostate"),
     @JsonProperty("stub")
     STUB("StubState in SubmachineState");
-
+    
     public final String astahValue;
-
+    
     private PseudostateKind(String astahValue) {
         this.astahValue = astahValue;
     }

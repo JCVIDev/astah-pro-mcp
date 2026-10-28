@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class UseCaseDiagramGuide {
-
+    
     private UseCaseDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 Terminology Definitions (quoted from OMG UML Specification v.2.5.1):

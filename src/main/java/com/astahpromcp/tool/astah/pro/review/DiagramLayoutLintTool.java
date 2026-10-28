@@ -32,9 +32,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class DiagramLayoutLintTool extends AstahToolProvider {
-
+    
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
-
+    
+    // How far apart two lines may be and still count as running along each other, and how much of a line may stray from the other
+    private static final double LINE_OVERLAP_TOLERANCE = 4.0;
+    
     // The node and link presentation types checked for overlaps on one diagram type.
     private record OverlapTarget(
         NamedElementDTO.Type diagramType,
@@ -42,7 +45,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         Set<Type> linkTypes
     ) {
     }
-
+    
     // The diagram types supported by overlap detection
     private static final List<OverlapTarget> OVERLAP_TARGETS = List.of(
         new OverlapTarget(
@@ -60,7 +63,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.DEPENDENCY,
                 Type.USAGE,
                 Type.LINK)),
-
+        
         new OverlapTarget(
             NamedElementDTO.Type.USE_CASE_DIAGRAM,
             EnumSet.of(
@@ -73,7 +76,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.DEPENDENCY,
                 Type.EXTEND,
                 Type.INCLUDE)),
-
+        
         new OverlapTarget(
             NamedElementDTO.Type.SEQUENCE_DIAGRAM,
             EnumSet.of(
@@ -81,7 +84,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.NOTE),
             EnumSet.of(
                 Type.MESSAGE)),
-
+        
         new OverlapTarget(
             NamedElementDTO.Type.ACTIVITY_DIAGRAM,
             EnumSet.of(
@@ -100,7 +103,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.NOTE),
             EnumSet.of(
                 Type.CONTROL_FLOW_OR_OBJECT_FLOW)),
-
+        
         new OverlapTarget(
             NamedElementDTO.Type.STATE_MACHINE_DIAGRAM,
             EnumSet.of(
@@ -113,7 +116,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.NOTE),
             EnumSet.of(
                 Type.TRANSITION)),
-
+        
         new OverlapTarget(
             NamedElementDTO.Type.REQUIREMENT_DIAGRAM,
             EnumSet.of(
@@ -131,21 +134,21 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 Type.REFINE,
                 Type.TRACE,
                 Type.DEPENDENCY)));
-
+    
     private static final String SUPPORTED_DIAGRAM_TYPE_NAMES = OVERLAP_TARGETS.stream()
         .map(target -> target.diagramType().typeName)
         .collect(Collectors.joining(", "));
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public DiagramLayoutLintTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -156,11 +159,11 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 IdDTO.class,
                 ReportDTO.class));
     }
-
+    
     private ReportDTO detectOverlap(IdDTO param) throws Exception {
         IDiagram diagram = astahProToolSupport.getDiagram(param.id());
         StringBuilder sbContents = new StringBuilder();
-
+        
         // Retrieve the node/link presentations to be checked for overlap detection
         OverlapTarget overlapTarget = findOverlapTarget(diagram).orElseThrow(() -> new IllegalArgumentException(String.format(
             "The type of this diagram is excluded from overlap detection: %s(%s) is a diagram of type %s. Supported diagram types: %s.",
@@ -170,26 +173,26 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
             SUPPORTED_DIAGRAM_TYPE_NAMES)));
         List<INodePresentation> targetNodePresentations = getNodePresentationsByTypes(diagram, overlapTarget.nodeTypes());
         List<ILinkPresentation> targetLinkPresentations = getLinkPresentationsByTypes(diagram, overlapTarget.linkTypes());
-
+        
         // Detect overlaps
         sbContents.append(detectOverlapsBetweenRectangles(targetNodePresentations));
         sbContents.append(detectOverlapsBetweenLines(targetLinkPresentations));
         sbContents.append(detectOverlapsBetweenRectangleAndLine(targetNodePresentations, targetLinkPresentations));
-
+        
         if (sbContents.isEmpty()) {
             sbContents.append("No overlap was detected.");
         }
-
+        
         return new ReportDTO(sbContents.toString());
     }
-
+    
     // Find the overlap target for the type of the diagram, if overlap detection supports it
     private static Optional<OverlapTarget> findOverlapTarget(IDiagram diagram) {
         return OVERLAP_TARGETS.stream()
             .filter(target -> target.diagramType().typeClass.isInstance(diagram))
             .findFirst();
     }
-
+    
     // Retrieve node presentations of the specified types
     private List<INodePresentation> getNodePresentationsByTypes(IDiagram diagram, Set<Type> types) throws Exception {
         List<INodePresentation> nodePresentations = new ArrayList<>();
@@ -200,7 +203,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return nodePresentations;
     }
-
+    
     // Retrieve link presentations of the specified types
     private List<ILinkPresentation> getLinkPresentationsByTypes(IDiagram diagram, Set<Type> types) throws Exception {
         List<ILinkPresentation> linkPresentations = new ArrayList<>();
@@ -211,7 +214,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return linkPresentations;
     }
-
+    
     // Detect overlaps between rectangles
     private StringBuilder detectOverlapsBetweenRectangles(List<INodePresentation> nodePresentations) throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -222,7 +225,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 
                 Polygon polygonA = toPolygon(nodePresentationA.getRectangle());
                 Polygon polygonB = toPolygon(nodePresentationB.getRectangle());
-
+                
                 // Detect overlap
                 if (polygonA.intersection(polygonB).getArea() > 0) {
                     sb.append(formatOverlap(nodePresentationA, nodePresentationB)).append("\n");
@@ -231,7 +234,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return sb;
     }
-
+    
     // Detect overlaps between rectangles and lines
     private StringBuilder detectOverlapsBetweenRectangleAndLine(List<INodePresentation> nodePresentations, List<ILinkPresentation> linkPresentations) throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -240,7 +243,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
             if (lineString == null) {
                 continue;
             }
-
+            
             IPresentation sourceEnd = linkPresentation.getSourceEnd();
             IPresentation targetEnd = linkPresentation.getTargetEnd();
             for (INodePresentation nodePresentation : nodePresentations) {
@@ -248,9 +251,9 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 if (isEndOrItsAncestor(nodePresentation, sourceEnd) || isEndOrItsAncestor(nodePresentation, targetEnd)) {
                     continue;
                 }
-
+                
                 Polygon polygon = toPolygon(nodePresentation.getRectangle());
-
+                
                 // Detect overlap
                 Geometry intersection = lineString.intersection(polygon);
                 if (intersection.getDimension() >= 1 && intersection.getLength() > 0) {
@@ -260,7 +263,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return sb;
     }
-
+    
     // Whether the given node presentation is an end of the link, or encloses that end.
     // Comparing against the ends alone is not enough on a sequence diagram: the end of a message there is the activation the message leaves or starts, never the lifeline that activation sits on, while the nodes checked against are the lifelines.
     private static boolean isEndOrItsAncestor(INodePresentation nodePresentation, IPresentation end) {
@@ -273,7 +276,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return false;
     }
-
+    
     // Detect overlaps between lines
     private StringBuilder detectOverlapsBetweenLines(List<ILinkPresentation> linkPresentations) throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -287,20 +290,23 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
                 if (lineA == null || lineB == null) {
                     continue;
                 }
-
+                
                 // Detect overlap
                 //   Treat as overlapping when they mostly overlap.
-                final double EPS = 4.0;
-                double intersectionLength = lineB.intersection(lineA.buffer(EPS)).getLength();
-                if ((int) (intersectionLength - (lineA.getLength() - EPS)) >= 0
-                        || (int) (intersectionLength - (lineB.getLength() - EPS)) >= 0) {
+                if (mostlyRunsAlong(lineA, lineB) || mostlyRunsAlong(lineB, lineA)) {
                     sb.append(formatOverlap(linkPresentationA, linkPresentationB)).append("\n");
                 }
             }
         }
         return sb;
     }
-
+    
+    // Whether the line runs within the tolerance of the other line for all but the tolerance of its own length.
+    private static boolean mostlyRunsAlong(LineString line, LineString other) {
+        double nearLength = line.intersection(other.buffer(LINE_OVERLAP_TOLERANCE)).getLength();
+        return nearLength > 0 && nearLength >= line.getLength() - LINE_OVERLAP_TOLERANCE;
+    }
+    
     private static Polygon toPolygon(Rectangle2D rectangle) {
         double x = rectangle.getX();
         double y = rectangle.getY();
@@ -314,7 +320,7 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
             new Coordinate(x, y)
         });
     }
-
+    
     private static LineString toLineString(Point2D[] points) {
         if (points == null || points.length < 2) {
             return null;
@@ -325,13 +331,13 @@ public class DiagramLayoutLintTool extends AstahToolProvider {
         }
         return GEOMETRY_FACTORY.createLineString(coordinates);
     }
-
+    
     private static String formatOverlap(IPresentation a, IPresentation b) {
         return String.format("[%s] %s (id=%s) overlaps with [%s] %s (id=%s)",
             a.getType(), labelOf(a), a.getID(),
             b.getType(), labelOf(b), b.getID());
     }
-
+    
     private static String labelOf(IPresentation presentation) {
         String label = presentation.getLabel();
         return (label == null || label.isEmpty()) ? "(unnamed)" : label;

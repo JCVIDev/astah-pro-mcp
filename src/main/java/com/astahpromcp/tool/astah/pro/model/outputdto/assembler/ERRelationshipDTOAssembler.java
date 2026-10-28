@@ -38,14 +38,14 @@ public class ERRelationshipDTOAssembler {
         for (IERAttribute astahERAttribute : astahERRelationship.getForeignKeys()) {
             foreignKeysDTOs.add(NameIdTypeDTOAssembler.toDTO(astahERAttribute));
         }
-
+        
         String verbPhraseParentToChild;
         if (astahERRelationship.getVerbPhraseParent() != null) {
             verbPhraseParentToChild = astahERRelationship.getVerbPhraseParent();
         } else {
             verbPhraseParentToChild = "";
         }
-
+        
         String verbPhraseChildToParent;
         if (astahERRelationship.getVerbPhraseChild() != null) {
             verbPhraseChildToParent = astahERRelationship.getVerbPhraseChild();

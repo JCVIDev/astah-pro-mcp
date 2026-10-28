@@ -10,9 +10,9 @@ public enum AggregationKind {
     COMPOSITE(com.change_vision.jude.api.inf.model.AggregationKind.COMPOSITE),
     @JsonProperty("none")
     NONE(com.change_vision.jude.api.inf.model.AggregationKind.NONE);
-
+    
     public final com.change_vision.jude.api.inf.model.AggregationKind astahValue;
-
+    
     private AggregationKind(com.change_vision.jude.api.inf.model.AggregationKind astahValue) {
         this.astahValue = astahValue;
     }

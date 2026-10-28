@@ -6,34 +6,34 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record AttributeDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Is Aggregate")
     boolean isAggregate,
-
+    
     @JsonPropertyDescription("Is Changeable")
     boolean isChangeable,
-
+    
     @JsonPropertyDescription("Is Composite")
     boolean isComposite,
-
+    
     @JsonPropertyDescription("Is Derived")
     boolean isDerived,
-
+    
     @JsonPropertyDescription("Is Static")
     boolean isStatic,
-
+    
     @JsonPropertyDescription("Is initial value")
     String initialValue,
-
+    
     @JsonPropertyDescription("Multiplicity")
     String multiplicity,
-
+    
     @JsonPropertyDescription("Navigability")
     String navigability,
-
+    
     @JsonPropertyDescription("Type")
     NameIdTypeDTO type,
-
+    
     @JsonPropertyDescription("Type Expression: The string representation of a type, consisting of the type name and its modifiers.")
     String typeExpression
 ) {

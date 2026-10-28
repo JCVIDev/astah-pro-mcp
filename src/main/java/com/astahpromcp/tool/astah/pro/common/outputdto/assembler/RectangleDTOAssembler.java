@@ -7,7 +7,7 @@ import java.awt.geom.Rectangle2D;
 
 public class RectangleDTOAssembler {
     public static RectangleDTO toDTO(@NonNull Rectangle2D astahRectangle) throws Exception {
-
+        
         return new RectangleDTO(
             astahRectangle.getX(),
             astahRectangle.getY(),

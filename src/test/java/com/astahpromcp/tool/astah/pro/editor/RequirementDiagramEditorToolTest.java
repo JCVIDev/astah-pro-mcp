@@ -18,11 +18,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RequirementDiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private RequirementDiagramEditorTool tool;
     private Method createRequirementDiagram;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -31,40 +31,40 @@ public class RequirementDiagramEditorToolTest {
         RequirementDiagramEditor requirementDiagramEditor = projectAccessor.getDiagramEditorFactory().getRequirementDiagramEditor();
         projectAccessor.open("src/test/resources/modelfile/editor/RequirementDiagramEditorToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new RequirementDiagramEditorTool(
             projectAccessor,
             transactionSupport,
             requirementDiagramEditor,
             astahProToolSupport);
-
+        
         // createRequirementDiagram() method
         createRequirementDiagram = TestSupport.getAccessibleMethod(
             RequirementDiagramEditorTool.class,
             "createRequirementDiagram",
             NewDiagramInPackageDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createRequirementDiagram_ok() throws Exception {
         // Get package
         IPackage astahPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewDiagramInPackageDTO inputDTO = new NewDiagramInPackageDTO(
             astahPackage.getId(),
             "TestRequirementDiagram");
-
+        
         // ----------------------------------------
         // Call createRequirementDiagram()
         // ----------------------------------------
@@ -73,7 +73,7 @@ public class RequirementDiagramEditorToolTest {
             tool,
             inputDTO,
             DiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

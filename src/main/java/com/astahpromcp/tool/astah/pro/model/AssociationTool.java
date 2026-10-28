@@ -22,17 +22,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IAssociation.html
 @Slf4j
 public class AssociationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public AssociationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -42,85 +42,84 @@ public class AssociationTool extends AstahToolProvider {
                 this::getAssociationInfo,
                 IdDTO.class,
                 AssociationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_asso_end_a_info",
                 "Return the model element information about the specified association end A (specified by ID). Note that the input to this tool function is the association-end ID, not the association ID.",
                 this::getAssociationEndAInfo,
                 IdDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_asso_end_b_info",
                 "Return the model element information about the specified association end B (specified by ID). Note that the input to this tool function is the association-end ID, not the association ID.",
                 this::getAssociationEndBInfo,
                 IdDTO.class,
                 AttributeDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_init_val_of_asso_end_a",
                 "Set the initial value of the specified association end A (specified by ID), and return the model element of the association end after it is set.",
                 this::setInitialValueOfAssociationEndA,
                 AttributeWithInitialValueDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_init_val_of_asso_end_b",
                 "Set the initial value of the specified association end B (specified by ID), and return the model element of the association end after it is set.",
                 this::setInitialValueOfAssociationEndB,
                 AttributeWithInitialValueDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_static_of_asso_end_a",
                 "Set the Static of the specified association end A (specified by ID), and return the model element of the association end after it is set.",
                 this::setStaticOfAssociationEndA,
                 AttributeWithStaticDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_static_of_asso_end_b",
                 "Set the Static of the specified association end B (specified by ID), and return the model element of the association end after it is set.",
                 this::setStaticOfAssociationEndB,
                 AttributeWithStaticDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_multiplicity_of_asso_end_a",
                 "Set the upper and lower multiplicity (specified by string) of the specified association end A (specified by ID), and return the model element of the association end after it is set. If there is only one multiplicity, set either the upper or the lower multiplicity, and set the other to an empty string.",
                 this::setMultiplicityOfAssociationEndA,
                 AttributeWithMultiplicityDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_multiplicity_of_asso_end_b",
                 "Set the upper and lower multiplicity (specified by string) of the specified association end B (specified by ID), and return the model element of the association end after it is set. If there is only one multiplicity, set either the upper or the lower multiplicity, and set the other to an empty string.",
                 this::setMultiplicityOfAssociationEndB,
                 AttributeWithMultiplicityDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_aggregation_kind_of_asso_end_a",
                 "Set the aggregation kind of the specified association end A (specified by ID), and return the model element of the association end after it is set. When 'aggregate' is specified, a hollow diamond is placed at the type of association end A. When 'composite' is specified, a filled (black) diamond is placed at the type of association end A. The diamond is not shown while association end A is navigable. Only one end of an association can be an aggregation or a composition, so setting 'aggregate' or 'composite' resets association end B to 'none'.",
                 this::setAggregationKindOfAssociationEndA,
                 AssociationEndWithAggregationKindDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_aggregation_kind_of_asso_end_b",
                 "Set the aggregation kind of the specified association end B (specified by ID), and return the model element of the association end after it is set. When 'aggregate' is specified, a hollow diamond is placed at the type of association end B. When 'composite' is specified, a filled (black) diamond is placed at the type of association end B. The diamond is not shown while association end B is navigable. Only one end of an association can be an aggregation or a composition, so setting 'aggregate' or 'composite' resets association end A to 'none'.",
                 this::setAggregationKindOfAssociationEndB,
                 AssociationEndWithAggregationKindDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_navigability_of_asso_end_a",
                 "Set the navigability of the specified association end A (specified by ID), and return the model element of the association end after it is set. Note that when you set the navigability of association end A to 'navigable', the arrowhead appears on the association end A side.",
                 this::setNavigabilityOfAssociationEndA,
                 AssociationEndWithNavigabilityDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_navigability_of_asso_end_b",
                 "Set the navigability of the specified association end B (specified by ID), and return the model element of the association end after it is set. Note that when you set the navigability of association end B to 'navigable', the arrowhead appears on the association end B side.",
@@ -129,152 +128,152 @@ public class AssociationTool extends AstahToolProvider {
                 AttributeDTO.class)
         );
     }
-
+    
     private AssociationDTO getAssociationInfo(IdDTO param) throws Exception {
         IAssociation astahAssociation = astahProToolSupport.getAssociation(param.id());
-
+        
         return AssociationDTOAssembler.toDTO(astahAssociation);
     }
-
+    
     private AttributeDTO getAssociationEndAInfo(IdDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.id(), 0);
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO getAssociationEndBInfo(IdDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.id(), 1);
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
-
+    
     private AttributeDTO setInitialValueOfAssociationEndA(AttributeWithInitialValueDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 0);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndA.setInitialValue(param.initialValue());
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO setInitialValueOfAssociationEndB(AttributeWithInitialValueDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 1);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndB.setInitialValue(param.initialValue());
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
-
+    
     private AttributeDTO setStaticOfAssociationEndA(AttributeWithStaticDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 0);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndA.setStatic(param.isStatic());
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO setStaticOfAssociationEndB(AttributeWithStaticDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 1);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndB.setStatic(param.isStatic());
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
-
+    
     private AttributeDTO setMultiplicityOfAssociationEndA(AttributeWithMultiplicityDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 0);
-
+        
         String lowerStringMultiplicity = AstahProToolSupport.requireMultiplicityBound(param.lowerMultiplicity());
         String upperStringMultiplicity = AstahProToolSupport.requireMultiplicityBound(param.upperMultiplicity());
-
+        
         if (!lowerStringMultiplicity.isEmpty() && !upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndA.setMultiplicityStrings(new String[][]{{lowerStringMultiplicity, upperStringMultiplicity}});
             });
         } else if (!lowerStringMultiplicity.isEmpty() && upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndA.setMultiplicityString(lowerStringMultiplicity);
             });
         } else if (lowerStringMultiplicity.isEmpty() && !upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndA.setMultiplicityString(upperStringMultiplicity);
             });
         } else {
             throw new IllegalArgumentException("Lower multiplicity and upper multiplicity are both empty.");
         }
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO setMultiplicityOfAssociationEndB(AttributeWithMultiplicityDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.targetAttributeId(), 1);
-
+        
         String lowerStringMultiplicity = AstahProToolSupport.requireMultiplicityBound(param.lowerMultiplicity());
         String upperStringMultiplicity = AstahProToolSupport.requireMultiplicityBound(param.upperMultiplicity());
-
+        
         if (!lowerStringMultiplicity.isEmpty() && !upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndB.setMultiplicityStrings(new String[][]{{lowerStringMultiplicity, upperStringMultiplicity}});
             });
         } else if (!lowerStringMultiplicity.isEmpty() && upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndB.setMultiplicityString(lowerStringMultiplicity);
             });
         } else if (lowerStringMultiplicity.isEmpty() && !upperStringMultiplicity.isEmpty()) {
-            txnAstah.run( () -> {
+            txnAstah.run(() -> {
                 astahAssociationEndB.setMultiplicityString(upperStringMultiplicity);
             });
         } else {
             throw new IllegalArgumentException("Lower multiplicity and upper multiplicity are both empty.");
         }
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
-
+    
     private AttributeDTO setAggregationKindOfAssociationEndA(AssociationEndWithAggregationKindDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.targetAssociationEndId(), 0);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndA.setAggregationKind(param.aggregationKind().astahValue);
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO setAggregationKindOfAssociationEndB(AssociationEndWithAggregationKindDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.targetAssociationEndId(), 1);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndB.setAggregationKind(param.aggregationKind().astahValue);
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
-
+    
     private AttributeDTO setNavigabilityOfAssociationEndA(AssociationEndWithNavigabilityDTO param) throws Exception {
         IAttribute astahAssociationEndA = astahProToolSupport.getAssociationEnd(param.targetAssociationEndId(), 0);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndA.setNavigability(param.navigabilityKind().astahValue);
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndA);
     }
-
+    
     private AttributeDTO setNavigabilityOfAssociationEndB(AssociationEndWithNavigabilityDTO param) throws Exception {
         IAttribute astahAssociationEndB = astahProToolSupport.getAssociationEnd(param.targetAssociationEndId(), 1);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAssociationEndB.setNavigability(param.navigabilityKind().astahValue);
         });
-
+        
         return AttributeDTOAssembler.toDTO(astahAssociationEndB);
     }
 }

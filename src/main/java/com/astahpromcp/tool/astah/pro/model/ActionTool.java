@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IAction.html
 @Slf4j
 public class ActionTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ActionTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,8 +41,7 @@ public class ActionTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ActionDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_calling_activity_of_action",
                 "Set the calling activity (specified by ID) of the specified call behavior action (specified by ID), and return the model element of the action after it is set.",
@@ -51,23 +50,23 @@ public class ActionTool extends AstahToolProvider {
                 ActionDTO.class)
         );
     }
-
+    
     private ActionDTO getInfo(IdDTO param) throws Exception {
         IAction astahAction = astahProToolSupport.getAction(param.id());
-
+        
         return ActionDTOAssembler.toDTO(astahAction);
     }
-
+    
     private ActionDTO setCallingActivity(ActionWithCallingActivityDTO param) throws Exception {
         IAction astahAction = astahProToolSupport.getAction(param.targetActionId());
         IActivity astahCallingActivity = astahProToolSupport.getActivity(param.callingActivityId());
-
+        
         if (!astahAction.isCallBehaviorAction()) {
             throw new IllegalArgumentException(String.format(
                 "The action '%s' (ID: %s) is not a call behavior action. A calling activity can be set only on a call behavior action. To call an activity, create a call behavior action with create_call_behavior_act.",
                 astahAction.getName(), astahAction.getId()));
         }
-
+        
         for (IActivityNode astahActivityNode : astahCallingActivity.getActivityNodes()) {
             if (astahActivityNode.getId().equals(astahAction.getId())) {
                 throw new IllegalArgumentException(String.format(
@@ -75,11 +74,11 @@ public class ActionTool extends AstahToolProvider {
                     astahAction.getName(), astahAction.getId(), astahCallingActivity.getName(), astahCallingActivity.getId()));
             }
         }
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahAction.setCallingActivity(astahCallingActivity);
         });
-
+        
         return ActionDTOAssembler.toDTO(astahAction);
     }
 }

@@ -6,9 +6,9 @@ var rootPackageId = tools.get_proj({}).element.id;
 // find_named_elements_by_name matches partially, and an exact name is not necessarily unique either,
 // so the hits are filtered and then counted rather than taking value[0].
 var diagrams = tools.find_named_elements_by_name({ name: 'Class Diagram0' }).value
-  .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
+    .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
 if (diagrams.length !== 1) {
-  throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
+    throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
 }
 var diagramId = diagrams[0].id;
 
@@ -20,28 +20,28 @@ var diagramId = diagrams[0].id;
 // create_enum_in_parent_pkg wraps the model element in classDTO, unlike the other create tools,
 // so the ID is at .classDTO.namedElement.element.id rather than .namedElement.element.id.
 var currency = tools.create_enum_in_parent_pkg({
-  newEnumerationName: 'Currency',
-  parentPackageId: rootPackageId
+    newEnumerationName: 'Currency',
+    parentPackageId: rootPackageId
 });
 var currencyId = currency.classDTO.namedElement.element.id;
 
 tools.set_definition({
-  targetNamedElementId: currencyId,
-  definition: 'The currency an amount of money is counted in.'
+    targetNamedElementId: currencyId,
+    definition: 'The currency an amount of money is counted in.'
 });
 
 // Create the enumeration literals.
 tools.create_enum_literal({
-  newEnumerationLiteralName: 'JPY',
-  parentEnumerationId: currencyId
+    newEnumerationLiteralName: 'JPY',
+    parentEnumerationId: currencyId
 });
 tools.create_enum_literal({
-  newEnumerationLiteralName: 'USD',
-  parentEnumerationId: currencyId
+    newEnumerationLiteralName: 'USD',
+    parentEnumerationId: currencyId
 });
 tools.create_enum_literal({
-  newEnumerationLiteralName: 'EUR',
-  parentEnumerationId: currencyId
+    newEnumerationLiteralName: 'EUR',
+    parentEnumerationId: currencyId
 });
 
 
@@ -51,55 +51,55 @@ tools.create_enum_literal({
 
 // Create the class.
 var money = tools.create_class_in_parent_pkg({
-  newClassName: 'Money',
-  parentPackageId: rootPackageId
+    newClassName: 'Money',
+    parentPackageId: rootPackageId
 });
 var moneyId = money.namedElement.element.id;
 
 // Set the definition.
 tools.set_definition({
-  targetNamedElementId: moneyId,
-  definition: 'A value object holding an amount in the minor currency unit.'
+    targetNamedElementId: moneyId,
+    definition: 'A value object holding an amount in the minor currency unit.'
 });
 
 // Create an attribute. Its type defaults to int, which is what we want here.
 tools.create_attr({
-  newAttributeName: 'amount',
-  parentClassId: moneyId
+    newAttributeName: 'amount',
+    parentClassId: moneyId
 });
 
 var currencyOfMoney = tools.create_attr({
-  newAttributeName: 'currency',
-  parentClassId: moneyId
+    newAttributeName: 'currency',
+    parentClassId: moneyId
 });
 
 // An enumeration is a model element too, so the attribute is typed by its ID.
 tools.set_type_of_attr({
-  targetAttributeId: currencyOfMoney.namedElement.element.id,
-  attributeTypeId: currencyId
+    targetAttributeId: currencyOfMoney.namedElement.element.id,
+    attributeTypeId: currencyId
 });
 
 // Create an operation. Its return type defaults to void.
 var isGreaterThan = tools.create_ope({
-  newOperationName: 'isGreaterThan',
-  parentClassId: moneyId
+    newOperationName: 'isGreaterThan',
+    parentClassId: moneyId
 });
 var isGreaterThanId = isGreaterThan.namedElement.element.id;
 
 // Change the return type to a primitive type.
 tools.set_return_type_expression_of_ope({
-  targetOperationId: isGreaterThanId,
-  returnTypeExpression: 'boolean'
+    targetOperationId: isGreaterThanId,
+    returnTypeExpression: 'boolean'
 });
 
 // Create a parameter and set its type. Its type defaults to int.
 var other = tools.create_param({
-  newParameterName: 'other',
-  targetOperationId: isGreaterThanId
+    newParameterName: 'other',
+    targetOperationId: isGreaterThanId
 });
 tools.set_type_of_param({
-  targetParameterId: other.namedElement.element.id,
-  parameterTypeId: moneyId
+    targetParameterId: other.namedElement.element.id,
+    parameterTypeId: moneyId
 });
 
 
@@ -108,70 +108,70 @@ tools.set_type_of_param({
 // ============================================================
 
 var orderLine = tools.create_class_in_parent_pkg({
-  newClassName: 'OrderLine',
-  parentPackageId: rootPackageId
+    newClassName: 'OrderLine',
+    parentPackageId: rootPackageId
 });
 var orderLineId = orderLine.namedElement.element.id;
 
 tools.set_definition({
-  targetNamedElementId: orderLineId,
-  definition: 'One item line of an order. Holds the quantity and the unit price.'
+    targetNamedElementId: orderLineId,
+    definition: 'One item line of an order. Holds the quantity and the unit price.'
 });
 
 tools.create_attr({
-  newAttributeName: 'quantity',
-  parentClassId: orderLineId
+    newAttributeName: 'quantity',
+    parentClassId: orderLineId
 });
 
 var unitPrice = tools.create_attr({
-  newAttributeName: 'unitPrice',
-  parentClassId: orderLineId
+    newAttributeName: 'unitPrice',
+    parentClassId: orderLineId
 });
 
 // set_type_of_attr takes the model element of the type, so it needs a class rather than a name.
 tools.set_type_of_attr({
-  targetAttributeId: unitPrice.namedElement.element.id,
-  attributeTypeId: moneyId
+    targetAttributeId: unitPrice.namedElement.element.id,
+    attributeTypeId: moneyId
 });
 
 var lineDiscount = tools.create_attr({
-  newAttributeName: 'lineDiscount',
-  parentClassId: orderLineId
+    newAttributeName: 'lineDiscount',
+    parentClassId: orderLineId
 });
 
 tools.set_type_of_attr({
-  targetAttributeId: lineDiscount.namedElement.element.id,
-  attributeTypeId: moneyId
+    targetAttributeId: lineDiscount.namedElement.element.id,
+    attributeTypeId: moneyId
 });
 
 var calculateSubtotal = tools.create_ope({
-  newOperationName: 'calculateSubtotalMinorUnits',
-  parentClassId: orderLineId
+    newOperationName: 'calculateSubtotalMinorUnits',
+    parentClassId: orderLineId
 });
 
 tools.set_return_type_expression_of_ope({
-  targetOperationId: calculateSubtotal.namedElement.element.id,
-  returnTypeExpression: 'long'
+    targetOperationId: calculateSubtotal.namedElement.element.id,
+    returnTypeExpression: 'long'
 });
 
 var exceedsBudget = tools.create_ope({
-  newOperationName: 'exceedsBudget',
-  parentClassId: orderLineId
+    newOperationName: 'exceedsBudget',
+    parentClassId: orderLineId
 });
 var exceedsBudgetId = exceedsBudget.namedElement.element.id;
 
 tools.set_return_type_expression_of_ope({
-  targetOperationId: exceedsBudgetId,
-  returnTypeExpression: 'boolean'
+    targetOperationId: exceedsBudgetId,
+    returnTypeExpression: 'boolean'
 });
 
 var budget = tools.create_param({
-  newParameterName: 'budget',
-  targetOperationId: exceedsBudgetId
+    newParameterName: 'budget',
+    targetOperationId: exceedsBudgetId
 });
 tools.set_type_of_param({
-  targetParameterId: budget.namedElement.element.id,
-  parameterTypeId: moneyId
+    targetParameterId: budget.namedElement.element.id,
+    parameterTypeId: moneyId
 });
 
 
@@ -180,24 +180,24 @@ tools.set_type_of_param({
 // ============================================================
 
 tools.create_node_prst_on_dgm({
-  targetDiagramId: diagramId,
-  targetElementId: orderLineId,
-  locationX: 40,
-  locationY: 40
+    targetDiagramId: diagramId,
+    targetElementId: orderLineId,
+    locationX: 40,
+    locationY: 40
 });
 
 tools.create_node_prst_on_dgm({
-  targetDiagramId: diagramId,
-  targetElementId: moneyId,
-  locationX: 380,
-  locationY: 40
+    targetDiagramId: diagramId,
+    targetElementId: moneyId,
+    locationX: 380,
+    locationY: 40
 });
 
 tools.create_node_prst_on_dgm({
-  targetDiagramId: diagramId,
-  targetElementId: currencyId,
-  locationX: 705,
-  locationY: 40
+    targetDiagramId: diagramId,
+    targetElementId: currencyId,
+    locationX: 705,
+    locationY: 40
 });
 
 

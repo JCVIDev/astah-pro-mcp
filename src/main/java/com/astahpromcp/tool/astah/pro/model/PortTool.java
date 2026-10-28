@@ -20,17 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IPort.html
 @Slf4j
 public class PortTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public PortTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,15 +40,14 @@ public class PortTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 PortDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_behavior_of_port",
                 "Set the behavior (specified by boolean) of the specified port (specified by ID), and return the model element of the port after it is set.",
                 this::setBehavior,
                 PortWithBehaviorDTO.class,
                 PortDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_service_of_port",
                 "Set the service (specified by boolean) of the specified port (specified by ID), and return the model element of the port after it is set.",
@@ -57,30 +56,30 @@ public class PortTool extends AstahToolProvider {
                 PortDTO.class)
         );
     }
-
+    
     private PortDTO getInfo(IdDTO param) throws Exception {
         IPort astahPort = astahProToolSupport.getPort(param.id());
-
+        
         return PortDTOAssembler.toDTO(astahPort);
     }
-
+    
     private PortDTO setBehavior(PortWithBehaviorDTO param) throws Exception {
         IPort astahPort = astahProToolSupport.getPort(param.targetPortId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahPort.setIsBehavior(param.isBehavior());
         });
-
+        
         return PortDTOAssembler.toDTO(astahPort);
     }
-
+    
     private PortDTO setService(PortWithServiceDTO param) throws Exception {
         IPort astahPort = astahProToolSupport.getPort(param.targetPortId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahPort.setIsService(param.isService());
         });
-
+        
         return PortDTOAssembler.toDTO(astahPort);
     }
 }

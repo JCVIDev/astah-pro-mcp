@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IMindMapDiagram.html
 @Slf4j
 public class MindMapDiagramTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public MindMapDiagramTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class MindMapDiagramTool extends AstahToolProvider {
                 MindMapDiagramDTO.class)
         );
     }
-
+    
     private MindMapDiagramDTO getInfo(IdDTO param) throws Exception {
         IMindMapDiagram astahMindMapDiagram = astahProToolSupport.getMindMapDiagram(param.id());
-
+        
         return MindMapDiagramDTOAssembler.toDTO(astahMindMapDiagram);
     }
 }

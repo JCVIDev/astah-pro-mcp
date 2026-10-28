@@ -19,19 +19,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/UseCaseModelEditor.html
 @Slf4j
 public class UseCaseModelEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final UseCaseModelEditor useCaseModelEditor;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public UseCaseModelEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, UseCaseModelEditor useCaseModelEditor, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.useCaseModelEditor = useCaseModelEditor;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,28 +41,28 @@ public class UseCaseModelEditorTool extends AstahToolProvider {
                         this::createActor,
                         NewActorDTO.class,
                         ClassDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                         "create_include",
                         "Create a new include between a usecase (specified by ID) and an included usecase (specified by ID), and return the newly created model element of the include. Only the model element is created; nothing is drawn on any diagram, so draw it with other tool function that creates a link presentation. Set the name to an empty string when the include has no name.",
                         this::createInclude,
                         NewIncludeDTO.class,
                         IncludeDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                         "create_extend",
                         "Create a new extend between a usecase (specified by ID) and an extended usecase (specified by ID), and return the newly created model element of the extend. Only the model element is created; nothing is drawn on any diagram, so draw it with other tool function that creates a link presentation. Set the name to an empty string when the extend has no name.",
                         this::createExtend,
                         NewExtendDTO.class,
                         ExtendDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                         "create_extension_point",
                         "Create a new extension point in the specified usecase (specified by ID), and return the newly created model element of the extension point. The extension point is shown in every usecase presentation of the usecase.",
                         this::createExtensionPoint,
                         NewExtensionPointDTO.class,
                         NamedElementDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                         "create_usecase",
                         "Create a new usecase in the specified package (specified by ID), and return the newly created model element of the usecase.",
@@ -71,68 +71,68 @@ public class UseCaseModelEditorTool extends AstahToolProvider {
                 UseCaseDTO.class)
         );
     }
-
+    
     private ClassDTO createActor(NewActorDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IClass astahActor = txnAstah.call( () -> {
+        
+        IClass astahActor = txnAstah.call(() -> {
             return useCaseModelEditor.createActor(
                     astahPackage,
                     param.newActorName());
         });
-
+        
         return ClassDTOAssembler.toDTO(astahActor);
     }
-
+    
     private IncludeDTO createInclude(NewIncludeDTO param) throws Exception {
         IUseCase astahUsecase = astahProToolSupport.getUseCase(param.includingUsecaseId());
         IUseCase astahIncludedUsecase = astahProToolSupport.getUseCase(param.includedUsecaseId());
-
-        IInclude astahInclude = txnAstah.call( () -> {
+        
+        IInclude astahInclude = txnAstah.call(() -> {
             return useCaseModelEditor.createInclude(
                     astahUsecase,
                     astahIncludedUsecase,
                     param.newIncludeName());
         });
-
+        
         return IncludeDTOAssembler.toDTO(astahInclude);
     }
-
+    
     private ExtendDTO createExtend(NewExtendDTO param) throws Exception {
         IUseCase astahUsecase = astahProToolSupport.getUseCase(param.extendingUsecaseId());
         IUseCase astahExtendedUsecase = astahProToolSupport.getUseCase(param.extendedUsecaseId());
-
-        IExtend astahExtend = txnAstah.call( () -> {
+        
+        IExtend astahExtend = txnAstah.call(() -> {
             return useCaseModelEditor.createExtend(
                     astahUsecase,
                     astahExtendedUsecase,
                     param.newExtendName());
         });
-
+        
         return ExtendDTOAssembler.toDTO(astahExtend);
     }
-
+    
     private NamedElementDTO createExtensionPoint(NewExtensionPointDTO param) throws Exception {
         IUseCase astahUsecase = astahProToolSupport.getUseCase(param.targetUsecaseId());
-
-        IExtentionPoint astahExtensionPoint = txnAstah.call( () -> {
+        
+        IExtentionPoint astahExtensionPoint = txnAstah.call(() -> {
             return useCaseModelEditor.createExtensionPoint(
                     astahUsecase,
                     param.newExtensionPointName());
         });
-
+        
         return NamedElementDTOAssembler.toDTO(astahExtensionPoint);
     }
-
+    
     private UseCaseDTO createUseCase(NewUseCaseDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IUseCase astahUseCase = txnAstah.call( () -> {
+        
+        IUseCase astahUseCase = txnAstah.call(() -> {
             return useCaseModelEditor.createUseCase(
                     astahPackage,
                     param.newUsecaseName());
         });
-
+        
         return UseCaseDTOAssembler.toDTO(astahUseCase);
     }
 }

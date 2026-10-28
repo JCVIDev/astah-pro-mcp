@@ -7,7 +7,7 @@ public record AssociationClassDTO(
     @JsonPropertyDescription("Class info")
     @JsonProperty("class")
     ClassDTO class_,    // For avoiding Java keyword collision
-
+    
     @JsonPropertyDescription("Association info")
     AssociationDTO association
 ) {

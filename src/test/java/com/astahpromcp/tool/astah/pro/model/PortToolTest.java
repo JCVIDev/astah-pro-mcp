@@ -19,13 +19,13 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PortToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private PortTool tool;
     private Method getInfo;
     private Method setBehavior;
     private Method setService;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -33,49 +33,49 @@ public class PortToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/PortToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new PortTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             PortTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setBehavior() method
         setBehavior = TestSupport.getAccessibleMethod(
             PortTool.class,
             "setBehavior",
             PortWithBehaviorDTO.class);
-
+        
         // setService() method
         setService = TestSupport.getAccessibleMethod(
             PortTool.class,
             "setService",
             PortWithServiceDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get port
         IPort port = (IPort) TestSupport.instance().getNamedElementByClassAndName(
             IPort.class,
             "port0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(port.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -84,27 +84,27 @@ public class PortToolTest {
             tool,
             inputDTO,
             PortDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(port.getId(), outputDTO.attribute().namedElement().element().id());
     }
-
+    
     @Test
     void setBehavior_ok() throws Exception {
         // Get port
         IPort port = (IPort) TestSupport.instance().getNamedElementByClassAndName(
             IPort.class,
             "port0");
-
+        
         // Create input DTO
         PortWithBehaviorDTO inputDTO = new PortWithBehaviorDTO(
             port.getId(),
             true);
-
+        
         // Check behavior before setting
         assertFalse(port.isBehavior());
-
+        
         // ----------------------------------------
         // Call setBehavior()
         // ----------------------------------------
@@ -113,30 +113,30 @@ public class PortToolTest {
             tool,
             inputDTO,
             PortDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.isBehavior());
-
+        
         // Check behavior after setting
         assertTrue(port.isBehavior());
     }
-
+    
     @Test
     void setService_ok() throws Exception {
         // Get port
         IPort port = (IPort) TestSupport.instance().getNamedElementByClassAndName(
             IPort.class,
             "port0");
-
+        
         // Create input DTO
         PortWithServiceDTO inputDTO = new PortWithServiceDTO(
             port.getId(),
             true);
-
+        
         // Check service before setting
         assertFalse(port.isService());
-
+        
         // ----------------------------------------
         // Call setService()
         // ----------------------------------------
@@ -145,11 +145,11 @@ public class PortToolTest {
             tool,
             inputDTO,
             PortDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.isService());
-
+        
         // Check service after setting
         assertTrue(port.isService());
     }

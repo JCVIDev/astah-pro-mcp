@@ -5,9 +5,9 @@
 // find_named_elements_by_name matches partially, and an exact name is not necessarily unique either,
 // so the hits are filtered and then counted rather than taking value[0].
 var diagrams = tools.find_named_elements_by_name({ name: 'Class Diagram0' }).value
-  .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
+    .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
 if (diagrams.length !== 1) {
-  throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
+    throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
 }
 var diagramId = diagrams[0].id;
 
@@ -27,9 +27,9 @@ var target = { x: 20, y: 20, width: 600, height: 400 };
 // refuses to move or resize the frame of either, and the frame of a sequence diagram grows by itself
 // instead, to take in what is drawn outside it.
 var frames = tools.get_prsts_on_dgm({ id: diagramId }).value
-  .filter(function (p) { return p.type === 'Frame'; });
+    .filter(function (p) { return p.type === 'Frame'; });
 if (frames.length !== 1) {
-  throw new Error('Expected 1 frame on the diagram, found ' + frames.length + '.');
+    throw new Error('Expected 1 frame on the diagram, found ' + frames.length + '.');
 }
 var frameId = frames[0].id;
 
@@ -45,10 +45,10 @@ var before = tools.get_node_prst_rectangle({ id: frameId });
 var rect = tools.set_node_prst_location({ nodePresentationId: frameId, locationX: target.x, locationY: target.y });
 
 if (target.width > rect.width) {
-  rect = tools.set_node_prst_width({ nodePresentationId: frameId, width: target.width });
+    rect = tools.set_node_prst_width({ nodePresentationId: frameId, width: target.width });
 }
 if (target.height > rect.height) {
-  rect = tools.set_node_prst_height({ nodePresentationId: frameId, height: target.height });
+    rect = tools.set_node_prst_height({ nodePresentationId: frameId, height: target.height });
 }
 
 
@@ -64,30 +64,30 @@ if (target.height > rect.height) {
 // nothing, so it leaves the frame at the target.
 // Halving takes about 11 steps for 1000 pixels, so the cap only stops a run that is going nowhere.
 for (var step = 0; rect.width > target.width || rect.height > target.height; step++) {
-  if (step === 32) {
-    throw new Error('The frame is still ' + rect.width + ' x ' + rect.height + ' after ' + step + ' steps.');
-  }
-
-  var keptWidth = Math.floor((rect.width - target.width) / 2);
-  var keptHeight = Math.floor((rect.height - target.height) / 2);
-
-  tools.set_node_prst_location({
-    nodePresentationId: frameId,
-    locationX: target.x - keptWidth,
-    locationY: target.y - keptHeight
-  });
-
-  if (rect.width > target.width) {
-    rect = tools.set_node_prst_width({ nodePresentationId: frameId, width: target.width + keptWidth });
-  }
-  if (rect.height > target.height) {
-    rect = tools.set_node_prst_height({ nodePresentationId: frameId, height: target.height + keptHeight });
-  }
+    if (step === 32) {
+        throw new Error('The frame is still ' + rect.width + ' x ' + rect.height + ' after ' + step + ' steps.');
+    }
+    
+    var keptWidth = Math.floor((rect.width - target.width) / 2);
+    var keptHeight = Math.floor((rect.height - target.height) / 2);
+    
+    tools.set_node_prst_location({
+        nodePresentationId: frameId,
+        locationX: target.x - keptWidth,
+        locationY: target.y - keptHeight
+    });
+    
+    if (rect.width > target.width) {
+        rect = tools.set_node_prst_width({ nodePresentationId: frameId, width: target.width + keptWidth });
+    }
+    if (rect.height > target.height) {
+        rect = tools.set_node_prst_height({ nodePresentationId: frameId, height: target.height + keptHeight });
+    }
 }
 
 
 function rectangleText(r) {
-  return '(' + r.x + ', ' + r.y + ') ' + r.width + ' x ' + r.height;
+    return '(' + r.x + ', ' + r.y + ') ' + r.width + ' x ' + r.height;
 }
 
 print('Moved the frame of Class Diagram0 from ' + rectangleText(before) + ' to ' + rectangleText(rect) + '.');

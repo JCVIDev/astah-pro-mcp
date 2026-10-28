@@ -16,17 +16,17 @@ import java.util.List;
 
 @Slf4j
 public class EnumerationLiteralTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public EnumerationLiteralTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -38,14 +38,14 @@ public class EnumerationLiteralTool extends AstahToolProvider {
                 EnumerationLiteralDTO.class)
         );
     }
-
+    
     private EnumerationLiteralDTO setValue(EnumerationLiteralWithValueDTO param) throws Exception {
         IEnumerationLiteral astahEnumerationLiteral = astahProToolSupport.getEnumerationLiteral(param.targetEnumerationLiteralId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahEnumerationLiteral.setValue(param.value());
         });
-
+        
         return EnumerationLiteralDTOAssembler.toDTO(astahEnumerationLiteral);
     }
 }

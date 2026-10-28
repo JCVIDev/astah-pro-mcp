@@ -27,15 +27,15 @@ import java.util.List;
 // Factory for creating Astah Pro tools
 @Slf4j
 public class AstahProToolFactory {
-
+    
     private final Path imageOutputDir;
     private final ProjectDiffJobs projectDiffJobs;
-
+    
     public AstahProToolFactory(Path imageOutputDir, ProjectDiffJobs projectDiffJobs) {
         this.imageOutputDir = imageOutputDir;
         this.projectDiffJobs = projectDiffJobs;
     }
-
+    
     // Whether this runs inside the Astah GUI (the plugin environment)
     public static boolean isRunningInsideAstahGui() {
         try {
@@ -45,19 +45,19 @@ public class AstahProToolFactory {
             return false;
         }
     }
-
+    
     // Create the tool providers, each wrapped so that its handlers hold the process-wide Astah API lock.
     public List<ToolProvider> createToolProviders() {
         return createRawToolProviders().stream()
                 .map(provider -> (ToolProvider) new ExclusiveToolProvider(provider))
                 .toList();
     }
-
+    
     // Create the tool providers without the Astah API lock.
     public List<ToolProvider> createRawToolProviders() {
         return createRawToolProviders(DiagramThumbnails.INCLUDE);
     }
-
+    
     // Create the tool providers without the Astah API lock, choosing whether the editing tools capture the diagram they change.
     public List<ToolProvider> createRawToolProviders(DiagramThumbnails diagramThumbnails) {
         try {
@@ -87,7 +87,7 @@ public class AstahProToolFactory {
                     : new ImageCaptureSupport(astahProToolSupport, systemPropertySupport, imageOutputDir);
             SvgOverlaySupport svgOverlaySupport = new SvgOverlaySupport(imageCaptureSupport, imageConvertSupport, systemPropertySupport);
             TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
-
+            
             List<ToolProvider> providers = new ArrayList<>();
             
             // Common tools
@@ -126,7 +126,7 @@ public class AstahProToolFactory {
             } catch (InvalidUsingException e) {
                 log.warn("View manager tools are unavailable (not running inside Astah): {}", e.getMessage());
             }
-
+            
             // Activity diagram tools
             providers.add(new ActivityDiagramEditorTool(projectAccessor, transactionSupport, activityDiagramEditor, astahProToolSupport, imageCaptureSupport));
             providers.add(new ActionTool(projectAccessor, transactionSupport, astahProToolSupport));
@@ -137,7 +137,7 @@ public class AstahProToolFactory {
             providers.add(new FlowTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new ObjectNodeTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new PartitionTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Class diagram tools
             providers.add(new ClassDiagramEditorTool(projectAccessor, transactionSupport, classDiagramEditor, astahProToolSupport, imageCaptureSupport));
             providers.add(new AssociationClassTool(projectAccessor, transactionSupport, astahProToolSupport));
@@ -156,7 +156,7 @@ public class AstahProToolFactory {
             providers.add(new RealizationTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new SlotTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new UsageTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Sequence diagram tools
             providers.add(new SequenceDiagramEditorTool(projectAccessor, transactionSupport, sequenceDiagramEditor, astahProToolSupport, imageCaptureSupport));
             providers.add(new SequenceDiagramTool(projectAccessor, transactionSupport, astahProToolSupport));
@@ -169,7 +169,7 @@ public class AstahProToolFactory {
             providers.add(new LinkEndTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new LinkTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new MessageTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // State machine diagram tools
             providers.add(new StateMachineDiagramEditorTool(projectAccessor, transactionSupport, stateMachineDiagramEditor, astahProToolSupport, imageCaptureSupport));
             providers.add(new StateMachineDiagramTool(projectAccessor, transactionSupport, astahProToolSupport));
@@ -178,29 +178,29 @@ public class AstahProToolFactory {
             providers.add(new TransitionTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new VertexTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new PseudostateTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Use case diagram tools
             providers.add(new UseCaseDiagramEditorTool(projectAccessor, transactionSupport, useCaseDiagramEditor, astahProToolSupport));
             providers.add(new UseCaseModelEditorTool(projectAccessor, transactionSupport, useCaseModelEditor, astahProToolSupport));
             providers.add(new UseCaseTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new IncludeTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new ExtendTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Requirement diagram tools
             providers.add(new RequirementDiagramEditorTool(projectAccessor, transactionSupport, requirementDiagramEditor, astahProToolSupport));
             providers.add(new RequirementTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new TestCaseTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Communication diagram tools
             providers.add(new CommunicationDiagramTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new LifelineLinkTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Composite structure diagram tools
             providers.add(new CompositeStructureDiagramEditorTool(projectAccessor, transactionSupport, compositeStructureDiagramEditor, astahProToolSupport, imageCaptureSupport));
             providers.add(new CompositeStructureModelEditorTool(compositeStructureModelEditor, projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new ConnectorTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new PortTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // ER diagram tools
             providers.add(new ERModelEditorTool(erModelEditor, basicModelEditor, projectAccessor, transactionSupport, astahProToolSupport, systemPropertySupport));
             providers.add(new ERDiagramEditorTool(projectAccessor, transactionSupport, erDiagramEditor, astahProToolSupport, imageCaptureSupport));
@@ -215,17 +215,17 @@ public class AstahProToolFactory {
             providers.add(new ERIndexTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new ERRelationshipTool(projectAccessor, transactionSupport, astahProToolSupport));
             providers.add(new ERSubtypeRelationshipTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Mind map diagram tools
             providers.add(new MindmapEditorTool(projectAccessor, transactionSupport, mindmapEditor, astahProToolSupport, imageConvertSupport, imageCaptureSupport));
             providers.add(new MindMapDiagramTool(projectAccessor, transactionSupport, astahProToolSupport));
-
+            
             // Astah API script tools
             providers.add(new AstahApiScriptExampleTool());
             providers.add(new AstahApiScriptTool(projectAccessor));
-
+            
             return List.copyOf(providers);
-
+            
         } catch (ClassNotFoundException e) {
             log.error("Failed to get Astah Pro API classes: {}", e.getMessage());
             return List.of();

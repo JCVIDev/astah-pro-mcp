@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 public class StateMachineDiagramDTOAssembler {
     public static StateMachineDiagramDTO toDTO(@NonNull IStateMachineDiagram astahStateMachineDiagram) throws Exception {
-
+        
         // StateMachine
         NameIdTypeDTO stateMachine;
         if (astahStateMachineDiagram.getStateMachine() != null) {

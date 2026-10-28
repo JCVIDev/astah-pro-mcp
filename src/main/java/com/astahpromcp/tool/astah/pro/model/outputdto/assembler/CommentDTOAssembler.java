@@ -11,12 +11,12 @@ import java.util.List;
 
 public class CommentDTOAssembler {
     public static CommentDTO toDTO(@NonNull IComment astahComment) throws Exception {
-
+        
         List<ElementDTO> annotatedElementDTOs = new ArrayList<>();
         for (IElement astahElement : astahComment.getAnnotatedElements()) {
             annotatedElementDTOs.add(ElementDTOAssembler.toDTO(astahElement));
         }
-
+        
         return new CommentDTO(
             NamedElementDTOAssembler.toDTO(astahComment),
             astahComment.getBody(),

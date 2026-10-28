@@ -8,10 +8,10 @@ import java.util.List;
 public record ActivityNodeDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Incoming control flows and object flows")
     List<NameIdTypeDTO> incomingFlows,
-
+    
     @JsonPropertyDescription("Outgoing control flows and object flows")
     List<NameIdTypeDTO> outgoingFlows
 ) {

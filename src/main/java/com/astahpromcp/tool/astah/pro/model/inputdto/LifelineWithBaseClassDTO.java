@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record LifelineWithBaseClassDTO(
     @JsonPropertyDescription("Target lifeline identifier")
     String targetLifelineId,
-
+    
     @JsonPropertyDescription("Base class identifier")
     String baseClassId
 ) {

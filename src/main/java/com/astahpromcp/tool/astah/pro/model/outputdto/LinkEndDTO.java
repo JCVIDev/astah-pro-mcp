@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record LinkEndDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Is Aggregation")
     boolean isAggregation,
-
+    
     @JsonPropertyDescription("Is Composition")
     boolean isComposition,
-
+    
     @JsonPropertyDescription("Navigability: 'Navigable', 'Non_Navigable' or 'Unspecified'")
     String navigability
 ) {

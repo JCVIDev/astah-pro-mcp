@@ -8,13 +8,13 @@ import java.util.List;
 public record LifelineLinkDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Messages")
     List<NameIdTypeDTO> messages,
-
+    
     @JsonPropertyDescription("Source lifeline")
     NameIdTypeDTO sourceLifeline,
-
+    
     @JsonPropertyDescription("Target lifeline")
     NameIdTypeDTO targetLifeline
 ) {

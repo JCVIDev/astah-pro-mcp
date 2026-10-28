@@ -8,10 +8,10 @@ import java.util.List;
 public record ERSchemaDTO(
     @JsonPropertyDescription("ER package info")
     ERPackageDTO erPackage,
-
+    
     @JsonPropertyDescription("ER domains")
     List<NameIdTypeDTO> erDomains,
-
+    
     @JsonPropertyDescription("ER datatypes")
     List<NameIdTypeDTO> erDatatypes
 ) {

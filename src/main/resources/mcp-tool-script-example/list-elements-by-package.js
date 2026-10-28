@@ -6,14 +6,14 @@ var lines = [];
 
 // ownedElementNameAndIds holds the direct children of a package, each as { name, id, type }.
 function listPackage(packageId, indent) {
-  var children = tools.get_pkg_info({ id: packageId }).ownedElementNameAndIds;
-  for (var i = 0; i < children.length; i++) {
-    var child = children[i];
-    lines.push(indent + child.type + ' ' + child.name + ' (' + child.id + ')');
-    if (child.type === 'Package') {
-      listPackage(child.id, indent + '  ');
+    var children = tools.get_pkg_info({ id: packageId }).ownedElementNameAndIds;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        lines.push(indent + child.type + ' ' + child.name + ' (' + child.id + ')');
+        if (child.type === 'Package') {
+            listPackage(child.id, indent + '  ');
+        }
     }
-  }
 }
 
 // The root package is the project itself.

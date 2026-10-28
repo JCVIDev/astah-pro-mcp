@@ -12,7 +12,7 @@ public record ExportInformation(
     List<ReferenceProjectDTO> referenceProjects,
     RuntimeInformation runtime
 ) {
-
+    
     // Whether the project file was saved by an older Astah, so that Astah converted it on loading
     public boolean isOlderFormat() {
         return projectModelVersion >= 0 && projectModelVersion < astahModelVersion;

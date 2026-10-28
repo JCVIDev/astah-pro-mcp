@@ -19,21 +19,21 @@ import java.util.List;
 // Tool that fetches Object-Relational Impedance Mismatch knowledge content and returns it in chunks
 @Slf4j
 public class ORImpedanceMismatchKnowledgeTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
     private final Path outputDirectory;
     private final HttpClient httpClient;
-
+    
     public ORImpedanceMismatchKnowledgeTool(Path outputDirectory) {
         this(outputDirectory, KnowledgeToolSupport.newHttpClient());
     }
-
+    
     public ORImpedanceMismatchKnowledgeTool(Path outputDirectory, HttpClient httpClient) {
         this.outputDirectory = outputDirectory;
         this.httpClient = httpClient;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -44,7 +44,7 @@ public class ORImpedanceMismatchKnowledgeTool implements ToolProvider {
                     this::getORImpedanceMismatchKnowledgeInfo,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_object_relational_impedance_mismatch",
                     "Return the chunk data of Object-Relational Impedance Mismatch knowledge. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -57,30 +57,30 @@ public class ORImpedanceMismatchKnowledgeTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getORImpedanceMismatchKnowledgeInfo(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("Object-Relational Impedance Mismatch knowledge already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading Object-Relational Impedance Mismatch knowledge from web pages.");
         List<String> urls = KnowledgeToolSupport.readUrlsFromResource(getClass(), "or-impedance-mismatch-knowledge-url.txt");
         if (urls.isEmpty()) {
             throw new IOException("Object-Relational Impedance Mismatch knowledge URL resource not found or is empty.");
         }
-
+        
         String allTextContentString = KnowledgeToolSupport.fetchAllOrFail(httpClient, urls, "Object-Relational Impedance Mismatch knowledge");
-
+        
         String outputFileName = "or_impedance_mismatch_knowledge.md";
         Path outputPath = outputDirectory.resolve(outputFileName);
         Files.writeString(outputPath, allTextContentString, StandardCharsets.UTF_8);
         log.info("Object-Relational Impedance Mismatch knowledge saved to file: {}", outputPath.toAbsolutePath());
-
+        
         return KnowledgeToolSupport.chunkAndCache(allTextContentString, contentCache);
     }
-
+    
     private DocumentChunkDTO getORImpedanceMismatchKnowledgeChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

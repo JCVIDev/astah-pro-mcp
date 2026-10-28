@@ -10,4 +10,3 @@ public record RequirementWithTextDTO(
     String requirementText
 ) {
 }
-

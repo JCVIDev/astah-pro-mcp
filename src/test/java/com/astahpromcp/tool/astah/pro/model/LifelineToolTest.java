@@ -24,13 +24,13 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LifelineToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private LifelineTool tool;
     private Method getInfo;
     private Method setBaseClass;
     private Method setLength;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -38,49 +38,49 @@ public class LifelineToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/LifelineToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new LifelineTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             LifelineTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setBaseClass() method
         setBaseClass = TestSupport.getAccessibleMethod(
             LifelineTool.class,
             "setBaseClass",
             LifelineWithBaseClassDTO.class);
-
+        
         // setLength() method
         setLength = TestSupport.getAccessibleMethod(
             LifelineTool.class,
             "setLength",
             LifelineWithLengthDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get lifeline
         ILifeline lifeline = (ILifeline) TestSupport.instance().getNamedElementByClassAndName(
             ILifeline.class,
             "foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(lifeline.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -89,31 +89,31 @@ public class LifelineToolTest {
             tool,
             inputDTO,
             LifelineDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setBaseClass_ok() throws Exception {
         // Get lifeline
         ILifeline lifeline = (ILifeline) TestSupport.instance().getNamedElementByClassAndName(
             ILifeline.class,
             "foo");
-
+        
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         LifelineWithBaseClassDTO inputDTO = new LifelineWithBaseClassDTO(
             lifeline.getId(),
             clazz.getId());
-
+        
         // Check base class before setting
         assertNotEquals(clazz, lifeline.getBase());
-
+        
         // ----------------------------------------
         // Call setBaseClass()
         // ----------------------------------------
@@ -122,26 +122,26 @@ public class LifelineToolTest {
             tool,
             inputDTO,
             LifelineDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check base class after setting
         assertEquals(clazz, lifeline.getBase());
     }
-
+    
     @Test
     void setLength_ok() throws Exception {
         // Get lifeline
         ILifeline lifeline = (ILifeline) TestSupport.instance().getNamedElementByClassAndName(
             ILifeline.class,
             "foo");
-
+        
         // Create input DTO
         LifelineWithLengthDTO inputDTO = new LifelineWithLengthDTO(
             lifeline.getPresentations()[0].getID(),
             100);
-
+        
         // ----------------------------------------
         // Call setLength()
         // ----------------------------------------
@@ -150,28 +150,28 @@ public class LifelineToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check length after setting
         String lengthProperty = lifeline.getPresentations()[0].getProperty(Key.LIFELINE_LENGTH);
         assertNotNull(lengthProperty);
         assertEquals(100, (int) Double.parseDouble(lengthProperty));
     }
-
+    
     @Test
     void setLength_ng_modelElementIdGiven() throws Exception {
         // Get lifeline
         ILifeline lifeline = (ILifeline) TestSupport.instance().getNamedElementByClassAndName(
             ILifeline.class,
             "foo");
-
+        
         // Create input DTO
         LifelineWithLengthDTO inputDTO = new LifelineWithLengthDTO(
             lifeline.getId(),
             100);
-
+        
         // ----------------------------------------
         // Call setLength()
         // ----------------------------------------
@@ -182,14 +182,14 @@ public class LifelineToolTest {
                 inputDTO,
                 NodePresentationDTO.class));
     }
-
+    
     @Test
     void setLength_ng_otherNodePresentationType() throws Exception {
         // Get lifeline
         ILifeline lifeline = (ILifeline) TestSupport.instance().getNamedElementByClassAndName(
             ILifeline.class,
             "foo");
-
+        
         // Get a node presentation on the same diagram that does not draw a lifeline
         INodePresentation notLifelinePresentation = null;
         for (IPresentation presentation : lifeline.getPresentations()[0].getDiagram().getPresentations()) {
@@ -200,13 +200,12 @@ public class LifelineToolTest {
             }
         }
         assertNotNull(notLifelinePresentation);
-
+        
         // Create input DTO
         LifelineWithLengthDTO inputDTO = new LifelineWithLengthDTO(
             notLifelinePresentation.getID(),
             100);
-
-
+        
         // ----------------------------------------
         // Call setLength()
         // ----------------------------------------
@@ -217,7 +216,7 @@ public class LifelineToolTest {
                 inputDTO,
                 NodePresentationDTO.class));
     }
-
+    
     @Test
     void setLength_ng_tooShort() throws Exception {
         // Get lifeline
@@ -226,12 +225,12 @@ public class LifelineToolTest {
             "foo");
         IPresentation lifelinePresentation = lifeline.getPresentations()[0];
         String lengthBefore = lifelinePresentation.getProperty(Key.LIFELINE_LENGTH);
-
+        
         // Create input DTO
         LifelineWithLengthDTO inputDTO = new LifelineWithLengthDTO(
             lifelinePresentation.getID(),
             10);
-
+        
         // ----------------------------------------
         // Call setLength()
         // ----------------------------------------
@@ -241,11 +240,11 @@ public class LifelineToolTest {
                 tool,
                 inputDTO,
                 NodePresentationDTO.class));
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("Cannot set the length of the lifeline 'foo : Foo' to 10: it is too short"));
-
+        
         // Check that the length is unchanged
         assertEquals(lengthBefore, lifelinePresentation.getProperty(Key.LIFELINE_LENGTH));
     }

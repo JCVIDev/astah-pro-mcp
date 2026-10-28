@@ -29,13 +29,13 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/StateMachineDiagramEditor.html
 @Slf4j
 public class StateMachineDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final StateMachineDiagramEditor stateMachineDiagramEditor;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public StateMachineDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, StateMachineDiagramEditor stateMachineDiagramEditor, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -43,7 +43,7 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -53,98 +53,98 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                 this::addRegion,
                 NewRegionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "delete_region",
                 "Delete the specified region (specified by 0-based index) in the parent state (specified by node presentation ID) on the specified state machine diagram (specified by ID), and return the parent node presentation along with the updated diagram image in low resolution. Note that this is not a layout operation: the states and pseudostates in the region, including those nested in them, are deleted together with their model elements, as are the transitions connected to them, even those that cross the boundary of the parent state. Deleting the last region of a state turns it into a simple state.",
                 this::deleteRegion,
                 DeleteRegionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_parent_state",
                 "Change the parent state (specified by presentation ID) of the specified state (specified by presentation ID) on the specified state machine diagram (specified by ID), and return the node presentation of the parent-changed state along with the updated diagram image in low resolution. If there is no parent state (i.e., when rendering at the top level), set the parent state ID to an empty string. Note that Astah does not move the state: if the state is drawn outside the parent state or too close to its edges, Astah enlarges the parent state in every direction until the state fits. To keep the layout, move the state well inside the parent state, or resize the parent state, before calling this tool.",
                 this::changeParentOfState,
                 ChangeParentStateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_choice_pseudostate",
                 "Create a new choice pseudostate at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the choice pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createChoicePseudostate,
                 NewChoicePseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_deep_history_pseudostate",
                 "Create a new deep history pseudostate at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the deep history pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createDeepHistoryPseudostate,
                 NewDeepHistoryPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_shallow_history_pseudostate",
                 "Create a new shallow history pseudostate at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the shallow history pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createShallowHistoryPseudostate,
                 NewShallowHistoryPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_final_state",
                 "Create a new final state at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the final state along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createFinalState,
                 NewFinalStateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_fork_pseudostate",
                 "Create a new fork pseudostate of the specified size (specified by width and height) at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the fork pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createForkPseudostate,
                 NewForkPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_init_pseudostate",
                 "Create a new initial pseudostate at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the initial pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createInitialPseudostate,
                 NewInitialPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_join_pseudostate",
                 "Create a new join pseudostate of the specified size (specified by width and height) at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the join pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createJoinPseudostate,
                 NewJoinPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_junction_pseudostate",
                 "Create a new junction pseudostate at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the junction pseudostate along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createJunctionPseudostate,
                 NewJunctionPseudostateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_state",
                 "Create a new state at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the state along with the updated diagram image in low resolution. If there is no parent state (i.e., when rendering at the top level), set the parent state ID to an empty string.",
                 this::createState,
                 NewStateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_state_machine_dgm",
                 "Create a new state machine diagram under the specified package (specified by ID), and return the newly created model element of the state machine diagram.",
                 this::createStateMachineDiagram,
                 NewStateMachineDiagramDTO.class,
                 DiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_sub_machine_state",
                 "Create a new sub machine state at the specified point (specified by x and y coordinates) in the parent node presentation (specified by ID) on the specified state machine diagram (specified by ID), and return the newly created node presentation of the sub machine state along with the updated diagram image in low resolution. If there is no parent node presentation (i.e., when rendering at the top level), set the parent node presentation ID to an empty string.",
                 this::createSubMachineState,
                 NewSubMachineStateDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_transition",
                 "Create a new transition between the specified source state (specified by presentation ID) and the specified target state (specified by presentation ID) on the specified state machine diagram (specified by ID), and return the newly created link presentation of the transition along with the updated diagram image in low resolution.",
@@ -153,215 +153,215 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                 LinkPresentationDTO.class)
         );
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> addRegion(NewRegionDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
         INodePresentation astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
-
+        
         if (!(astahParentNodePresentation.getModel() instanceof IState astahParentState)) {
             throw new IllegalArgumentException("The parent node presentation is not a state: " + param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
+        
         // Astah returns without adding anything in some situations (e.g., a state that already has two regions), so check the region count afterwards instead of reporting success blindly.
         int regionCountBefore = astahParentState.getRegionSize();
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             stateMachineDiagramEditor.addRegion(
                 astahParentNodePresentation,
                 param.isHorizontal());
         });
-
+        
         int regionCountAfter = astahParentState.getRegionSize();
         if (regionCountAfter <= regionCountBefore) {
             throw new RuntimeException("No region was added to the state (the region count stays " + regionCountBefore + "). Astah cannot add a region to this state in its current configuration.");
         }
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahParentNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> deleteRegion(DeleteRegionDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
         INodePresentation astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
-
+        
         if (!(astahParentNodePresentation.getModel() instanceof IState astahParentState)) {
             throw new IllegalArgumentException("The parent node presentation is not a state: " + param.parentNodePresentationId());
         }
-
+        
         int regionCount = astahParentState.getRegionSize();
         if (param.index() < 0 || param.index() >= regionCount) {
             throw new IllegalArgumentException(String.format(
                 "The region index %d is out of range. The state '%s' (ID: %s) has %d region(s).",
                 param.index(), astahParentState.getName(), astahParentState.getId(), regionCount));
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             stateMachineDiagramEditor.deleteRegion(
                 astahParentNodePresentation,
                 param.index());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahParentNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> changeParentOfState(ChangeParentStateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetStateId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentStateId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentStateId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             stateMachineDiagramEditor.changeParentOfState(
                 astahTargetNodePresentation,
                 astahParentNodePresentation);
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahTargetNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createChoicePseudostate(NewChoicePseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahChoicePseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahChoicePseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createChoicePseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahChoicePseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createDeepHistoryPseudostate(NewDeepHistoryPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahDeepHistoryPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahDeepHistoryPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createDeepHistoryPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahDeepHistoryPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createShallowHistoryPseudostate(NewShallowHistoryPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahShallowHistoryPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahShallowHistoryPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createShallowHistoryPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahShallowHistoryPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createFinalState(NewFinalStateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahFinalState = txnAstah.call( () -> {
+        
+        INodePresentation astahFinalState = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createFinalState(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahFinalState);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createForkPseudostate(NewForkPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahForkPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahForkPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createForkPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
@@ -370,54 +370,54 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                 param.width(),
                 param.height());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahForkPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createInitialPseudostate(NewInitialPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahInitialPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahInitialPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createInitialPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahInitialPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createJoinPseudostate(NewJoinPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahJoinPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahJoinPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createJoinPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
@@ -426,54 +426,54 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                 param.width(),
                 param.height());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahJoinPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createJunctionPseudostate(NewJunctionPseudostateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahJunctionPseudostate = txnAstah.call( () -> {
+        
+        INodePresentation astahJunctionPseudostate = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createJunctionPseudostate(
                 astahParentNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahJunctionPseudostate);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createState(NewStateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahState = txnAstah.call( () -> {
+        
+        INodePresentation astahState = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createState(
                 param.newStateName(),
                 astahParentNodePresentation,
@@ -481,40 +481,40 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahState);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private DiagramDTO createStateMachineDiagram(NewStateMachineDiagramDTO param) throws Exception {
         INamedElement astahParentNamedElement = astahProToolSupport.getNamedElement(param.parentNamedElementId());
-
-        IStateMachineDiagram astahStateMachineDiagram = txnAstah.call( () -> {
+        
+        IStateMachineDiagram astahStateMachineDiagram = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createStatemachineDiagram(
                 astahParentNamedElement,
                 param.newStateMachineDiagramName());
         });
-
+        
         return DiagramDTOAssembler.toDTO(astahStateMachineDiagram);
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createSubMachineState(NewSubMachineStateDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
         IStateMachineDiagram astahSubMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.subMachineDiagramId());
-
+        
         INodePresentation astahParentNodePresentation;
         if (param.parentNodePresentationId().isEmpty()) {
             astahParentNodePresentation = null;
         } else {
             astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         }
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        INodePresentation astahSubMachineState = txnAstah.call( () -> {
+        
+        INodePresentation astahSubMachineState = txnAstah.call(() -> {
             return stateMachineDiagramEditor.createSubmachineState(
                 astahParentNodePresentation,
                 astahSubMachineDiagram,
@@ -522,38 +522,38 @@ public class StateMachineDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahSubMachineState);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createTransition(NewTransitionDTO param) throws Exception {
         IStateMachineDiagram astahStateMachineDiagram = astahProToolSupport.getStateMachineDiagram(param.targetDiagramId());
         INodePresentation astahSourceNodePresentation = astahProToolSupport.getNodePresentation(param.sourceNodePresentationId());
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
-
+        
         stateMachineDiagramEditor.setDiagram(astahStateMachineDiagram);
-
-        ILinkPresentation astahLinkPresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLinkPresentation = txnAstah.call(() -> {
             ILinkPresentation createdLinkPresentation = stateMachineDiagramEditor.createTransition(
                 astahSourceNodePresentation,
                 astahTargetNodePresentation);
-
+            
             // Workaround: StateMachineDiagramEditor.createTransition() gives a transition from a state a placeholder event, and a transition from a choice or junction pseudostate a placeholder guard. The transition has just been created, so nothing of the user's is lost.
             ITransition createdTransition = (ITransition) createdLinkPresentation.getModel();
             createdTransition.setEvent(null);
             createdTransition.setGuard(null);
-
+            
             return createdLinkPresentation;
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLinkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

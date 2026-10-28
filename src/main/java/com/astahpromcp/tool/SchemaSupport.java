@@ -11,30 +11,30 @@ import java.util.concurrent.ConcurrentHashMap;
 
 // JSON schema utility
 public final class SchemaSupport {
-
+    
     private static final SchemaGenerator GENERATOR = createSchemaGenerator();
-
+    
     // One schema per type, generated on first use
     private static final Map<Class<?>, String> SCHEMAS = new ConcurrentHashMap<>();
-
+    
     private SchemaSupport() {
     }
-
+    
     private static SchemaGenerator createSchemaGenerator() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(
             SchemaVersion.DRAFT_2020_12,
             OptionPreset.PLAIN_JSON);
-
+        
         // Configure for simpler JSON output
         configBuilder
             .with(new JacksonSchemaModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY))
             .without(Option.SCHEMA_VERSION_INDICATOR)      // Remove the $schema field
             .without(Option.DEFINITIONS_FOR_ALL_OBJECTS);  // Suppress automatic $defs generation
             // Note: INLINE_ALL_SCHEMAS cannot be used because schemas are recursive
-
+        
         // Every property is required
         configBuilder.forFields().withRequiredCheck(field -> true);
-
+        
         // A Map is written where it is used, never as a named definition in $defs.
         // Without this, a DTO using the same Map type twice would get a definition named like "Map(String,Object)".
         configBuilder.forTypesInGeneral().withCustomDefinitionProvider(new CustomDefinitionProviderV2() {
@@ -48,20 +48,20 @@ public final class SchemaSupport {
                     CustomDefinition.DefinitionType.INLINE, CustomDefinition.AttributeInclusion.YES);
             }
         });
-
+        
         return new SchemaGenerator(configBuilder.build());
     }
-
+    
     // Generate a formatted JSON schema from a record type
     public static String generateSchema(Class<?> recordClass) {
         return SCHEMAS.computeIfAbsent(recordClass, SchemaSupport::generateUncached);
     }
-
+    
     private static String generateUncached(Class<?> recordClass) {
         JsonNode schemaNode = GENERATOR.generateSchema(recordClass);
         try {
             return JsonSupport.OBJ_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(schemaNode);
-
+            
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate schema for " + recordClass.getName(), e);
         }

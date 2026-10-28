@@ -12,26 +12,26 @@ import java.util.List;
 
 public class LifelineLinkDTOAssembler {
     public static LifelineLinkDTO toDTO(@NonNull ILifelineLink astahLifelineLink) throws Exception {
-
+        
         List<NameIdTypeDTO> messages = new ArrayList<>();
         for (INamedElement astahMessage : astahLifelineLink.getMessages()) {
             messages.add(NameIdTypeDTOAssembler.toDTO(astahMessage));
         }
-
+        
         NameIdTypeDTO sourceLifelineDTO;
         if (astahLifelineLink.getSource() != null) {
             sourceLifelineDTO = NameIdTypeDTOAssembler.toDTO(astahLifelineLink.getSource());
         } else {
             sourceLifelineDTO = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO targetLifelineDTO;
         if (astahLifelineLink.getTarget() != null) {
             targetLifelineDTO = NameIdTypeDTOAssembler.toDTO(astahLifelineLink.getTarget());
         } else {
             targetLifelineDTO = NameIdTypeDTO.empty();
         }
-
+        
         return new LifelineLinkDTO(
             NamedElementDTOAssembler.toDTO(astahLifelineLink),
             messages,

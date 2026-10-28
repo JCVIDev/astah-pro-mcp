@@ -24,17 +24,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IState.html
 @Slf4j
 public class StateTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public StateTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -44,36 +44,35 @@ public class StateTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 StateDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "add_inter_trans_of_state",
                 "Add an internal transition to the specified state (specified by ID), and return the model element of the state after it is edited.",
                 this::addInternalTransition,
                 StateWithInternalTransitionDTO.class,
                 StateDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "delete_all_inter_trans_of_state",
                 "Delete all internal transitions from the specified state (specified by ID), and return the model element of the state after it is edited.",
                 this::deleteAllInternalTransitions,
                 IdDTO.class,
                 StateDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_entry_of_state",
                 "Set the entry of the specified state (specified by ID), and return the model element of the state after it is edited.",
                 this::setEntry,
                 StateWithEntryDTO.class,
                 StateDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_do_act_of_state",
                 "Set the doActivity of the specified state (specified by ID), and return the model element of the state after it is edited.",
                 this::setDoActivity,
                 StateWithDoActivityDTO.class,
                 StateDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_exit_of_state",
                 "Set the exit of the specified state (specified by ID), and return the model element of the state after it is edited.",
@@ -82,31 +81,31 @@ public class StateTool extends AstahToolProvider {
                 StateDTO.class)
         );
     }
-
+    
     private StateDTO getInfo(IdDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.id());
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
-
+    
     private StateDTO addInternalTransition(StateWithInternalTransitionDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.targetStateId());
-
+        
         if (astahState instanceof IFinalState) {
             throw new IllegalArgumentException(String.format(
                 "The state (ID: %s) is a final state.",
                 astahState.getId()));
         }
-
+        
         // IState.addInternalTransition() stores null as the text "null", so a null guard or action means none
         String event = stripOrEmpty(param.event());
         String guard = stripOrEmpty(param.guard());
         String action = stripOrEmpty(param.action());
-
+        
         if (event.isEmpty()) {
             throw new IllegalArgumentException("The event of an internal transition must not be empty or blank.");
         }
-
+        
         // IState.addInternalTransition() accepts the same internal transition twice
         for (ITransition astahTransition : astahState.getInternalTransitions()) {
             if (event.equals(stripOrEmpty(astahTransition.getEvent()))
@@ -117,55 +116,55 @@ public class StateTool extends AstahToolProvider {
                     astahState.getName(), astahState.getId(), astahTransition.getName(), astahTransition.getId()));
             }
         }
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahState.addInternalTransition(event, guard, action);
         });
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
-
+    
     private static String stripOrEmpty(String text) {
         return text == null ? "" : text.strip();
     }
-
+    
     private StateDTO deleteAllInternalTransitions(IdDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.id());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahState.deleteAllInternalTransitions();
         });
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
-
+    
     private StateDTO setEntry(StateWithEntryDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.targetStateId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahState.setEntry(param.entry());
         });
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
-
+    
     private StateDTO setDoActivity(StateWithDoActivityDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.targetStateId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahState.setDoActivity(param.doActivity());
         });
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
-
+    
     private StateDTO setExit(StateWithExitDTO param) throws Exception {
         IState astahState = astahProToolSupport.getState(param.targetStateId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahState.setExit(param.exit());
         });
-
+        
         return StateDTOAssembler.toDTO(astahState);
     }
 }

@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 public class GeneralizationDTOAssembler {
     public static GeneralizationDTO toDTO(@NonNull IGeneralization astahGeneralization) throws Exception {
-
+        
         return new GeneralizationDTO(
             NamedElementDTOAssembler.toDTO(astahGeneralization),
             NameIdTypeDTOAssembler.toDTO(astahGeneralization.getSuperType()),

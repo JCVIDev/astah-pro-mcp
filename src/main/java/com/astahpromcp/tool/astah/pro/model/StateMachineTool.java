@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IStateMachine.html
 @Slf4j
 public class StateMachineTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public StateMachineTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class StateMachineTool extends AstahToolProvider {
                 StateMachineDTO.class)
         );
     }
-
+    
     private StateMachineDTO getInfo(IdDTO param) throws Exception {
         IStateMachine astahStateMachine = astahProToolSupport.getStateMachine(param.id());
-
+        
         return StateMachineDTOAssembler.toDTO(astahStateMachine);
     }
 }

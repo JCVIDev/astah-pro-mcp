@@ -4,18 +4,18 @@ import com.astahpromcp.config.McpServerConfig;
 import com.astahpromcp.tool.ToolDefinition;
 import com.astahpromcp.tool.ToolProvider;
 import com.astahpromcp.tool.ToolSupport;
-import com.astahpromcp.tool.astah.pro.common.outputdto.GuideDTO;
 import com.astahpromcp.tool.common.inputdto.NoInputDTO;
+import com.astahpromcp.tool.common.outputdto.GuideDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
 public class ProjectDiffGuideTool implements ToolProvider {
-
+    
     public ProjectDiffGuideTool() {
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -27,13 +27,13 @@ public class ProjectDiffGuideTool implements ToolProvider {
                     NoInputDTO.class,
                     GuideDTO.class)
             );
-
+            
         } catch (Exception e) {
             log.error("Failed to create project diff guide tools", e);
             return List.of();
         }
     }
-
+    
     private GuideDTO getGuide(NoInputDTO param) throws Exception {
         String contents = """
 Finding what has changed between two versions of a project takes two tool functions: one starts the comparison and returns a 'diffId' at once, and the other returns the result for that 'diffId', page by page.
@@ -101,9 +101,10 @@ IDs:
 * The open project is read once, while the call that starts the comparison runs, and the result compares that snapshot. It may have changed since, so read its current state with the other tools before you edit based on the result.
 
 
-Parts recreated with a new xmi.id:
+Parts that Astah recreates or recomputes on its own:
 * Some parts are recreated with a new xmi.id whenever their value changes: multiplicities, constraint bodies, the parameter that holds a return type, transition events, slot values. The multiplicity of an association end is matched across and shown as a modified value, with the base's ID in 'baseXmiId'; the others show as one removed and one added element under the same 'xmlContextOwner'.
 * Showing a communication diagram makes Astah resize the labels of its messages without marking the project modified; differences of less than 2 pixels in their width and position are left out.
+* Values of 'XMI.field', '@width' and '@height' of a presentation that differ by no more than a billionth of the value are taken as equal, even in a presentation that changed otherwise.
 * 'normalization' says how many parts each of these rules matched or left out.
 
 
@@ -124,7 +125,7 @@ What else to keep in mind:
             .replace("{RESULT_WAIT_SECONDS}", String.valueOf(McpServerConfig.PROJECT_DIFF_RESULT_WAIT_SECONDS))
             .replace("{MAX_RESPONSE_VALUE_CHARS}", String.valueOf(McpServerConfig.PROJECT_DIFF_MAX_RESPONSE_VALUE_CHARS))
             .replace("{LAST_RESORT_VALUE_CHARS}", String.valueOf(McpServerConfig.PROJECT_DIFF_LAST_RESORT_VALUE_CHARS));
-
+        
         return new GuideDTO(contents);
     }
 }

@@ -20,13 +20,13 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InteractionUseToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private InteractionUseTool tool;
     private Method getInfo;
     private Method setArgument;
     private Method setSequenceDiagram;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -34,49 +34,49 @@ public class InteractionUseToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/InteractionUseToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new InteractionUseTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             InteractionUseTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setArgument() method
         setArgument = TestSupport.getAccessibleMethod(
             InteractionUseTool.class,
             "setArgument",
             InteractionUseWithArgumentDTO.class);
-
+        
         // setSequenceDiagram() method
         setSequenceDiagram = TestSupport.getAccessibleMethod(
             InteractionUseTool.class,
             "setSequenceDiagram",
             InteractionUseWithSequenceDiagramDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get interaction use
         IInteractionUse interactionUse = (IInteractionUse) TestSupport.instance().getNamedElementByClassAndName(
             IInteractionUse.class,
             "");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(interactionUse.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -85,26 +85,26 @@ public class InteractionUseToolTest {
             tool,
             inputDTO,
             InteractionUseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setArgument_ok() throws Exception {
         // Get interaction use
         IInteractionUse interactionUse = (IInteractionUse) TestSupport.instance().getNamedElementByClassAndName(
             IInteractionUse.class,
             "");
-
+        
         // Create input DTO
         InteractionUseWithArgumentDTO inputDTO = new InteractionUseWithArgumentDTO(
             interactionUse.getId(),
             "test argument");
-
+        
         // Check argument before setting
         assertNotEquals("test argument", interactionUse.getArgument());
-
+        
         // ----------------------------------------
         // Call setArgument()
         // ----------------------------------------
@@ -113,34 +113,34 @@ public class InteractionUseToolTest {
             tool,
             inputDTO,
             InteractionUseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check argument after setting
         assertEquals("test argument", interactionUse.getArgument());
     }
-
+    
     @Test
     void setSequenceDiagram_ok() throws Exception {
         // Get interaction use
         IInteractionUse interactionUse = (IInteractionUse) TestSupport.instance().getNamedElementByClassAndName(
             IInteractionUse.class,
             "");
-
+        
         // Get sequence diagram
         ISequenceDiagram sequenceDiagram = (ISequenceDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ISequenceDiagram.class,
             "Sequence Diagram1");
-
+        
         // Create input DTO
         InteractionUseWithSequenceDiagramDTO inputDTO = new InteractionUseWithSequenceDiagramDTO(
             interactionUse.getId(),
             sequenceDiagram.getId());
-
+        
         // Check sequence diagram before setting
         assertNotEquals(sequenceDiagram, interactionUse.getSequenceDiagram());
-
+        
         // ----------------------------------------
         // Call setSequenceDiagram()
         // ----------------------------------------
@@ -149,10 +149,10 @@ public class InteractionUseToolTest {
             tool,
             inputDTO,
             InteractionUseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check sequence diagram after setting
         assertEquals(sequenceDiagram, interactionUse.getSequenceDiagram());
     }

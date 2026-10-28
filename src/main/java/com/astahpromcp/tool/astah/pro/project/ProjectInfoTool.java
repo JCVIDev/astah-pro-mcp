@@ -28,17 +28,17 @@ import java.util.Set;
 
 @Slf4j
 public class ProjectInfoTool extends AstahToolProvider {
-
+    
     private static final int CHUNK_SIZE = 400;
-
+    
     private final ProjectAccessor projectAccessor;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ProjectInfoTool(ProjectAccessor projectAccessor, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -48,91 +48,91 @@ public class ProjectInfoTool extends AstahToolProvider {
                 this::getAllNamedElements,
                 NoInputDTO.class,
                 AllNameIdTypeInfoDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_chunk_of_all_named_elements",
                 "Return the chunk data of all named elements in the project, from the list identified by the snapshot ID that get_info_of_all_named_elements returned. If that list has changed since then, because the model was edited or another project was opened, this tool fails instead of returning a chunk of the changed list: call get_info_of_all_named_elements again and read every chunk with the new snapshot ID. Read the remaining chunks right away, in parallel where you can, to keep that from happening. The chunk data is a simplified information: name, identifier, and type.",
                 this::getNamedElementsChunk,
                 SnapshotChunkDTO.class,
                 NameIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_info_of_all_prsts",
                 "Return the snapshot ID, the total number of chunks and the data of the first chunk of all presentations in the project. To read the other chunks, pass the snapshot ID to get_chunk_of_all_prsts. The chunk data is a simplified information: label, identifier, and type.",
                 this::getAllPresentations,
                 NoInputDTO.class,
                 AllLabelIdTypeInfoDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_chunk_of_all_prsts",
                 "Return the chunk data of all presentations in the project, from the list identified by the snapshot ID that get_info_of_all_prsts returned. If that list has changed since then, because the model was edited or another project was opened, this tool fails instead of returning a chunk of the changed list: call get_info_of_all_prsts again and read every chunk with the new snapshot ID. Read the remaining chunks right away, in parallel where you can, to keep that from happening. The chunk data is a simplified information: label, identifier, and type.",
                 this::getPresentationsChunk,
                 SnapshotChunkDTO.class,
                 LabelIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_info_of_all_definitions",
                 "Return the snapshot ID, the total number of chunks and the data of the first chunk of all definitions in the project. To read the other chunks, pass the snapshot ID to get_chunk_of_all_definitions. The chunk data is a simplified information: definition, name, identifier, and type.",
                 this::getAllDefinitions,
                 NoInputDTO.class,
                 AllDefinitionNameIdTypeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_chunk_of_all_definitions",
                 "Return the chunk data of all definitions in the project, from the list identified by the snapshot ID that get_info_of_all_definitions returned. If that list has changed since then, because the model was edited or another project was opened, this tool fails instead of returning a chunk of the changed list: call get_info_of_all_definitions again and read every chunk with the new snapshot ID. Read the remaining chunks right away, in parallel where you can, to keep that from happening. The chunk data is a simplified information: definition, name, identifier, and type.",
                 this::getDefinitionsChunk,
                 SnapshotChunkDTO.class,
                 DefinitionNameIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_info_of_dgm_prsts",
                 "Return all presentation data on the specified diagram (specified by ID). The presentation data is a simplified information: label, identifier, and type.",
                 this::getAllPresentationsOnDiagram,
                 IdDTO.class,
                 LabelIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_all_constraints_and_conditions",
                 "Return all constraints and conditions (preconditions, postconditions, and body conditions) in the project. For example, use this tool to obtain the constraints when you want to verify whether constraints written in OCL are satisfied.",
                 this::getAllConstraintsAndConditions,
                 NoInputDTO.class,
                 ReportDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "retrieve_classifiers_that_ref_or_be_refed_by",
                 "Return all classifiers (classes, interfaces, and enumerations) that the specified classifier (specified by ID) references or that reference it. The returned data is a simplified information: name, identifier, and type. For example, when you need to understand the scope of impact of changes to a specific element, use this tool. If you want to traverse references recursively, you'll need to use this tool repeatedly. Note that using a classifier as a type is considered a reference to that classifier.",
                 this::retrieveClassifiersThatReferenceOrBeReferencedBy,
                 IdDTO.class,
                 SourceTargetNameIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "search_within_named_elements",
                 "Search for the specified string within the name and definition (the element's description field) of named elements using partial matching. The search is case-insensitive. Note that presentations are excluded from the search scope. Specify an empty string as the search string to target all named elements.",
                 this::searchWithinNamedElements,
                 SearchDTO.class,
                 NameIdTypeDefinitionListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "search_within_prsts",
                 "Search for the specified string within the label of presentations using partial matching. The search is case-insensitive. Note that named elements are excluded from the search scope. For example, if you want to search for the specified string within note contents, use this tool. Specify an empty string as the search string to target all presentations.",
                 this::searchWithinPresentations,
                 SearchDTO.class,
                 LabelIdTypeListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "retrieve_classifiers_within_pkg",
                 "Return all classifiers (classes, interfaces, and enumerations) within the specified package (specified by ID), including those in its subpackages. The returned data is a simplified information: name, identifier, type, and namespace.",
                 this::retrieveClassifiersWithinPackage,
                 IdDTO.class,
                 NameIdTypeNamespaceListDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "retrieve_pkg_structure_as_puml",
                 "Return the PlantUML code that represents the package structure of the classifiers within the project. When you need to know the package structure of classifiers across the entire project, use this tool.",
                 this::retrievePackageStructureAsPlantuml,
                 NoInputDTO.class,
                 PlantumlDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "retrieve_relationships_as_puml",
                 "Return the PlantUML code for a class diagram that shows only the relationships among NamedElements in the Astah project. The relationships include associations, nested classes, generalizations, realizations, dependencies, and usages. However, this tool does not include the role names, multiplicities, aggregation kinds (composition and aggregation), or association names of the relationships. If you need that information, retrieve the detail information for each individual relationship. This tool is recommended when you want to understand the overall element relationships in the Astah project.",
@@ -141,19 +141,19 @@ public class ProjectInfoTool extends AstahToolProvider {
                 PlantumlDTO.class)
         );
     }
-
+    
     private AllNameIdTypeInfoDTO getAllNamedElements(NoInputDTO param) throws Exception {
         ListSnapshot<NameIdTypeDTO> snapshot = ListSnapshot.of(listNamedElements(), CHUNK_SIZE);
         return new AllNameIdTypeInfoDTO(snapshot.id(), snapshot.chunks().size(), snapshot.chunks().get(0));
     }
-
+    
     private NameIdTypeListDTO getNamedElementsChunk(SnapshotChunkDTO param) throws Exception {
         // The list is built again rather than kept, so that the snapshot ID is checked against the project as it is now
         List<NameIdTypeDTO> chunk = ListSnapshot.of(listNamedElements(), CHUNK_SIZE)
                 .chunk(param.snapshotId(), param.chunkIndex(), "get_info_of_all_named_elements");
         return new NameIdTypeListDTO(chunk);
     }
-
+    
     private List<NameIdTypeDTO> listNamedElements() throws Exception {
         INamedElement[] astahNamedElements = projectAccessor.findElements(INamedElement.class);
         List<NameIdTypeDTO> nameIdTypeDTOs = new ArrayList<>();
@@ -166,19 +166,19 @@ public class ProjectInfoTool extends AstahToolProvider {
         }
         return nameIdTypeDTOs;
     }
-
+    
     private AllDefinitionNameIdTypeDTO getAllDefinitions(NoInputDTO param) throws Exception {
         ListSnapshot<DefinitionNameIdTypeDTO> snapshot = ListSnapshot.of(listDefinitions(), CHUNK_SIZE);
         return new AllDefinitionNameIdTypeDTO(snapshot.id(), snapshot.chunks().size(), snapshot.chunks().get(0));
     }
-
+    
     private DefinitionNameIdTypeListDTO getDefinitionsChunk(SnapshotChunkDTO param) throws Exception {
         // The list is built again rather than kept, so that the snapshot ID is checked against the project as it is now
         List<DefinitionNameIdTypeDTO> chunk = ListSnapshot.of(listDefinitions(), CHUNK_SIZE)
                 .chunk(param.snapshotId(), param.chunkIndex(), "get_info_of_all_definitions");
         return new DefinitionNameIdTypeListDTO(chunk);
     }
-
+    
     private List<DefinitionNameIdTypeDTO> listDefinitions() throws Exception {
         INamedElement[] astahNamedElements = projectAccessor.findElements(INamedElement.class);
         List<DefinitionNameIdTypeDTO> definitionNameIdTypeDTOs = new ArrayList<>();
@@ -191,19 +191,19 @@ public class ProjectInfoTool extends AstahToolProvider {
         }
         return definitionNameIdTypeDTOs;
     }
-
+    
     private AllLabelIdTypeInfoDTO getAllPresentations(NoInputDTO param) throws Exception {
         ListSnapshot<LabelIdTypeDTO> snapshot = ListSnapshot.of(listPresentations(), CHUNK_SIZE);
         return new AllLabelIdTypeInfoDTO(snapshot.id(), snapshot.chunks().size(), snapshot.chunks().get(0));
     }
-
+    
     private LabelIdTypeListDTO getPresentationsChunk(SnapshotChunkDTO param) throws Exception {
         // The list is built again rather than kept, so that the snapshot ID is checked against the project as it is now
         List<LabelIdTypeDTO> chunk = ListSnapshot.of(listPresentations(), CHUNK_SIZE)
                 .chunk(param.snapshotId(), param.chunkIndex(), "get_info_of_all_prsts");
         return new LabelIdTypeListDTO(chunk);
     }
-
+    
     private List<LabelIdTypeDTO> listPresentations() throws Exception {
         INamedElement[] astahNamedElements = projectAccessor.findElements(IDiagram.class);
         List<LabelIdTypeDTO> labelIdTypeDTOs = new ArrayList<>();
@@ -215,20 +215,20 @@ public class ProjectInfoTool extends AstahToolProvider {
         }
         return labelIdTypeDTOs;
     }
-
+    
     private LabelIdTypeListDTO getAllPresentationsOnDiagram(IdDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.id());
         List<LabelIdTypeDTO> labelIdTypeDTOs = new ArrayList<>();
         for (IPresentation astahPresentation : AstahProToolSupport.getPresentationsOnDiagram(astahDiagram)) {
             labelIdTypeDTOs.add(LabelIdTypeDTOAssembler.toDTO(astahPresentation));
         }
-
+        
         return new LabelIdTypeListDTO(labelIdTypeDTOs);
     }
-
+    
     private ReportDTO getAllConstraintsAndConditions(NoInputDTO param) throws Exception {
         StringBuilder contents = new StringBuilder();
-
+        
         for (INamedElement astahNamedElement : projectAccessor.findElements(IConstraint.class)) {
             IConstraint astahConstraint = (IConstraint) astahNamedElement;
             String specification = astahConstraint.getSpecification();
@@ -237,25 +237,25 @@ public class ProjectInfoTool extends AstahToolProvider {
                     contents.append("# ").append(astahConstrainedNamedElement.getFullName(".")).append("\n");
                     contents.append("Type: ").append(NamedElementDTO.Type.getCorrespondingType(astahConstrainedNamedElement).typeName).append("\n");
                     contents.append("ID: ").append(astahConstrainedNamedElement.getId()).append("\n");
-
+                    
                     if (specification.startsWith("PRECONDITION:")) {
                         contents.append("Precondition:").append("\n");
                         contents.append("```").append("\n");
                         contents.append(Strings.CS.removeStart(specification, "PRECONDITION:")).append("\n");
                         contents.append("```").append("\n").append("\n");
-
+                        
                     } else if (specification.startsWith("POSTCONDITION:")) {
                         contents.append("Postcondition:").append("\n");
                         contents.append("```").append("\n");
                         contents.append(Strings.CS.removeStart(specification, "POSTCONDITION:")).append("\n");
                         contents.append("```").append("\n").append("\n");
-
+                        
                     } else if (specification.startsWith("BODYCONDITION:")) {
                         contents.append("Body condition:").append("\n");
                         contents.append("```").append("\n");
                         contents.append(Strings.CS.removeStart(specification, "BODYCONDITION:")).append("\n");
                         contents.append("```").append("\n").append("\n");
-
+                        
                     } else {
                         contents.append("Constraint:").append("\n");
                         contents.append("```").append("\n");
@@ -265,13 +265,13 @@ public class ProjectInfoTool extends AstahToolProvider {
                 }
             }
         }
-
+        
         return new ReportDTO(contents.toString());
     }
-
+    
     private SourceTargetNameIdTypeListDTO retrieveClassifiersThatReferenceOrBeReferencedBy(IdDTO param) throws Exception {
         IClass astahTargetClass = astahProToolSupport.getClass(param.id());
-
+        
         Set<NameIdTypeDTO> inheritanceSourceClassifier = new LinkedHashSet<>();
         Set<NameIdTypeDTO> inheritanceTargetClassifier = new LinkedHashSet<>();
         Set<NameIdTypeDTO> realizationSourceClassifier = new LinkedHashSet<>();
@@ -282,10 +282,10 @@ public class ProjectInfoTool extends AstahToolProvider {
         Set<NameIdTypeDTO> dependencyTargetClassifier = new LinkedHashSet<>();
         Set<NameIdTypeDTO> typeUsageSourceClassifier = new LinkedHashSet<>();
         Set<NameIdTypeDTO> typeUsageTargetClassifier = new LinkedHashSet<>();
-
+        
         for (INamedElement astahNamedElement : projectAccessor.findElements(IClass.class)) {
             IClass astahClass = (IClass)astahNamedElement;
-
+            
             if (astahClass.equals(astahTargetClass)) {
                 // Processing for the target class itself
                 for (IAttribute astahAttribute : astahClass.getAttributes()) {
@@ -294,23 +294,23 @@ public class ProjectInfoTool extends AstahToolProvider {
                         // Both navigabilities are unspecified
                         if (astahAttribute.getAssociation().getMemberEnds()[0].getNavigability().equals("Unspecified")
                             && astahAttribute.getAssociation().getMemberEnds()[1].getNavigability().equals("Unspecified")) {
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[0].getOwner() == astahTargetClass) {
                                 associationTargetClassifier.add(NameIdTypeDTOAssembler.toDTO((INamedElement) astahAttribute.getAssociation().getMemberEnds()[1].getOwner()));
                             }
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[1].getOwner() == astahTargetClass) {
                                 associationTargetClassifier.add(NameIdTypeDTOAssembler.toDTO((INamedElement) astahAttribute.getAssociation().getMemberEnds()[0].getOwner()));
                             }
-
+                        
                         // One of the navigabilities is specified
                         } else {
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[0].getOwner() == astahTargetClass
                                 && astahAttribute.getAssociation().getMemberEnds()[0].getNavigability().equals("Navigable")) {
                                 associationTargetClassifier.add(NameIdTypeDTOAssembler.toDTO((INamedElement) astahAttribute.getAssociation().getMemberEnds()[1].getOwner()));
                             }
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[1].getOwner() == astahTargetClass
                                 && astahAttribute.getAssociation().getMemberEnds()[1].getNavigability().equals("Navigable")) {
                                 associationTargetClassifier.add(NameIdTypeDTOAssembler.toDTO((INamedElement) astahAttribute.getAssociation().getMemberEnds()[0].getOwner()));
@@ -323,62 +323,62 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Operation
                 for (IOperation astahOperation : astahClass.getOperations()) {
                     if (astahOperation.getReturnType() != null) {
                         typeUsageTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahOperation.getReturnType()));
                     }
-
+                    
                     for (IParameter astahParameter : astahOperation.getParameters()) {
                         if (astahParameter.getType() != null) {
                             typeUsageTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahParameter.getType()));
                         }
                     }
                 }
-
+                
                 // Realization
                 for (IRealization astahRealization : astahClass.getClientRealizations()) {
                     if (astahRealization.getSupplier() != null) {
                         realizationTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahRealization.getSupplier()));
                     }
                 }
-
+                
                 // Generalization
                 for (IGeneralization astahGeneralization : astahClass.getGeneralizations()) {
                     if (astahGeneralization.getSuperType() != null) {
                         inheritanceTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahGeneralization.getSuperType()));
                     }
                 }
-
+                
                 // Template parameter
                 for (IClassifierTemplateParameter astahTemplateParameter : astahClass.getTemplateParameters()) {
                     if (astahTemplateParameter.getType() != null) {
                         typeUsageTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahTemplateParameter.getType()));
                     }
                 }
-
+                
                 // Dependency
                 for (IDependency astahDependency : astahClass.getClientDependencies()) {
                     if (astahDependency.getSupplier() != null) {
                         dependencyTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahDependency.getSupplier()));
                     }
                 }
-
+                
                 // Usage
                 for (IUsage astahUsage : astahClass.getClientUsages()) {
                     if (astahUsage.getSupplier() != null) {
                         dependencyTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahUsage.getSupplier()));
                     }
                 }
-
+                
                 // Port
                 for (IPort astahPort : astahClass.getPorts()) {
                     if (astahPort.getType() != null) {
                         typeUsageTargetClassifier.add(NameIdTypeDTOAssembler.toDTO(astahPort.getType()));
                     }
                 }
-
+                
             } else {
                 // Processing for other classes
                 for (IAttribute astahAttribute : astahClass.getAttributes()) {
@@ -387,23 +387,23 @@ public class ProjectInfoTool extends AstahToolProvider {
                         // Both navigabilities are unspecified
                         if (astahAttribute.getAssociation().getMemberEnds()[0].getNavigability().equals("Unspecified")
                             && astahAttribute.getAssociation().getMemberEnds()[1].getNavigability().equals("Unspecified")) {
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[0].getOwner() == astahTargetClass) {
                                 associationSourceClassifier.add(NameIdTypeDTOAssembler.toDTO(astahClass));
                             }
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[1].getOwner() == astahTargetClass) {
                                 associationSourceClassifier.add(NameIdTypeDTOAssembler.toDTO(astahClass));
                             }
-
+                        
                         // One of the navigabilities is specified
                         } else {
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[0].getOwner() == astahTargetClass
                                 && astahAttribute.getAssociation().getMemberEnds()[1].getNavigability().equals("Navigable")) {
                                 associationSourceClassifier.add(NameIdTypeDTOAssembler.toDTO(astahClass));
                             }
-
+                            
                             if (astahAttribute.getAssociation().getMemberEnds()[1].getOwner() == astahTargetClass
                                 && astahAttribute.getAssociation().getMemberEnds()[0].getNavigability().equals("Navigable")) {
                                 associationSourceClassifier.add(NameIdTypeDTOAssembler.toDTO(astahClass));
@@ -418,7 +418,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Operation
                 for (IOperation astahOperation : astahClass.getOperations()) {
                     if (astahOperation.getReturnType() != null) {
@@ -426,7 +426,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                             typeUsageSourceClassifier.add(NameIdTypeDTOAssembler.toDTO(astahClass));
                         }
                     }
-
+                    
                     for (IParameter astahParameter : astahOperation.getParameters()) {
                         if (astahParameter.getType() != null) {
                             if (astahParameter.getType().equals(astahTargetClass)) {
@@ -435,7 +435,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Realization
                 for (IRealization astahRealization : astahClass.getClientRealizations()) {
                     if (astahRealization.getSupplier() != null) {
@@ -444,7 +444,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Generalization
                 for (IGeneralization astahGeneralization : astahClass.getGeneralizations()) {
                     if (astahGeneralization.getSuperType() != null) {
@@ -453,7 +453,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Template parameter
                 for (IClassifierTemplateParameter astahTemplateParameter : astahClass.getTemplateParameters()) {
                     if (astahTemplateParameter.getType() != null) {
@@ -462,7 +462,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Dependency
                 for (IDependency astahDependency : astahClass.getClientDependencies()) {
                     if (astahDependency.getSupplier() != null) {
@@ -471,7 +471,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Usage
                 for (IUsage astahUsage : astahClass.getClientUsages()) {
                     if (astahUsage.getSupplier() != null) {
@@ -480,7 +480,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                         }
                     }
                 }
-
+                
                 // Port
                 for (IPort astahPort : astahClass.getPorts()) {
                     if (astahPort.getType() != null) {
@@ -491,7 +491,7 @@ public class ProjectInfoTool extends AstahToolProvider {
                 }
             }
         }
-
+        
         return new SourceTargetNameIdTypeListDTO(
                 new ArrayList<>(inheritanceSourceClassifier),
                 new ArrayList<>(inheritanceTargetClassifier),
@@ -504,12 +504,12 @@ public class ProjectInfoTool extends AstahToolProvider {
                 new ArrayList<>(typeUsageSourceClassifier),
                 new ArrayList<>(typeUsageTargetClassifier));
     }
-
+    
     private NameIdTypeDefinitionListDTO searchWithinNamedElements(SearchDTO param) throws Exception {
         // An empty search string targets all named elements
         String searchString = param.searchString() == null ? "" : param.searchString();
         boolean matchAll = searchString.isEmpty();
-
+        
         INamedElement[] astahNamedElements = projectAccessor.findElements(INamedElement.class);
         List<NameIdTypeDefinitionDTO> nameIdTypeDefinitionDTOs = new ArrayList<>();
         for (INamedElement astahNamedElement : astahNamedElements) {
@@ -519,15 +519,15 @@ public class ProjectInfoTool extends AstahToolProvider {
                 nameIdTypeDefinitionDTOs.add(NameIdTypeDefinitionDTOAssembler.toDTO(astahNamedElement));
             }
         }
-
+        
         return new NameIdTypeDefinitionListDTO(nameIdTypeDefinitionDTOs);
     }
-
+    
     private LabelIdTypeListDTO searchWithinPresentations(SearchDTO param) throws Exception {
         // An empty search string targets all presentations
         String searchString = param.searchString() == null ? "" : param.searchString();
         boolean matchAll = searchString.isEmpty();
-
+        
         INamedElement[] astahNamedElements = projectAccessor.findElements(IDiagram.class);
         List<LabelIdTypeDTO> labelIdTypeDTOs = new ArrayList<>();
         for (INamedElement astahNamedElement : astahNamedElements) {
@@ -539,17 +539,17 @@ public class ProjectInfoTool extends AstahToolProvider {
                 }
             }
         }
-
+        
         return new LabelIdTypeListDTO(labelIdTypeDTOs);
     }
-
+    
     private NameIdTypeNamespaceListDTO retrieveClassifiersWithinPackage(IdDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.id());
-
+        
         List<NameIdTypeNamespaceDTO> nameIdTypeNamespaceDTOs = new ArrayList<>();
         for (INamedElement astahNamedElement : projectAccessor.findElements(IClass.class)) {
             IClass astahClass = (IClass)astahNamedElement;
-
+            
             IElement owner = astahClass.getOwner();
             while (owner != null) {
                 if (owner.equals(astahPackage)) {
@@ -559,10 +559,10 @@ public class ProjectInfoTool extends AstahToolProvider {
                 owner = owner.getOwner();
             }
         }
-
+        
         return new NameIdTypeNamespaceListDTO(nameIdTypeNamespaceDTOs);
     }
-
+    
     private PlantumlDTO retrievePackageStructureAsPlantuml(NoInputDTO param) throws Exception {
         IModel astahProject;
         try {
@@ -570,108 +570,127 @@ public class ProjectInfoTool extends AstahToolProvider {
         } catch (Exception e) {
             throw new RuntimeException("Failed to get the current project.", e);
         }
-
+        
         StringBuilder plantumlCode = new StringBuilder();
         plantumlCode.append("@startuml").append("\n");
         String indent = "";
-
+        ClassifierAliases aliases = new ClassifierAliases();
+        
         for (INamedElement astahNamedElement : astahProject.getOwnedElements()) {
-            plantumlCode.append(getNamedElementPlantumlCode(astahNamedElement, indent));
+            appendPackageStructure(plantumlCode, astahNamedElement, indent, aliases);
         }
-
+        
         plantumlCode.append("@enduml").append("\n");
         log.debug("Package structure as PlantUML: {}", plantumlCode.toString());
-
+        
         return new PlantumlDTO(plantumlCode.toString());
     }
-
-    private String getNamedElementPlantumlCode(INamedElement astahNamedElement, String indent) {
-        StringBuilder plantumlCode = new StringBuilder();
-        if (astahNamedElement instanceof IEnumeration) {
-            IEnumeration astahEnumeration = (IEnumeration) astahNamedElement;
-            plantumlCode.append(indent).append("enum ").append("\"" + astahEnumeration.getName() + "\"").append("\n");
-
-        } else if (astahNamedElement instanceof IClass) {
-            IClass astahClass = (IClass) astahNamedElement;
-            if (Arrays.asList(astahClass.getStereotypes()).contains("interface")) {
-                plantumlCode.append(indent).append("interface ").append("\"" + astahClass.getName() + "\"").append("\n");
-            } else {
-                plantumlCode.append(indent).append("class ").append("\"" + astahClass.getName() + "\"").append("\n");
-            }
-
-            if (astahClass.getNestedClasses().length > 0) {
-                plantumlCode.append(indent).append("{").append("\n");
-                for (IClass nestedClass : astahClass.getNestedClasses()) {
-                    plantumlCode.append(getNamedElementPlantumlCode(nestedClass, indent + "  "));
-                }
-                plantumlCode.append(indent).append("}").append("\n");
-            }
+    
+    // Gives each classifier of the package structure an alias of its own.
+    // A nested class is declared in the same package as the class enclosing it, where another nested class may share its name, and PlantUML would take two declarations of one name for one classifier.
+    private static final class ClassifierAliases {
+        private int count;
+        
+        String next() {
+            count++;
+            return "c" + count;
         }
-
-        if (astahNamedElement instanceof IPackage) {
-            IPackage astahPackage = (IPackage) astahNamedElement;
-            plantumlCode.append(indent).append("package ").append("\"" + astahPackage.getName() + "\"").append("\n");
-
-            if (astahPackage.getOwnedElements().length > 0) {
-                plantumlCode.append(indent).append("{").append("\n");
-                for (INamedElement nestedElement : astahPackage.getOwnedElements()) {
-                    plantumlCode.append(getNamedElementPlantumlCode(nestedElement, indent + "  "));
-                }
-                plantumlCode.append(indent).append("}").append("\n");
-            }
-        }
-
-        return plantumlCode.toString();
     }
-
+    
+    private void appendPackageStructure(StringBuilder plantumlCode, INamedElement astahNamedElement, String indent, ClassifierAliases aliases) {
+        if (astahNamedElement instanceof IClass astahClass) {
+            appendClassifier(plantumlCode, astahClass, indent, aliases);
+        }
+        
+        if (astahNamedElement instanceof IPackage astahPackage) {
+            plantumlCode.append(indent).append("package ").append(plantumlQuoted(astahPackage.getName())).append("\n");
+            
+            // Even an empty package gets its braces: PlantUML cannot parse what follows a package declared without them.
+            // A package that holds only diagrams counts as empty here, since a diagram is not one of its owned elements.
+            plantumlCode.append(indent).append("{").append("\n");
+            for (INamedElement nestedElement : astahPackage.getOwnedElements()) {
+                appendPackageStructure(plantumlCode, nestedElement, indent + "  ", aliases);
+            }
+            plantumlCode.append(indent).append("}").append("\n");
+        }
+    }
+    
+    // Declares the classifier and its nested classes, and answers the alias of the classifier.
+    // A nested class is declared next to the class enclosing it and tied to it with the nesting connector "+--".
+    private String appendClassifier(StringBuilder plantumlCode, IClass astahClass, String indent, ClassifierAliases aliases) {
+        String keyword;
+        if (astahClass instanceof IEnumeration) {
+            keyword = "enum";
+        } else if (Arrays.asList(astahClass.getStereotypes()).contains("interface")) {
+            keyword = "interface";
+        } else {
+            keyword = "class";
+        }
+        
+        String alias = aliases.next();
+        plantumlCode.append(indent).append(keyword).append(" ").append(plantumlQuoted(astahClass.getName()))
+            .append(" as ").append(alias).append("\n");
+        
+        for (IClass nestedClass : astahClass.getNestedClasses()) {
+            String nestedAlias = appendClassifier(plantumlCode, nestedClass, indent, aliases);
+            plantumlCode.append(indent).append(alias).append(" +-- ").append(nestedAlias).append("\n");
+        }
+        
+        return alias;
+    }
+    
+    // Puts the name in double quotes for PlantUML.
+    // A double quote in the name would end the quoted name early, so it is written as the Unicode escape that PlantUML shows as a double quote.
+    private static String plantumlQuoted(String name) {
+        return "\"" + name.replace("\"", "<U+0022>") + "\"";
+    }
+    
     private PlantumlDTO retrieveRelationshipsAsPlantuml(NoInputDTO param) throws Exception {
         StringBuilder plantumlCode = new StringBuilder("@startuml\n");
-
+        
         List<INamedElement> namedElements = new ArrayList<>(Arrays.asList(projectAccessor.findElements(INamedElement.class)));
         namedElements.sort(Comparator.comparing(element -> element.getFullName(".")));
-
+        
         // An association is reachable from the attributes of the classes on both of its ends,
         // so keep track of the associations that have already been added to avoid duplicates.
         Set<String> addedAssociationIds = new LinkedHashSet<>();
-
+        
         for (INamedElement namedElement : namedElements) {
             if (namedElement.getName().isEmpty()) {
                 continue;
             }
-
+            
             if (namedElement instanceof IClass) {
                 // Add nested classes
                 for (IClass nestedClass : ((IClass) namedElement).getNestedClasses()) {
-                    plantumlCode.append("\"").append(namedElement.getFullName(".")).append("\"")
-                            .append(" +-- ")
-                            .append("\"").append(nestedClass.getFullName(".")).append("\"\n");
+                    appendRelationship(plantumlCode, namedElement, " +-- ", nestedClass);
                 }
-
+                
                 // Add associations
                 for (IAttribute attribute : ((IClass) namedElement).getAttributes()) {
                     IAssociation association = attribute.getAssociation();
                     if (association == null) {
                         continue;
                     }
-
+                    
                     if (!addedAssociationIds.add(association.getId())) {
                         continue;
                     }
-
+                    
                     IAttribute associationEndA = association.getMemberEnds()[0];
                     IAttribute associationEndB = association.getMemberEnds()[1];
-
+                    
                     // The type of an association end is the class placed on that end
                     IClass classOnAssociationEndA = associationEndA.getType();
                     IClass classOnAssociationEndB = associationEndB.getType();
                     if (classOnAssociationEndA == null || classOnAssociationEndB == null) {
                         continue;
                     }
-
+                    
                     // An arrowhead is placed on the navigable end
                     boolean isAssociationEndANavigable = "Navigable".equals(associationEndA.getNavigability());
                     boolean isAssociationEndBNavigable = "Navigable".equals(associationEndB.getNavigability());
-
+                    
                     String arrow;
                     if (isAssociationEndANavigable && isAssociationEndBNavigable) {
                         arrow = " <--> ";
@@ -682,63 +701,61 @@ public class ProjectInfoTool extends AstahToolProvider {
                     } else {
                         arrow = " --- ";
                     }
-
-                    plantumlCode.append("\"").append(classOnAssociationEndA.getFullName(".")).append("\"")
-                            .append(arrow)
-                            .append("\"").append(classOnAssociationEndB.getFullName(".")).append("\"\n");
+                    
+                    appendRelationship(plantumlCode, classOnAssociationEndA, arrow, classOnAssociationEndB);
                 }
-
+                
                 // Add inheritances
                 for (IGeneralization generalization : ((IClass) namedElement).getGeneralizations()) {
                     INamedElement superType = generalization.getSuperType();
                     if (superType == null) {
                         continue;
                     }
-
-                    plantumlCode.append("\"").append(namedElement.getFullName(".")).append("\"")
-                            .append(" --|> ")
-                            .append("\"").append(superType.getFullName(".")).append("\"\n");
+                    
+                    appendRelationship(plantumlCode, namedElement, " --|> ", superType);
                 }
             }
-
+            
             // Add realizations
             for (IRealization realization : namedElement.getClientRealizations()) {
                 INamedElement supplier = realization.getSupplier();
                 if (supplier == null) {
                     continue;
                 }
-
-                plantumlCode.append("\"").append(namedElement.getFullName(".")).append("\"")
-                        .append(" ..|> ")
-                        .append("\"").append(supplier.getFullName(".")).append("\"\n");
+                
+                appendRelationship(plantumlCode, namedElement, " ..|> ", supplier);
             }
-
+            
             // Add dependencies
             for (IDependency dependency : namedElement.getClientDependencies()) {
                 INamedElement supplier = dependency.getSupplier();
                 if (supplier == null) {
                     continue;
                 }
-
-                plantumlCode.append("\"").append(namedElement.getFullName(".")).append("\"")
-                        .append(" ..> ")
-                        .append("\"").append(supplier.getFullName(".")).append("\"\n");
+                
+                appendRelationship(plantumlCode, namedElement, " ..> ", supplier);
             }
-
+            
             // Add usages
             for (IUsage usage : namedElement.getClientUsages()) {
                 INamedElement supplier = usage.getSupplier();
                 if (supplier == null) {
                     continue;
                 }
-
-                plantumlCode.append("\"").append(namedElement.getFullName(".")).append("\"")
-                        .append(" ..> ")
-                        .append("\"").append(supplier.getFullName(".")).append("\"\n");
+                
+                appendRelationship(plantumlCode, namedElement, " ..> ", supplier);
             }
         }
         plantumlCode.append("@enduml\n");
-
+        
         return new PlantumlDTO(plantumlCode.toString());
+    }
+    
+    // One relationship line, naming both elements by their fully-qualified names
+    private static void appendRelationship(StringBuilder plantumlCode, INamedElement source, String arrow, INamedElement target) {
+        plantumlCode.append(plantumlQuoted(source.getFullName(".")))
+            .append(arrow)
+            .append(plantumlQuoted(target.getFullName(".")))
+            .append("\n");
     }
 }

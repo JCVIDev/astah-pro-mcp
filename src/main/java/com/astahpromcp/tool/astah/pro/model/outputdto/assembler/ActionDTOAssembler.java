@@ -13,14 +13,14 @@ import java.util.List;
 
 public class ActionDTOAssembler {
     public static ActionDTO toDTO(@NonNull IAction astahAction) throws Exception {
-
+        
         NameIdTypeDTO callingActivity;
         if (astahAction.getCallingActivity() != null) {
             callingActivity = NameIdTypeDTOAssembler.toDTO(astahAction.getCallingActivity());
         } else {
             callingActivity = NameIdTypeDTO.empty();
         }
-
+        
         List<NameIdTypeDTO> inputPins = new ArrayList<>();
         for (IInputPin inputPin : astahAction.getInputs()) {
             inputPins.add(NameIdTypeDTOAssembler.toDTO(inputPin));
@@ -30,7 +30,7 @@ public class ActionDTOAssembler {
         for (IOutputPin outputPin : astahAction.getOutputs()) {
             outputPins.add(NameIdTypeDTOAssembler.toDTO(outputPin));
         }
-
+        
         return new ActionDTO(
             ActivityNodeDTOAssembler.toDTO(astahAction),
             callingActivity,

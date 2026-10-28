@@ -33,13 +33,13 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/ActivityDiagramEditor.html
 @Slf4j
 public class ActivityDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final ActivityDiagramEditor activityDiagramEditor;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public ActivityDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, ActivityDiagramEditor activityDiagramEditor, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -47,7 +47,7 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -57,133 +57,133 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                 this::createAcceptEventAction,
                 NewAcceptEventActionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_accept_time_event_act",
                 "Create a new accept time event action at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the accept time event action along with the updated diagram image in low resolution. An empty string is not allowed as an action name.",
                 this::createAcceptTimeEventAction,
                 NewAcceptTimeEventActionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_act",
                 "Create a new action at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the action along with the updated diagram image in low resolution. An empty string is not allowed as an action name.",
                 this::createAction,
                 NewActionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_activity_dgm",
                 "Create a new activity diagram under the specified package (specified by ID), and return the newly created activity diagram information.",
                 this::createActivityDiagram,
                 NewActivityDiagramDTO.class,
                 ActivityDiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_activity_param_node",
                 "Create a new activity parameter node of the base class (specified by ID) at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the activity parameter node along with the updated diagram image in low resolution. An empty string is not allowed as a node name. Note that an activity parameter node is always placed on the border of the diagram frame: it is snapped from the specified point onto the nearest edge of the frame. Specify a point close to the edge where the node should sit, and check the returned drawn rectangle for its actual location.",
                 this::createActivityParameterNode,
                 NewActivityParameterNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_call_behavior_act",
                 "Create a new call behavior action of the specified activity diagram (specified by ID) at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the call behavior action along with the updated diagram image in low resolution. An empty string is not allowed as an action name.",
                 this::createCallBehaviorAction,
                 NewCallBehaviorActionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_connector",
                 "Create a new connector at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the connector along with the updated diagram image in low resolution. An empty string is not allowed as a connector name.",
                 this::createConnector,
                 NewConnectorDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_decision_merge_node",
                 "Create a new decision merge node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the decision merge node along with the updated diagram image in low resolution. The node belongs to the partition that contains the specified point, if any.",
                 this::createDecisionMergeNode,
                 NewDecisionMergeNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_dep_between_nodes",
                 "Create a new dependency between the specified source node presentation (specified by ID) and the specified target node presentation (specified by ID) on the specified activity diagram (specified by ID), and return the newly created link presentation of the dependency along with the updated diagram image in low resolution. Set the name to an empty string when the dependency has no name.",
                 this::createDependency,
                 NewDependencyDTO.class,
                 LinkPresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_final_node",
                 "Create a new final node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the final node along with the updated diagram image in low resolution. Always set a name. An empty string is not allowed as a node name.",
                 this::createFinalNode,
                 NewFinalNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_flow",
                 "Create a new flow between the specified source node presentation (specified by ID) and the specified target node presentation (specified by ID) on the specified activity diagram (specified by ID), and return the newly created link presentation of the flow along with the updated diagram image in low resolution.",
                 this::createFlow,
                 NewFlowDTO.class,
                 LinkPresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_flow_final_node",
                 "Create a new flow final node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the flow final node along with the updated diagram image in low resolution. Always set a name. An empty string is not allowed as a node name.",
                 this::createFlowFinalNode,
                 NewFlowFinalNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_fork_node",
                 "Create a new fork node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the fork node along with the updated diagram image in low resolution. The node belongs to the partition that contains the specified point, if any.",
                 this::createForkNode,
                 NewForkNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_init_node",
                 "Create a new initial node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the initial node along with the updated diagram image in low resolution. Always set a name. An empty string is not allowed as a node name.",
                 this::createInitialNode,
                 NewInitialNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_join_node",
                 "Create a new join node at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the join node along with the updated diagram image in low resolution. The node belongs to the partition that contains the specified point, if any.",
                 this::createJoinNode,
                 NewJoinNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_obj_node",
                 "Create a new object node of the base class (specified by ID) at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the object node along with the updated diagram image in low resolution. An empty string is not allowed as a node name.",
                 this::createObjectNode,
                 NewObjectNodeDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_partition",
                 "Create a new partition by specifying the super partition (specified by presentation ID) and the previous partition (specified by presentation ID) on the specified activity diagram (specified by ID), and return the newly created node presentation of the partition along with the updated diagram image in low resolution. The super partition and the previous partition must be partitions on the target activity diagram with the same orientation as the new partition, and the previous partition must be a sub partition of the super partition. The new partition is inserted right after the previous partition. If the previous partition is an empty string, the new partition is appended after the last partition (the last sub partition of the super partition, if specified), so it cannot be inserted before the first one. If the super partition is an empty string, the new partition is placed in the super partition of the previous partition, or at the top level when the previous partition is also empty. When the new partition is inserted between existing partitions, every presentation whose left edge (top edge for a horizontal partition) is at or beyond the insertion position moves right (down) by the width (height) of the new partition, whether it is inside a partition or not. When it is appended after the last partition, nothing moves, so presentations placed beyond the last partition may end up inside the new one.",
                 this::createPartition,
                 NewPartitionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_in_or_out_pin",
                 "Create a new input/output pin of the base class (specified by ID) on the specified parent action (specified by presentation ID) on the specified activity diagram (specified by ID), and return the newly created node presentation of the pin along with the updated diagram image in low resolution. An empty string is not allowed as a pin name.",
                 this::createPin,
                 NewPinWithBaseClassAndParentActionDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_process",
                 "Create a new process at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the process along with the updated diagram image in low resolution. An empty string is not allowed as a process name.",
                 this::createProcess,
                 NewProcessDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_send_signal_act",
                 "Create a new send signal action at the specified point (specified by x and y coordinates) on the specified activity diagram (specified by ID), and return the newly created node presentation of the send signal action along with the updated diagram image in low resolution. An empty string is not allowed as an action name.",
@@ -192,86 +192,86 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                 NodePresentationDTO.class)
         );
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createAcceptEventAction(NewAcceptEventActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createAcceptEventAction(
                 param.newAcceptEventActionName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createAcceptTimeEventAction(NewAcceptTimeEventActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createAcceptTimeEventAction(
                 param.newAcceptTimeEventActionName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createAction(NewActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createAction(
                 param.newActionName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private ActivityDiagramDTO createActivityDiagram(NewActivityDiagramDTO param) throws Exception {
         IPackage astahParentPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IActivityDiagram astahActivityDiagram = txnAstah.call( () -> {
+        
+        IActivityDiagram astahActivityDiagram = txnAstah.call(() -> {
             return activityDiagramEditor.createActivityDiagram(
                 astahParentPackage,
                 param.newActivityDiagramName());
         });
-
+        
         return ActivityDiagramDTOAssembler.toDTO(astahActivityDiagram);
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createActivityParameterNode(NewActivityParameterNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         IClass astahBaseClass = astahProToolSupport.getClassOrPrimitiveType(param.baseClassId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createActivityParameterNode(
                 param.newActivityParameterNodeName(),
                 astahBaseClass,
@@ -279,21 +279,21 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createCallBehaviorAction(NewCallBehaviorActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         IActivityDiagram astahReferenceActivityDiagram = astahProToolSupport.getActivityDiagram(param.referenceActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createCallBehaviorAction(
                 param.newCallBehaviorActionName(),
                 astahReferenceActivityDiagram,
@@ -301,202 +301,202 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createConnector(NewConnectorDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createConnector(
                 param.newConnectorName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createDecisionMergeNode(NewDecisionMergeNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createDecisionMergeNode(
                 null,   // No parent node presentation
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createDependency(NewDependencyDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         INodePresentation astahClientNodePresentation = astahProToolSupport.getNodePresentation(param.clientNodePresentationId());
         INodePresentation astahSupplierNodePresentation = astahProToolSupport.getNodePresentation(param.supplierNodePresentationId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        ILinkPresentation astahLinkPresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLinkPresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createDependency(
                 param.newDependencyName(),
                 astahClientNodePresentation,
                 astahSupplierNodePresentation);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLinkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createFinalNode(NewFinalNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createFinalNode(
                 param.newFinalNodeName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createFlow(NewFlowDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         INodePresentation astahSourceNodePresentation = astahProToolSupport.getNodePresentation(param.sourceNodePresentationId());
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        ILinkPresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createFlow(
                 astahSourceNodePresentation,
                 astahTargetNodePresentation);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createFlowFinalNode(NewFlowFinalNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createFlowFinalNode(
                 param.newFlowFinalNodeName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createForkNode(NewForkNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createForkNode(
                 null,   // No parent node presentation
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createInitialNode(NewInitialNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createInitialNode(
                 param.newInitialNodeName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createJoinNode(NewJoinNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createJoinNode(
                 null,   // No parent node presentation
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createObjectNode(NewObjectNodeDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         IClass astahBaseClass = astahProToolSupport.getClassOrPrimitiveType(param.baseClassId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createObjectNode(
                 param.newObjectNodeName(),
                 astahBaseClass,
@@ -504,49 +504,49 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createPartition(NewPartitionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         INodePresentation astahSuperNodePresentation = getPartitionOnDiagramOrNull(param.superPartitionId(), "super partition", astahActivityDiagram);
         INodePresentation astahPreviousNodePresentation = getPartitionOnDiagramOrNull(param.previousPartitionId(), "previous partition", astahActivityDiagram);
         requirePartitionArrangement(astahSuperNodePresentation, astahPreviousNodePresentation, param.isHorizontal());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createPartition(
                 astahSuperNodePresentation,
                 astahPreviousNodePresentation,
                 param.newPartitionName(),
                 param.isHorizontal());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private INodePresentation getPartitionOnDiagramOrNull(String partitionId, String role, IActivityDiagram astahActivityDiagram) {
         if (partitionId == null || partitionId.isEmpty()) {
             return null;
         }
-
+        
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(partitionId);
         if (!(astahNodePresentation.getModel() instanceof IPartition)) {
             throw new IllegalArgumentException(String.format(
                 "The %s (ID: %s, type: %s) is not a partition. Specify the presentation ID of a partition, or an empty string.",
                 role, partitionId, astahNodePresentation.getType()));
         }
-
+        
         IDiagram actualDiagram = astahNodePresentation.getDiagram();
         if (actualDiagram == null || !astahActivityDiagram.getId().equals(actualDiagram.getId())) {
             throw new IllegalArgumentException(String.format(
@@ -554,26 +554,26 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                 role, partitionId, astahActivityDiagram.getName(), astahActivityDiagram.getId(),
                 actualDiagram == null ? "" : " but on '" + actualDiagram.getName() + "' (ID: " + actualDiagram.getId() + ")"));
         }
-
+        
         return astahNodePresentation;
     }
-
+    
     // Astah rejects these arrangements with only "Parameter should be set correctly.", or fails inside with a NullPointerException
     private static void requirePartitionArrangement(INodePresentation astahSuperNodePresentation, INodePresentation astahPreviousNodePresentation, boolean isHorizontal) {
         String requested = isHorizontal ? "horizontal" : "vertical";
         String opposite = isHorizontal ? "vertical" : "horizontal";
-
+        
         if (astahSuperNodePresentation != null
             && ((IPartition) astahSuperNodePresentation.getModel()).isHorizontal() != isHorizontal) {
             throw new IllegalArgumentException(String.format(
                 "The super partition '%s' (ID: %s) is %s, but isHorizontal specifies a %s partition. A partition has the same orientation as its super partition.",
                 astahSuperNodePresentation.getLabel(), astahSuperNodePresentation.getID(), opposite, requested));
         }
-
+        
         if (astahPreviousNodePresentation == null) {
             return;
         }
-
+        
         IPartition astahPreviousPartition = (IPartition) astahPreviousNodePresentation.getModel();
         IPartition astahPreviousSuperPartition = astahPreviousPartition.getSuperPartition();
         if (astahPreviousSuperPartition == null) {
@@ -581,13 +581,13 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                 "The previous partition (ID: %s) is the dimension that Astah creates to hold the partitions of one orientation. Specify one of the partitions in it, or an empty string to append the new partition after the last one.",
                 astahPreviousNodePresentation.getID()));
         }
-
+        
         if (astahPreviousPartition.isHorizontal() != isHorizontal) {
             throw new IllegalArgumentException(String.format(
                 "The previous partition '%s' (ID: %s) is %s, but isHorizontal specifies a %s partition. A partition has the same orientation as the partitions next to it.",
                 astahPreviousNodePresentation.getLabel(), astahPreviousNodePresentation.getID(), opposite, requested));
         }
-
+        
         if (astahSuperNodePresentation != null
             && !astahSuperNodePresentation.getModel().getId().equals(astahPreviousSuperPartition.getId())) {
             throw new IllegalArgumentException(String.format(
@@ -596,15 +596,15 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                 astahSuperNodePresentation.getLabel(), astahSuperNodePresentation.getID()));
         }
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createPin(NewPinWithBaseClassAndParentActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
         IClass astahBaseClass = astahProToolSupport.getClassOrPrimitiveType(param.baseClassId());
         INodePresentation astahParentAction = astahProToolSupport.getNodePresentation(param.parentActionId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createPin(
                 param.newPinName(),
                 astahBaseClass,
@@ -614,51 +614,51 @@ public class ActivityDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createProcess(NewProcessDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createProcess(
                 param.newProcessName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createSendSignalAction(NewSendSignalActionDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.targetActivityDiagramId());
-
+        
         activityDiagramEditor.setDiagram(astahActivityDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return activityDiagramEditor.createSendSignalAction(
                 param.newSendSignalActionName(),
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetActivityDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

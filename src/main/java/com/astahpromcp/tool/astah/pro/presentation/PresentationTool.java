@@ -32,19 +32,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/presentation/IPresentation.html
 @Slf4j
 public class PresentationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public PresentationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -54,36 +54,35 @@ public class PresentationTool extends AstahToolProvider {
                 this::getElement,
                 IdDTO.class,
                 ElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_all_prst_types",
                 "Return the list of all presentation type names. A presentation type name is the notation the presentation is drawn with, which may differ from the type of the model element. For example, an enumeration, a component, an artifact and a use case on a class diagram are all drawn with the class rectangle, so their type is \"Class\". Note that \"Unknown\" is excluded from the type names.",
                 this::getAllTypes,
                 NoInputDTO.class,
                 PresentationTypeListDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "set_label",
                 "Set the label of the specified presentation (specified by ID), and return the presentation after it is set along with the updated diagram image in low resolution. Note that escape sequences such as \\n cannot be used in labels, but actual newline characters (Unicode U+000A, embedded directly in the string) are supported.",
                 this::setLabel,
                 PresentationWithLabelDTO.class,
                 PresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_fill_color",
                 "Change the fill color of the specified presentation (specified by ID), and return the presentation after it is changed along with the updated diagram image in low resolution.",
                 this::changeFillColor,
                 PresentationWithColorDTO.class,
                 PresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_line_color",
                 "Change the line color of the specified presentation (specified by ID), and return the presentation after it is changed along with the updated diagram image in low resolution.",
                 this::changeLineColor,
                 PresentationWithColorDTO.class,
                 PresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "change_font_color",
                 "Change the font color of the specified presentation (specified by ID), and return the presentation after it is changed along with the updated diagram image in low resolution.",
@@ -92,32 +91,32 @@ public class PresentationTool extends AstahToolProvider {
                 PresentationDTO.class)
         );
     }
-
+    
     private ElementDTO getElement(IdDTO param) throws Exception {
         IPresentation astahPresentation = astahProToolSupport.getPresentation(param.id());
-
+        
         IElement astahElement = astahPresentation.getModel();
-
+        
         if (astahElement != null) {
             return ElementDTOAssembler.toDTO(astahElement);
         } else {
             throw new RuntimeException("No element exists that corresponds to the presentation.");
         }
     }
-
+    
     private PresentationTypeListDTO getAllTypes(NoInputDTO param) throws Exception {
         List<String> typeNames = Arrays.stream(PresentationDTO.Type.values())
                 .filter(type -> type != PresentationDTO.Type.UNKNOWN)
                 .map(type -> type.typeName)
                 .toList();
-
+        
         return new PresentationTypeListDTO(typeNames);
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> setLabel(PresentationWithLabelDTO param) throws Exception {
         IPresentation astahPresentation = astahProToolSupport.getPresentation(param.presentationId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             // IPresentation.setLabel() rejects a note on sequence, component, deployment and composite structure diagrams with "Parameter should be set correctly.", while setting the name of its comment sets the note content on every diagram.
             if (astahPresentation.getModel() instanceof IComment astahComment) {
                 astahComment.setName(param.label());
@@ -125,51 +124,51 @@ public class PresentationTool extends AstahToolProvider {
                 astahPresentation.setLabel(param.label());
             }
         });
-
+        
         PresentationDTO dto = PresentationDTOAssembler.toDTO(astahPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(astahPresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> changeFillColor(PresentationWithColorDTO param) throws Exception {
         return changeColor(param, Key.FILL_COLOR, "fill color");
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> changeLineColor(PresentationWithColorDTO param) throws Exception {
         return changeColor(param, Key.LINE_COLOR, "line color");
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> changeFontColor(PresentationWithColorDTO param) throws Exception {
         return changeColor(param, Key.FONT_COLOR, "font color");
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> changeColor(PresentationWithColorDTO param, String key, String colorName) throws Exception {
         IPresentation astahPresentation = astahProToolSupport.getPresentation(param.presentationId());
         String color = AstahProToolSupport.requireRrggbbColor(param.color());
-
+        
         String noSuchColor = String.format("The presentation (ID: %s, type: %s) has no %s.",
             astahPresentation.getID(), astahPresentation.getType(), colorName);
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             try {
                 astahPresentation.setProperty(key, color);
             } catch (InvalidEditingException e) {
                 // The color is valid by now, so Astah rejects it only because this presentation has no such color, as a link has no fill color.
                 throw new IllegalArgumentException(noSuchColor, e);
             }
-
+            
             // Some presentations accept a color without keeping it
             if (!color.equalsIgnoreCase(astahPresentation.getProperty(key))) {
                 throw new IllegalArgumentException(noSuchColor);
             }
         });
-
+        
         PresentationDTO dto = PresentationDTOAssembler.toDTO(astahPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(astahPresentation.getDiagram().getId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

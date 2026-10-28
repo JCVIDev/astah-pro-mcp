@@ -8,11 +8,11 @@ import java.util.List;
 public record MindMapDiagramDTO(
     @JsonPropertyDescription("Diagram info")
     DiagramDTO diagram,
-
+    
     @JsonPropertyDescription("Root topic")
     LabelIdTypeDTO rootTopic,
-
+    
     @JsonPropertyDescription("Floating topics")
     List<LabelIdTypeDTO> floatingTopics
-) {    
+) {
 }

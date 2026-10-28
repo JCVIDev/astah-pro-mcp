@@ -18,17 +18,17 @@ import java.util.List;
 
 @Slf4j
 public class ObjectNodeTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ObjectNodeTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -38,8 +38,7 @@ public class ObjectNodeTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ObjectNodeDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_base_class_of_obj_node",
                 "Set the base class (specified by ID) of the specified object node (specified by ID), and return the model element of the object node after it is set.",
@@ -48,21 +47,21 @@ public class ObjectNodeTool extends AstahToolProvider {
                 ObjectNodeDTO.class)
         );
     }
-
+    
     private ObjectNodeDTO getInfo(IdDTO param) throws Exception {
         IObjectNode astahObjectNode = astahProToolSupport.getObjectNode(param.id());
-
+        
         return ObjectNodeDTOAssembler.toDTO(astahObjectNode);
     }
-
+    
     private ObjectNodeDTO setBase(ObjectNodeWithBaseDTO param) throws Exception {
         IObjectNode astahObjectNode = astahProToolSupport.getObjectNode(param.targetObjectNodeId());
         IClass astahBaseClass = astahProToolSupport.getClassOrPrimitiveType(param.baseClassId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahObjectNode.setBase(astahBaseClass);
         });
-
+        
         return ObjectNodeDTOAssembler.toDTO(astahObjectNode);
     }
 }

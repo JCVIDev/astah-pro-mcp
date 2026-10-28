@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class ClassDiagramGuide {
-
+    
     private ClassDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 IMPORTANT POINTS to Keep in Mind:
@@ -59,7 +59,7 @@ Terminology Definitions (quoted from OMG UML Specification v.2.5.1):
 * A Class classifies a set of objects and specifies the features that characterize the structure and behavior of those objects. A Class may have an internal structure and Ports.
 * A Package is a namespace for its members, which comprise those elements associated via packagedElement (which are said to be owned or contained), and those imported.
         """;
-
+        
         return contents;
     }
 }

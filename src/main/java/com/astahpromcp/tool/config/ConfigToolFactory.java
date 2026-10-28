@@ -11,7 +11,7 @@ public class ConfigToolFactory {
     
     public ConfigToolFactory() {
     }
-
+    
     public List<ToolProvider> createToolProviders() {
         try {
             return List.of(

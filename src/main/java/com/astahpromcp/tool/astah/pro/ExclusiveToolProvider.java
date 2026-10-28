@@ -16,24 +16,24 @@ import java.util.function.BiFunction;
 // while holding the process-wide Astah API lock.
 @Slf4j
 public final class ExclusiveToolProvider implements ToolProvider {
-
+    
     private final ToolProvider delegate;
     private final long lockTimeoutSeconds;
-
+    
     public ExclusiveToolProvider(ToolProvider delegate) {
         this(delegate, McpServerConfig.ASTAH_API_LOCK_TIMEOUT_SECONDS);
     }
-
+    
     public ExclusiveToolProvider(ToolProvider delegate, long lockTimeoutSeconds) {
         this.delegate = delegate;
         this.lockTimeoutSeconds = lockTimeoutSeconds;
     }
-
+    
     @Override
     public String name() {
         return delegate.name();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return delegate.createToolDefinitions().stream()
@@ -43,12 +43,12 @@ public final class ExclusiveToolProvider implements ToolProvider {
                         wrapWithLock(definition)))
                 .toList();
     }
-
+    
     // Wrap a tool handler so that it acquires the Astah API lock before running.
     private BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> wrapWithLock(ToolDefinition definition) {
-
+        
         String toolName = definition.toolSchema().name();
-
+        
         return (exchange, request) -> {
             try {
                 return executeWithLock(definition, toolName, exchange, request);
@@ -59,10 +59,10 @@ public final class ExclusiveToolProvider implements ToolProvider {
             }
         };
     }
-
+    
     // Acquire the Astah API lock, run the tool handler, and release the lock.
     private McpSchema.CallToolResult executeWithLock(ToolDefinition definition, String toolName, McpSyncServerExchange exchange, McpSchema.CallToolRequest request) {
-
+        
         boolean acquired;
         try {
             acquired = AstahApiLock.LOCK.tryLock(lockTimeoutSeconds, TimeUnit.SECONDS);
@@ -72,7 +72,7 @@ public final class ExclusiveToolProvider implements ToolProvider {
             log.warn(msg);
             return ResponseSupport.error(msg);
         }
-
+        
         if (!acquired) {
             String msg = String.format(
                     "Astah is busy processing another agent's request (waited %d seconds) @tool=%s. Please retry shortly.",
@@ -80,7 +80,7 @@ public final class ExclusiveToolProvider implements ToolProvider {
             log.warn(msg);
             return ResponseSupport.error(msg);
         }
-
+        
         try {
             // A tool that timed out earlier may have left a thread that is still using the Astah API.
             // Checked here rather than before tryLock, so that a suspension which starts while this call is waiting for the lock is caught too.
@@ -90,11 +90,11 @@ public final class ExclusiveToolProvider implements ToolProvider {
                 log.warn(msg);
                 return ResponseSupport.error(msg);
             }
-
+            
             McpSchema.CallToolResult result = definition.toolHandler().apply(exchange, request);
             EdtSupport.drain(toolName, "releasing the Astah API lock");  // Before the lock is released, so that the next holder never sees an edit half applied
             return result;
-
+            
         } finally {
             AstahApiLock.LOCK.unlock();
         }

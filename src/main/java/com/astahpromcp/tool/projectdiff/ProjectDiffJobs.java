@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 // The comparisons of the server: which are being prepared, which run, which results are kept, and what they occupy.
 @Slf4j
 public final class ProjectDiffJobs implements ProcessLauncher {
-
+    
     private final ProjectDiffStore store;
     private final int maxJobsInProgress;
     private final int maxStoredJobs;
@@ -45,9 +45,9 @@ public final class ProjectDiffJobs implements ProcessLauncher {
     private final long maxTotalBytes;
     private final long resultWaitMillis;
     private final long stopWaitMillis;
-
+    
     private final FolderDeleter deleter;
-
+    
     private final Object lock = new Object();
     private final Map<String, ProjectDiffJob> jobs = new LinkedHashMap<>();
     private final Map<String, String> diffIdByRequestId = new HashMap<>();
@@ -58,27 +58,27 @@ public final class ProjectDiffJobs implements ProcessLauncher {
     private long reservedBytes;
     private int preparing;
     private ExecutorService executor;
-
+    
     // Deletes a folder and everything in it, and says whether it is gone
     @FunctionalInterface
     interface FolderDeleter {
         boolean delete(Path directory);
     }
-
+    
     // A folder that could not be deleted, typically because exportXMI() failed and left a file in it open, which Astah may hold until it ends.
     private static final class PendingDeletion {
         final Path directory;
         final long bytes;
         final ProjectDiffJob owner;
         int attempts = 1;
-
+        
         PendingDeletion(Path directory, long bytes, ProjectDiffJob owner) {
             this.directory = directory;
             this.bytes = bytes;
             this.owner = owner;
         }
     }
-
+    
     public ProjectDiffJobs(Path root) {
         this(root,
             McpServerConfig.PROJECT_DIFF_MAX_JOBS_IN_PROGRESS,
@@ -88,12 +88,12 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             TimeUnit.SECONDS.toMillis(McpServerConfig.PROJECT_DIFF_RESULT_WAIT_SECONDS),
             TimeUnit.SECONDS.toMillis(McpServerConfig.PROJECT_DIFF_STOP_WAIT_SECONDS));
     }
-
+    
     // Package-private so that a test can reach the limits with a few comparisons, and does not sit through the waits.
     ProjectDiffJobs(Path root, int maxJobsInProgress, int maxStoredJobs, long maxJobBytes, long maxTotalBytes, long resultWaitMillis, long stopWaitMillis) {
         this(root, maxJobsInProgress, maxStoredJobs, maxJobBytes, maxTotalBytes, resultWaitMillis, stopWaitMillis, ProjectDiffStore::delete);
     }
-
+    
     ProjectDiffJobs(Path root, int maxJobsInProgress, int maxStoredJobs, long maxJobBytes, long maxTotalBytes, long resultWaitMillis, long stopWaitMillis,
                     FolderDeleter deleter) {
         this.store = new ProjectDiffStore(root);
@@ -105,16 +105,41 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         this.stopWaitMillis = stopWaitMillis;
         this.deleter = deleter;
     }
-
-    // What accepting a request led to: a new comparison to prepare, or the one an earlier request with the same requestId started
+    
+    // What accepting a request led to: a new comparison, or the one an earlier request with the same requestId started
     public record Admission(
         ProjectDiffJob job,
         boolean created
     ) {
     }
-
+    
+    // Prepares a new comparison on the caller's thread, and returns the work to run in the background
+    @FunctionalInterface
+    public interface Preparation {
+        Runnable prepare(ProjectDiffJob job) throws Exception;
+    }
+    
+    // Start a comparison, or return the one an earlier request with the same requestId started.
+    public Admission startComparison(String requestId, String inputKey, Preparation preparation) throws Exception {
+        Admission admission = admit(requestId, inputKey);
+        if (!admission.created()) {
+            return admission;
+        }
+        
+        ProjectDiffJob job = admission.job();
+        try {
+            // The lock is not held while preparing, which copies files and may capture the open project
+            submit(job, preparation.prepare(job));
+            
+        } catch (Throwable t) {
+            discard(job);
+            throw t;
+        }
+        return admission;
+    }
+    
     // Accept a comparison, or refuse it with a message saying why.
-    public Admission admit(String requestId, String inputKey) {
+    Admission admit(String requestId, String inputKey) {
         sweep();
         Admission admission;
         List<ProjectDiffJob> evicted;
@@ -122,22 +147,22 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             if (!accepting) {
                 throw new IllegalStateException("The MCP server is stopping, so it accepts no comparison.");
             }
-
+            
             ProjectDiffJob earlier = findEarlier(requestId, inputKey);
             if (earlier != null) {
                 return new Admission(earlier, false);
             }
-
+            
             long inProgress = jobs.values().stream().filter(ProjectDiffJob::inProgress).count();
             if (inProgress >= maxJobsInProgress) {
                 throw new IllegalStateException(inProgress + " comparisons are already in progress, which is as many as this server runs at once. Get their results, then try again.");
             }
-
+            
             evicted = makeRoom(Instant.now());
             for (ProjectDiffJob job : evicted) {
                 forget(job);
             }
-
+            
             String diffId = "d" + sequence.incrementAndGet() + "-" + Integer.toHexString(ThreadLocalRandom.current().nextInt(0x100000, 0x1000000));
             ProjectDiffJob job = new ProjectDiffJob(diffId, requestId, inputKey, store.directoryOf(diffId), maxJobBytes);
             jobs.put(diffId, job);
@@ -148,14 +173,14 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             preparing++;
             admission = new Admission(job, true);
         }
-
+        
         for (ProjectDiffJob job : evicted) {
             log.debug("Delete the comparison {} to make room; its result was last given out at {}", job.diffId(), job.lastDeliveredAt());
             deleteOrRemember(job.directory(), null);
         }
         return admission;
     }
-
+    
     // The comparison that an earlier request with the same requestId started, or null when there is none.
     public ProjectDiffJob earlier(String requestId, String inputKey) {
         sweep();
@@ -163,7 +188,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             return findEarlier(requestId, inputKey);
         }
     }
-
+    
     // The comparison of an earlier request with the same requestId, or null; an empty requestId has none. Called with the lock held.
     private ProjectDiffJob findEarlier(String requestId, String inputKey) {
         if (requestId.isEmpty()) {
@@ -176,14 +201,14 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         }
         return earlier;
     }
-
+    
     // The results to delete to make room for one more comparison, or a refusal saying when room will be made.
     // Nothing is deleted unless that makes enough room. Called with the lock held.
     private List<ProjectDiffJob> makeRoom(Instant now) {
         if (jobs.size() < maxStoredJobs && reservedBytes + maxJobBytes <= maxTotalBytes) {
             return List.of();
         }
-
+        
         Duration grace = Duration.ofMinutes(McpServerConfig.PROJECT_DIFF_READ_GRACE_MINUTES);
         List<ProjectDiffJob> candidates = new ArrayList<>();
         for (ProjectDiffJob job : jobs.values()) {
@@ -193,7 +218,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             }
         }
         candidates.sort(Comparator.comparing(ProjectDiffJob::lastDeliveredAt));
-
+        
         int kept = jobs.size();
         long bytes = reservedBytes;
         List<ProjectDiffJob> evicted = new ArrayList<>();
@@ -205,7 +230,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             kept--;
             bytes -= candidate.reservedBytes();
         }
-
+        
         if (kept >= maxStoredJobs) {
             throw new IllegalStateException("This server already keeps " + jobs.size() + " comparisons, which is as many as it keeps. " + whenRoomIsMade(grace) + pendingDeletionNote());
         }
@@ -214,7 +239,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         }
         return evicted;
     }
-
+    
     // When a result kept will make room, for a refusal. Called with the lock held.
     private String whenRoomIsMade(Duration grace) {
         Instant earliest = null;
@@ -230,9 +255,9 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         }
         return "Try again at " + format(earliest) + " or later. " + rule;
     }
-
+    
     // The preparation failed or was refused
-    public void discard(ProjectDiffJob job) {
+    void discard(ProjectDiffJob job) {
         synchronized (lock) {
             forget(job);
             preparing--;
@@ -240,7 +265,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         }
         deleteOrRemember(job.directory(), null);
     }
-
+    
     // Delete a folder, or remember it to delete later when it cannot be deleted now.
     void deleteOrRemember(Path directory, ProjectDiffJob owner) {
         if (deleter.delete(directory)) {
@@ -257,7 +282,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         log.info("Could not delete {} ({} bytes), probably because Astah still holds a file in it open. It stays counted in the disk space of the comparisons and is deleted once it can be.",
                 directory, bytes);
     }
-
+    
     // Try again to delete the folders that could not be deleted
     public void retryPendingDeletions() {
         List<PendingDeletion> pending;
@@ -291,7 +316,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             }
         }
     }
-
+    
     // What a refusal says about the folders that could not be deleted yet, which take disk space too
     private String pendingDeletionNote() {
         if (pendingDeletions.isEmpty()) {
@@ -300,9 +325,9 @@ public final class ProjectDiffJobs implements ProcessLauncher {
         long bytes = pendingDeletions.values().stream().mapToLong(deletion -> deletion.bytes).sum();
         return " " + pendingDeletions.size() + " folders of earlier comparisons (" + bytes + " bytes) could not be deleted yet, because Astah still holds files in them open; they are deleted as soon as it lets go.";
     }
-
+    
     // Hand a prepared comparison to the background
-    public void submit(ProjectDiffJob job, Runnable work) {
+    void submit(ProjectDiffJob job, Runnable work) {
         synchronized (lock) {
             if (!accepting) {
                 throw new IllegalStateException("The MCP server is stopping, so it runs no more comparisons.");
@@ -325,7 +350,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             lock.notifyAll();
         }
     }
-
+    
     // The background is done with a comparison
     void finished(ProjectDiffJob job) {
         long size = ProjectDiffStore.sizeOf(job.directory());
@@ -336,25 +361,25 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             }
         }
     }
-
+    
     public ProjectDiffJob find(String diffId) {
         sweep();
         synchronized (lock) {
             return jobs.get(diffId);
         }
     }
-
+    
     // The answer of get_proj_diff_result: wait for the comparison up to the time allowed, then say where it stands, with the page of its changes that starts at startIndex and startPropertyIndex once it is done.
     public DiffResultDTO answer(String diffId, int startIndex, int startPropertyIndex) throws InterruptedException {
         ProjectDiffJob job = find(diffId);
         if (job == null) {
             throw new IllegalArgumentException("No comparison has the diffId '" + diffId + "'. Its result may have been deleted after it expired, or the MCP server was restarted since.");
         }
-
+        
         job.awaitEnd(resultWaitMillis);
         NormalizationDTO noNormalization = new NormalizationDTO(NormalizationRule.VERSION, false, List.of());
         int maxBytes = McpServerConfig.PROJECT_DIFF_MAX_RESPONSE_BYTES;
-
+        
         return switch (job.state()) {
             case DONE -> {
                 DiffResultDTO header = job.result();
@@ -384,25 +409,25 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             }
         };
     }
-
+    
     private static void requireFirstPage(int startIndex, int startPropertyIndex, String why) {
         if (startIndex != 0 || startPropertyIndex != 0) {
             throw new IllegalArgumentException("The startIndex and the startPropertyIndex must be 0 here, because " + why + ".");
         }
     }
-
+    
     private static ProjectSideDTO orEmpty(ProjectSideDTO side) {
         return side != null ? side : new ProjectSideDTO(ProjectKind.FILE, "", "", "", "", "", "", -1, List.of());
     }
-
+    
     static String format(Instant instant) {
         return instant == null ? "" : OffsetDateTime.ofInstant(instant, ZoneId.systemDefault()).toString();
     }
-
+    
     // Delete the results kept past their time, and try again to delete the folders that could not be deleted
     private void sweep() {
         retryPendingDeletions();
-
+        
         Instant now = Instant.now();
         List<ProjectDiffJob> expired = new ArrayList<>();
         synchronized (lock) {
@@ -420,7 +445,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             deleteOrRemember(job.directory(), null);
         }
     }
-
+    
     private void forget(ProjectDiffJob job) {
         if (jobs.remove(job.diffId()) == job) {
             reservedBytes -= job.reservedBytes();
@@ -429,7 +454,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             }
         }
     }
-
+    
     @Override
     public Process start(ProcessBuilder builder) throws IOException {
         synchronized (lock) {
@@ -441,14 +466,14 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             return process;
         }
     }
-
+    
     @Override
     public void finished(Process process) {
         synchronized (lock) {
             processes.remove(process);
         }
     }
-
+    
     // Stop every comparison, and say whether everything that writes to the comparisons' files is known to have stopped.
     public boolean shutdown() {
         List<ProjectDiffJob> all;
@@ -461,11 +486,11 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             background = executor;
         }
         long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(stopWaitMillis);
-
+        
         for (ProjectDiffJob job : all) {
             job.requestStop();
         }
-
+        
         boolean confirmed = true;
         for (Process process : running) {
             process.destroyForcibly();
@@ -477,7 +502,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
                     confirmed = false;
                 }
             }
-
+            
             if (background != null) {
                 background.shutdownNow();
                 if (!background.awaitTermination(remainingMillis(deadline), TimeUnit.MILLISECONDS)) {
@@ -485,7 +510,7 @@ public final class ProjectDiffJobs implements ProcessLauncher {
                     confirmed = false;
                 }
             }
-
+            
             synchronized (lock) {
                 while (preparing > 0) {
                     long remaining = remainingMillis(deadline);
@@ -501,23 +526,23 @@ public final class ProjectDiffJobs implements ProcessLauncher {
             Thread.currentThread().interrupt();
             confirmed = false;
         }
-
+        
         // Once more before the workspace is deleted; what still cannot be deleted is left to the next start (WorkspaceDirectories)
         retryPendingDeletions();
         return confirmed;
     }
-
+    
     private static long remainingMillis(long deadlineNanos) {
         return Math.max(0, TimeUnit.NANOSECONDS.toMillis(deadlineNanos - System.nanoTime()));
     }
-
+    
     // For tests
     long reservedBytes() {
         synchronized (lock) {
             return reservedBytes;
         }
     }
-
+    
     // For tests
     int pendingDeletionCount() {
         synchronized (lock) {

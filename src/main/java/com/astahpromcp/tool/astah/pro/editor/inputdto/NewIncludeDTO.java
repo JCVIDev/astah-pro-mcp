@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 public record NewIncludeDTO(
     @JsonPropertyDescription("Including usecase identifier") String includingUsecaseId,
-
+    
     @JsonPropertyDescription("Included usecase identifier") String includedUsecaseId,
-
+    
     @JsonPropertyDescription("New include name. Set this to an empty string when the include has no name.")
     String newIncludeName
 ) {

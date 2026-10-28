@@ -16,23 +16,23 @@ import java.util.List;
 
 // Keeps the answer of get_proj_diff_result within its size limit, measured as UTF-8 after serialization.
 final class ResponseLimiter {
-
+    
     // How long a value of the fields other than the changes may stay when those have to be shortened
     private static final int SHORT_VALUE_CHARS = 200;
-
+    
     // How many warnings and referenced projects to keep when those have to be shortened
     private static final int SHORT_LIST_SIZE = 3;
-
+    
     // At most how much of the text that leads up to the part of a modified value that changed is shown before it
     private static final int CONTEXT_CHARS = 100;
-
+    
     private ResponseLimiter() {
     }
-
+    
     static int sizeOf(Object dto) {
         return JsonSupport.OBJ_MAPPER.writeValueAsBytes(dto).length;
     }
-
+    
     // A value cut to at most the given length from its start, saying how long it was. A value that this would not make shorter is kept whole.
     static String shorten(String value, int maxChars) {
         if (value == null || value.length() <= maxChars) {
@@ -40,7 +40,7 @@ final class ResponseLimiter {
         }
         return shorterOf(value.substring(0, endBefore(value, maxChars)) + "... (cut short; " + value.length() + " characters in all)", value);
     }
-
+    
     // The before and after values of a modified property, each cut to at most maxChars around the part that changed,
     // rather than from the start, so that a change past the first maxChars characters still shows. Both are cut at the
     // same place at the start, where they are the same; what is left out at the end is said to be the same in both when
@@ -56,7 +56,7 @@ final class ResponseLimiter {
         }
         return new String[] {window(before, start, suffix, maxChars), window(after, start, suffix, maxChars)};
     }
-
+    
     private static String window(String value, int start, int suffix, int maxChars) {
         if (value.length() <= maxChars) {
             return value;
@@ -80,12 +80,12 @@ final class ResponseLimiter {
         }
         return shorterOf(shown.toString(), value);
     }
-
+    
     // The cut form of a value, or the value itself when the notes the cut adds leave it no shorter.
     private static String shorterOf(String cut, String value) {
         return cut.length() < value.length() ? cut : value;
     }
-
+    
     // How many characters the two values start with in common, never ending inside a surrogate pair
     private static int commonPrefix(String a, String b) {
         int length = Math.min(a.length(), b.length());
@@ -98,7 +98,7 @@ final class ResponseLimiter {
         }
         return prefix;
     }
-
+    
     // How many characters the two values end with in common, not counting any of the common start
     private static int commonSuffix(String a, String b, int prefix) {
         int length = Math.min(a.length(), b.length()) - prefix;
@@ -108,20 +108,20 @@ final class ResponseLimiter {
         }
         return suffix;
     }
-
+    
     // The end of a cut at most at the given position that does not split a surrogate pair
     private static int endBefore(String value, int end) {
         return end > 0 && Character.isHighSurrogate(value.charAt(end - 1)) ? end - 1 : end;
     }
-
+    
     // A change as an answer shows it, and how many of its values were cut short to show it: in the fields other than its properties, and in each of its properties
     record Shown(ChangeDTO change, int otherValuesCut, List<Integer> propertyValuesCut) {
-
+        
         int valuesCut() {
             return otherValuesCut + propertyValuesCut.stream().mapToInt(Integer::intValue).sum();
         }
     }
-
+    
     // A change with its values cut to at most the given length. The values of a modified property are cut around the part that changed (cutAround); every other value is cut from its start.
     static Shown show(ChangeDTO change, int maxChars) {
         Counter cuts = new Counter();
@@ -155,24 +155,24 @@ final class ResponseLimiter {
                 shorten(change.diagram(), maxChars, cuts), shorten(change.model(), maxChars, cuts), change.propertyStart(), change.propertyCount(), properties);
         return new Shown(shown, cuts.count - inProperties, propertyValuesCut);
     }
-
+    
     private static ContextDTO shorten(ContextDTO context, int maxChars, Counter cuts) {
         return new ContextDTO(context.xmiId(), context.type(), cuts.shorten(context.name(), maxChars), cuts.shorten(context.participant(), maxChars),
                 cuts.shorten(context.ownerPath(), maxChars));
     }
-
+    
     private static ElementRefDTO shorten(ElementRefDTO ref, int maxChars, Counter cuts) {
         return new ElementRefDTO(ref.xmiId(), cuts.shorten(ref.name(), maxChars));
     }
-
+    
     // Counts the values cut short
     private static final class Counter {
         int count;
-
+        
         String shorten(String value, int maxChars) {
             return note(value, ResponseLimiter.shorten(value, maxChars));
         }
-
+        
         String note(String value, String shown) {
             if (value != null && !value.equals(shown)) {
                 count++;
@@ -180,38 +180,38 @@ final class ResponseLimiter {
             return shown;
         }
     }
-
+    
     // An answer without changes whose other fields are shortened, step by step, until it takes at most maxBytes
     static DiffResultDTO fitHeader(DiffResultDTO answer, int maxBytes) {
         DiffResultDTO current = answer;
         if (sizeOf(current) <= maxBytes) {
             return current;
         }
-
+        
         // 1. Long values in the other fields
         current = withHeader(current, shorten(current.base(), SHORT_VALUE_CHARS, Integer.MAX_VALUE), shorten(current.target(), SHORT_VALUE_CHARS, Integer.MAX_VALUE),
                 shortenEach(current.warnings(), SHORT_VALUE_CHARS), current.notCompared());
         if (sizeOf(current) <= maxBytes) {
             return current;
         }
-
+        
         // 2. Only the first few warnings and referenced projects
         current = withHeader(current, shorten(current.base(), SHORT_VALUE_CHARS, SHORT_LIST_SIZE), shorten(current.target(), SHORT_VALUE_CHARS, SHORT_LIST_SIZE),
                 firstOf(current.warnings(), SHORT_LIST_SIZE), current.notCompared());
         if (sizeOf(current) <= maxBytes) {
             return current;
         }
-
+        
         // 3. Only what says where the result is
         return withHeader(current, emptied(current.base()), emptied(current.target()), List.of(), List.of());
     }
-
+    
     private static DiffResultDTO withHeader(DiffResultDTO answer, ProjectSideDTO base, ProjectSideDTO target, List<String> warnings, List<String> notCompared) {
         return new DiffResultDTO(answer.diffId(), answer.status(), answer.expiresAt(), answer.failure(), base, target,
                 answer.normalization(), warnings, notCompared, answer.summary(), answer.startIndex(), answer.startPropertyIndex(), answer.nextIndex(),
                 answer.nextPropertyIndex(), answer.changes(), answer.truncated(), true, answer.fullDiffPath());
     }
-
+    
     private static ProjectSideDTO shorten(ProjectSideDTO side, int maxChars, int maxReferences) {
         List<ReferenceProjectDTO> references = new ArrayList<>();
         for (ReferenceProjectDTO reference : side.referenceProjects()) {
@@ -224,11 +224,11 @@ final class ResponseLimiter {
         return new ProjectSideDTO(side.kind(), shorten(side.path(), maxChars), shorten(side.projectName(), maxChars), side.projectRootId(),
                 side.captureStartedAt(), side.captureCompletedAt(), side.astahVersion(), side.projectModelVersion(), references);
     }
-
+    
     private static ProjectSideDTO emptied(ProjectSideDTO side) {
         return new ProjectSideDTO(side.kind(), "", "", "", "", "", "", side.projectModelVersion(), List.of());
     }
-
+    
     private static List<String> shortenEach(List<String> values, int maxChars) {
         List<String> shortened = new ArrayList<>();
         for (String value : values) {
@@ -236,7 +236,7 @@ final class ResponseLimiter {
         }
         return shortened;
     }
-
+    
     private static List<String> firstOf(List<String> values, int count) {
         if (values.size() <= count) {
             return values;

@@ -16,18 +16,18 @@ import java.util.List;
 
 @Slf4j
 public class SystemsEngineeringKnowledgeTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
-
+    
     private final Path outputDirectory;
-
+    
     private final String systemsEngineeringHandbookUrl = "https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf";
-
+    
     public SystemsEngineeringKnowledgeTool(Path outputDirectory) {
         this.outputDirectory = outputDirectory;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -38,7 +38,7 @@ public class SystemsEngineeringKnowledgeTool implements ToolProvider {
                     this::getSystemsEngineeringKnowledge,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_systems_engineering",
                     "Return the chunk data of NASA Systems Engineering Handbook. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -51,31 +51,31 @@ public class SystemsEngineeringKnowledgeTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getSystemsEngineeringKnowledge(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("NASA Systems Engineering Handbook already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading NASA Systems Engineering Handbook from PDF URL.");
         try (InputStream is = KnowledgeToolSupport.openUrlStream(systemsEngineeringHandbookUrl)) {
             if (is == null) {
                 throw new IOException("NASA Systems Engineering Handbook PDF resource not found.");
             }
-
+            
             byte[] bytes = is.readAllBytes();
             String text = KnowledgeToolSupport.convertPdfToMarkdown(bytes, outputDirectory, "nasa_systems_engineering_handbook");
-
+            
             return KnowledgeToolSupport.chunkAndCache(text, contentCache);
-
+            
         } catch (IOException e) {
             log.error("Failed to load NASA Systems Engineering Handbook from URL: {}", systemsEngineeringHandbookUrl, e);
             throw e;
         }
     }
-
+    
     private DocumentChunkDTO getSystemsEngineeringKnowledgeChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

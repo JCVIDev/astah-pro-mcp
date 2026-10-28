@@ -7,10 +7,10 @@ import lombok.NonNull;
 
 public class NodePresentationGeometryDTOAssembler {
     public static NodePresentationGeometryDTO toDTO(@NonNull INodePresentation astahNodePresentation) throws Exception {
-
+        
         // If the presentation has a null label (such as an image or rectangle), use an empty string.
         String label = astahNodePresentation.getLabel() != null ? astahNodePresentation.getLabel() : "";
-
+        
         return new NodePresentationGeometryDTO(
             astahNodePresentation.getID(),
             label,

@@ -29,52 +29,52 @@ var ILinkPresentation = Java.type('com.change_vision.jude.api.inf.presentation.I
 // The link of a flow, a message or an association keeps its label position under the same keys, so only
 // the line of a transition is taken.
 function isTransitionLink(entity) {
-  return entity instanceof ILinkPresentation && entity.getModel() instanceof ITransition;
+    return entity instanceof ILinkPresentation && entity.getModel() instanceof ITransition;
 }
 
 // findElements matches the name exactly, but two diagrams are free to share a name.
 function findDiagram(name) {
-  var hits = astah.findElements(IDiagram.class, name);
-  if (hits.length !== 1) {
-    throw new Error('Expected 1 diagram named "' + name + '", found ' + hits.length + '.');
-  }
-  return hits[0];
+    var hits = astah.findElements(IDiagram.class, name);
+    if (hits.length !== 1) {
+        throw new Error('Expected 1 diagram named "' + name + '", found ' + hits.length + '.');
+    }
+    return hits[0];
 }
 
 // Two transitions are free to join the same pair of states, one for each trigger.
 function findTransitionLink(diagram) {
-  var hits = [];
-  var presentations = diagram.getPresentations();
-
-  for (var i = 0; i < presentations.length; i++) {
-    if (!isTransitionLink(presentations[i])) { continue; }
-
-    var model = presentations[i].getModel();
-    if (model.getSource().getName() === sourceStateName && model.getTarget().getName() === targetStateName) {
-      hits.push(presentations[i]);
+    var hits = [];
+    var presentations = diagram.getPresentations();
+    
+    for (var i = 0; i < presentations.length; i++) {
+        if (!isTransitionLink(presentations[i])) { continue; }
+        
+        var model = presentations[i].getModel();
+        if (model.getSource().getName() === sourceStateName && model.getTarget().getName() === targetStateName) {
+            hits.push(presentations[i]);
+        }
     }
-  }
-
-  if (hits.length !== 1) {
-    throw new Error('Expected 1 transition from ' + sourceStateName + ' to ' + targetStateName + ' on "'
-      + diagram.getName() + '", found ' + hits.length + '. Put the ID of its link presentation in linkPresentationId.');
-  }
-  return hits[0];
+    
+    if (hits.length !== 1) {
+        throw new Error('Expected 1 transition from ' + sourceStateName + ' to ' + targetStateName + ' on "'
+            + diagram.getName() + '", found ' + hits.length + '. Put the ID of its link presentation in linkPresentationId.');
+    }
+    return hits[0];
 }
 
 // getEntity looks up presentations as well as model elements, and answers null for an ID it does not know.
 var link;
 if (linkPresentationId !== '') {
-  link = astah.getEntity(linkPresentationId);
-  if (link === null) {
-    throw new Error('No presentation in the current project has ID ' + linkPresentationId + '.');
-  }
-
-  if (!isTransitionLink(link)) {
-    throw new Error(linkPresentationId + ' is not the line of a transition.');
-  }
+    link = astah.getEntity(linkPresentationId);
+    if (link === null) {
+        throw new Error('No presentation in the current project has ID ' + linkPresentationId + '.');
+    }
+    
+    if (!isTransitionLink(link)) {
+        throw new Error(linkPresentationId + ' is not the line of a transition.');
+    }
 } else {
-  link = findTransitionLink(findDiagram(diagramName));
+    link = findTransitionLink(findDiagram(diagramName));
 }
 
 
@@ -86,8 +86,8 @@ if (linkPresentationId !== '') {
 var x = link.getProperty(Key.NAME_X);
 var y = link.getProperty(Key.NAME_Y);
 if (x === null || y === null) {
-  throw new Error('The ' + link.getType() + ' link ' + link.getID() + ' (label "' + link.getLabel() + '")'
-    + ' keeps no label position. A transition keeps one only while its label has something in it.');
+    throw new Error('The ' + link.getType() + ' link ' + link.getID() + ' (label "' + link.getLabel() + '")'
+        + ' keeps no label position. A transition keeps one only while its label has something in it.');
 }
 
 // A position is held as a string, so it is read as a number and written back as a string.
@@ -97,19 +97,19 @@ var newY = parseFloat(y) + (move.down || 0) - (move.up || 0);
 var transactionManager = astah.getTransactionManager();
 transactionManager.beginTransaction();
 try {
-  link.setProperty(Key.NAME_X, String(newX));
-  link.setProperty(Key.NAME_Y, String(newY));
-  transactionManager.endTransaction();
+    link.setProperty(Key.NAME_X, String(newX));
+    link.setProperty(Key.NAME_Y, String(newY));
+    transactionManager.endTransaction();
 } catch (e) {
-  transactionManager.abortTransaction();
-  throw e;
+    transactionManager.abortTransaction();
+    throw e;
 }
 
 
 // A position is kept to many decimal places, so the output rounds it to one.
 function rounded(value) {
-  return Math.round(value * 10) / 10;
+    return Math.round(value * 10) / 10;
 }
 
 print('Moved the label "' + link.getLabel() + '" of the ' + link.getType() + ' link ' + link.getID() + ' from ('
-  + rounded(parseFloat(x)) + ', ' + rounded(parseFloat(y)) + ') to (' + rounded(newX) + ', ' + rounded(newY) + ').');
+    + rounded(parseFloat(x)) + ', ' + rounded(parseFloat(y)) + ') to (' + rounded(newX) + ', ' + rounded(newY) + ').');

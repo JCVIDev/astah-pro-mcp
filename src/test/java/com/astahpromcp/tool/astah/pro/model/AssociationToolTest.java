@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AssociationToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private AssociationTool tool;
     private Method getAssociationInfo;
@@ -39,7 +39,7 @@ public class AssociationToolTest {
     private Method setAggregationKindOfAssociationEndB;
     private Method setNavigabilityOfAssociationEndA;
     private Method setNavigabilityOfAssociationEndB;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -47,109 +47,109 @@ public class AssociationToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/AssociationToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new AssociationTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getAssociationInfo() method
         getAssociationInfo = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "getAssociationInfo",
             IdDTO.class);
-
+        
         // getAssociationEndAInfo() method
         getAssociationEndAInfo = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "getAssociationEndAInfo",
             IdDTO.class);
-
+        
         // getAssociationEndBInfo() method
         getAssociationEndBInfo = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "getAssociationEndBInfo",
             IdDTO.class);
-
+        
         // setInitialValueOfAssociationEndA() method
         setInitialValueOfAssociationEndA = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setInitialValueOfAssociationEndA",
             AttributeWithInitialValueDTO.class);
-
+        
         // setInitialValueOfAssociationEndB() method
         setInitialValueOfAssociationEndB = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setInitialValueOfAssociationEndB",
             AttributeWithInitialValueDTO.class);
-
+        
         // setStaticOfAssociationEndA() method
         setStaticOfAssociationEndA = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setStaticOfAssociationEndA",
             AttributeWithStaticDTO.class);
-
+        
         // setStaticOfAssociationEndB() method
         setStaticOfAssociationEndB = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setStaticOfAssociationEndB",
             AttributeWithStaticDTO.class);
-
+        
         // setMultiplicityOfAssociationEndA() method
         setMultiplicityOfAssociationEndA = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setMultiplicityOfAssociationEndA",
             AttributeWithMultiplicityDTO.class);
-
+        
         // setMultiplicityOfAssociationEndB() method
         setMultiplicityOfAssociationEndB = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setMultiplicityOfAssociationEndB",
             AttributeWithMultiplicityDTO.class);
-
+        
         // setAggregationKindOfAssociationEndA() method
         setAggregationKindOfAssociationEndA = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setAggregationKindOfAssociationEndA",
             AssociationEndWithAggregationKindDTO.class);
-
+        
         // setAggregationKindOfAssociationEndB() method
         setAggregationKindOfAssociationEndB = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setAggregationKindOfAssociationEndB",
             AssociationEndWithAggregationKindDTO.class);
-
+        
         // setNavigabilityOfAssociationEndA() method
         setNavigabilityOfAssociationEndA = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setNavigabilityOfAssociationEndA",
             AssociationEndWithNavigabilityDTO.class);
-
+        
         // setNavigabilityOfAssociationEndB() method
         setNavigabilityOfAssociationEndB = TestSupport.getAccessibleMethod(
             AssociationTool.class,
             "setNavigabilityOfAssociationEndB",
             AssociationEndWithNavigabilityDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getAssociationInfo_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(association.getId());
-
+        
         // ----------------------------------------
         // Call getAssociationInfo()
         // ----------------------------------------
@@ -158,26 +158,26 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AssociationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(association.getMemberEnds()[1].getType().getId(), outputDTO.associationEndAOwner().id());
         assertEquals(association.getMemberEnds()[0].getType().getId(), outputDTO.associationEndBOwner().id());
     }
-
+    
     @Test
     void getAssociationEndAInfo_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A (first end)
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(associationEndAId);
-
+        
         // ----------------------------------------
         // Call getAssociationEndAInfo()
         // ----------------------------------------
@@ -186,24 +186,24 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getAssociationEndBInfo_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B (second end)
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(associationEndBId);
-
+        
         // ----------------------------------------
         // Call getAssociationEndBInfo()
         // ----------------------------------------
@@ -212,22 +212,22 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getAssociationEndAInfo_ng_withAssociationEndB() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association ends
         String associationEndAId = association.getMemberEnds()[0].getId();
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // ----------------------------------------
         // Call getAssociationEndAInfo()
         // ----------------------------------------
@@ -238,24 +238,24 @@ public class AssociationToolTest {
                 new IdDTO(associationEndBId),
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("because it is association end B"));
         assertTrue(exception.getCause().getMessage().contains("pass association end A (ID: " + associationEndAId + ")"));
     }
-
+    
     @Test
     void getAssociationEndBInfo_ng_withAssociationEndA() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association ends
         String associationEndAId = association.getMemberEnds()[0].getId();
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // ----------------------------------------
         // Call getAssociationEndBInfo()
         // ----------------------------------------
@@ -266,26 +266,26 @@ public class AssociationToolTest {
                 new IdDTO(associationEndAId),
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("because it is association end A"));
         assertTrue(exception.getCause().getMessage().contains("pass association end B (ID: " + associationEndBId + ")"));
     }
-
+    
     @Test
     void getAssociationEndAInfo_ng_withOrdinaryAttribute() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Create an ordinary attribute on the class at association end A
         IClass clazz = (IClass) association.getMemberEnds()[0].getType();
         IAttribute attribute = new TransactionSupport(projectAccessor.getTransactionManager()).call(() -> {
             return projectAccessor.getModelEditorFactory().getBasicModelEditor().createAttribute(clazz, "ordinaryAttribute", "int");
         });
-
+        
         // ----------------------------------------
         // Call getAssociationEndAInfo()
         // ----------------------------------------
@@ -296,30 +296,30 @@ public class AssociationToolTest {
                 new IdDTO(attribute.getId()),
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("because it is not an end of an association"));
     }
-
+    
     @Test
     void setInitialValueOfAssociationEndA_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithInitialValueDTO inputDTO = new AttributeWithInitialValueDTO(
             associationEndAId,
             "888");
-
+        
         // Check initial value before setting
         assertNotEquals("888", association.getMemberEnds()[0].getInitialValue());
-
+        
         // ----------------------------------------
         // Call setInitialValueOfAssociationEndA()
         // ----------------------------------------
@@ -328,32 +328,32 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check initial value after setting
         assertEquals("888", association.getMemberEnds()[0].getInitialValue());
     }
-
+    
     @Test
     void setInitialValueOfAssociationEndB_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithInitialValueDTO inputDTO = new AttributeWithInitialValueDTO(
             associationEndBId,
             "888");
-
+        
         // Check initial value before setting
         assertNotEquals("888", association.getMemberEnds()[1].getInitialValue());
-
+        
         // ----------------------------------------
         // Call setInitialValueOfAssociationEndB()
         // ----------------------------------------
@@ -362,32 +362,32 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check initial value after setting
         assertEquals("888", association.getMemberEnds()[1].getInitialValue());
     }
-
+    
     @Test
     void setStaticOfAssociationEndA_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithStaticDTO inputDTO = new AttributeWithStaticDTO(
             associationEndAId,
             true);
-
+        
         // Check static before setting
         assertFalse(association.getMemberEnds()[0].isStatic());
-
+        
         // ----------------------------------------
         // Call setStaticOfAssociationEndA()
         // ----------------------------------------
@@ -396,32 +396,32 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check static after setting
         assertTrue(association.getMemberEnds()[0].isStatic());
     }
-
+    
     @Test
     void setStaticOfAssociationEndB_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithStaticDTO inputDTO = new AttributeWithStaticDTO(
             associationEndBId,
             true);
-
+        
         // Check static before setting
         assertFalse(association.getMemberEnds()[1].isStatic());
-
+        
         // ----------------------------------------
         // Call setStaticOfAssociationEndB()
         // ----------------------------------------
@@ -430,33 +430,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check static after setting
         assertTrue(association.getMemberEnds()[1].isStatic());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byInt_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "1",
             "10");
-
+        
         // Check multiplicity before setting
         assertNotEquals("1..10", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -465,33 +465,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("1..10", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byInt_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "10",
             "*");
-
+        
         // Check multiplicity before setting
         assertNotEquals("10..*", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -500,33 +500,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("10..*", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byString() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "MIN",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -535,33 +535,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byIntAndString() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "0",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("0..MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -570,33 +570,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("0..MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byStringAndInt() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "MIN",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..5", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -605,33 +605,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..5", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byString_withOneValue_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "MAX",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -640,33 +640,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byString_withOneValue_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -675,33 +675,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byInt_withOneValue_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "5",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -710,33 +710,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_byInt_withOneValue_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -745,33 +745,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ok_withSameValue() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "5",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -780,33 +780,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndA_ng_withRange() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO (Astah would store '5..2' as '0..*')
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndAId,
             "5..2",
             "");
-
+        
         // Keep multiplicity before setting
         String multiplicityBefore = association.getMemberEnds()[0].getMultiplicityRangeString();
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndA()
         // ----------------------------------------
@@ -817,34 +817,34 @@ public class AssociationToolTest {
                 inputDTO,
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("Invalid multiplicity bound '5..2'"));
-
+        
         // Check that the multiplicity is not changed
         assertEquals(multiplicityBefore, association.getMemberEnds()[0].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byInt_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "1",
             "10");
-
+        
         // Check multiplicity before setting
         assertNotEquals("1..10", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -853,33 +853,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("1..10", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byInt_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "10",
             "*");
-
+        
         // Check multiplicity before setting
         assertNotEquals("10..*", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -888,33 +888,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("10..*", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byString() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "MIN",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -923,33 +923,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byIntAndString() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "0",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("0..MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -958,33 +958,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("0..MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byStringAndInt() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "MIN",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..5", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -993,33 +993,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..5", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byString_withOneValue_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "MAX",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1028,33 +1028,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byString_withOneValue_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1063,33 +1063,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byInt_withOneValue_1() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "5",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1098,33 +1098,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_byInt_withOneValue_2() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1133,33 +1133,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ok_withSameValue() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "5",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1168,33 +1168,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicityOfAssociationEndB_ng_withRange() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO (Astah would store '5..2' as '0..*')
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             associationEndBId,
             "5..2",
             "");
-
+        
         // Keep multiplicity before setting
         String multiplicityBefore = association.getMemberEnds()[1].getMultiplicityRangeString();
-
+        
         // ----------------------------------------
         // Call setMultiplicityOfAssociationEndB()
         // ----------------------------------------
@@ -1205,33 +1205,33 @@ public class AssociationToolTest {
                 inputDTO,
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("Invalid multiplicity bound '5..2'"));
-
+        
         // Check that the multiplicity is not changed
         assertEquals(multiplicityBefore, association.getMemberEnds()[1].getMultiplicityRangeString());
     }
-
+    
     @Test
     void setAggregationKindOfAssociationEndA_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AssociationEndWithAggregationKindDTO inputDTO = new AssociationEndWithAggregationKindDTO(
             associationEndAId,
             AggregationKind.AGGREGATE);
-
+        
         // Check aggregation kind before setting
         assertFalse(association.getMemberEnds()[0].isAggregate());
-
+        
         // ----------------------------------------
         // Call setAggregationKindOfAssociationEndA()
         // ----------------------------------------
@@ -1240,35 +1240,35 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check aggregation kind after setting
         assertTrue(association.getMemberEnds()[0].isAggregate());
         assertFalse(association.getMemberEnds()[0].isComposite());
         assertFalse(association.getMemberEnds()[1].isAggregate());
         assertFalse(association.getMemberEnds()[1].isComposite());
     }
-
+    
     @Test
     void setAggregationKindOfAssociationEndB_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AssociationEndWithAggregationKindDTO inputDTO = new AssociationEndWithAggregationKindDTO(
             associationEndBId,
             AggregationKind.COMPOSITE);
-
+        
         // Check aggregation kind before setting
         assertFalse(association.getMemberEnds()[1].isComposite());
-
+        
         // ----------------------------------------
         // Call setAggregationKindOfAssociationEndB()
         // ----------------------------------------
@@ -1277,35 +1277,35 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check aggregation kind after setting
         assertFalse(association.getMemberEnds()[0].isAggregate());
         assertFalse(association.getMemberEnds()[0].isComposite());
         assertFalse(association.getMemberEnds()[1].isAggregate());
         assertTrue(association.getMemberEnds()[1].isComposite());
     }
-
+    
     @Test
     void setNavigabilityOfAssociationEndA_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end A
         String associationEndAId = association.getMemberEnds()[0].getId();
-
+        
         // Create input DTO
         AssociationEndWithNavigabilityDTO inputDTO = new AssociationEndWithNavigabilityDTO(
             associationEndAId,
             NavigabilityKind.NON_NAVIGABLE);
-
+        
         // Check navigability before setting
         assertNotEquals("Non_Navigable", association.getMemberEnds()[0].getNavigability());
-
+        
         // ----------------------------------------
         // Call setNavigabilityOfAssociationEndA()
         // ----------------------------------------
@@ -1314,33 +1314,33 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check navigability after setting
         assertEquals("Non_Navigable", association.getMemberEnds()[0].getNavigability());
         assertNotEquals("Non_Navigable", association.getMemberEnds()[1].getNavigability());
     }
-
+    
     @Test
     void setNavigabilityOfAssociationEndB_ok() throws Exception {
         // Get association
         IAssociation association = (IAssociation) TestSupport.instance().getNamedElementByClassAndName(
             IAssociation.class,
             "");
-
+        
         // Get association end B
         String associationEndBId = association.getMemberEnds()[1].getId();
-
+        
         // Create input DTO
         AssociationEndWithNavigabilityDTO inputDTO = new AssociationEndWithNavigabilityDTO(
             associationEndBId,
             NavigabilityKind.NON_NAVIGABLE);
-
+        
         // Check navigability before setting
         assertNotEquals("Non_Navigable", association.getMemberEnds()[1].getNavigability());
-
+        
         // ----------------------------------------
         // Call setNavigabilityOfAssociationEndB()
         // ----------------------------------------
@@ -1349,10 +1349,10 @@ public class AssociationToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check navigability after setting
         assertNotEquals("Non_Navigable", association.getMemberEnds()[0].getNavigability());
         assertEquals("Non_Navigable", association.getMemberEnds()[1].getNavigability());

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class EdtSupportTest {
-
+    
     @Test
     void drain_ok_runsWorkQueuedBeforeIt() {
         AtomicBoolean done = new AtomicBoolean();
@@ -25,29 +25,29 @@ public class EdtSupportTest {
             }
             done.set(true);
         });
-
+        
         EdtSupport.drain("dummy_tool", "carrying on with the test");
-
+        
         assertTrue(done.get(), "Work queued on the EDT before the drain must have run when it returns");
     }
-
+    
     @Test
     void drain_ok_returnsAtOnceOnTheEventDispatchThread() throws Exception {
         long started = System.nanoTime();
         SwingUtilities.invokeAndWait(() -> EdtSupport.drain("dummy_tool", "carrying on with the test", 10));
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
-
+        
         // Waiting from the EDT for its own no-op could only end at the timeout
         assertTrue(elapsedMillis < 5_000, "The drain on the EDT should return at once: " + elapsedMillis + " ms");
     }
-
+    
     // The case the interrupt check exists for. AWT stops an idle EDT after about a second, and restarting it from an
     // interrupted thread is what swallows the interrupt (AWTAutoShutdown.activateBlockerThread). While the EDT is running,
     // posting from an interrupted thread loses nothing, so only a stopped EDT shows that the drain does not post.
     @Test
     void drain_ok_keepsTheInterruptWhenTheEdtWouldHaveToBeRestarted() throws Exception {
         assumeTrue(awaitNoEventDispatchThread(10, TimeUnit.SECONDS), "The EDT did not stop, so its restart cannot be reproduced");
-
+        
         AtomicBoolean interruptKept = new AtomicBoolean();
         Thread caller = new Thread(() -> {
             Thread.currentThread().interrupt();
@@ -56,11 +56,11 @@ public class EdtSupportTest {
         }, "interrupted-caller");
         caller.start();
         caller.join(15_000);
-
+        
         assertFalse(caller.isAlive(), "The drain should have returned");
         assertTrue(interruptKept.get(), "The caller's interrupt flag must survive the drain, even when the EDT is down");
     }
-
+    
     @Test
     void drain_ng_givesUpAfterTheTimeoutWhenTheEdtIsBlocked() throws Exception {
         CountDownLatch releaseEdt = blockEdt();
@@ -68,7 +68,7 @@ public class EdtSupportTest {
             long started = System.nanoTime();
             EdtSupport.drain("dummy_tool", "carrying on with the test", 1);
             long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
-
+            
             assertTrue(elapsedMillis >= 900 && elapsedMillis < 5_000,
                     "The drain should give up at the timeout: " + elapsedMillis + " ms");
             assertFalse(Thread.currentThread().isInterrupted(), "Giving up must not leave an interrupt behind");
@@ -76,14 +76,14 @@ public class EdtSupportTest {
             releaseEdt.countDown();
         }
     }
-
+    
     @Test
     void call_ok_runsTheTaskOnTheEventDispatchThread() throws Exception {
         boolean ranOnEdt = EdtSupport.call(SwingUtilities::isEventDispatchThread);
-
+        
         assertTrue(ranOnEdt, "The task should have run on the EDT");
     }
-
+    
     @Test
     void call_ok_runsTheTaskInPlaceOnTheEventDispatchThread() throws Exception {
         AtomicReference<String> result = new AtomicReference<>();
@@ -97,22 +97,22 @@ public class EdtSupportTest {
             }
         });
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
-
+        
         assertEquals("done", result.get());
         assertTrue(elapsedMillis < 5_000, "The call on the EDT should return at once: " + elapsedMillis + " ms");
     }
-
+    
     @Test
     void call_ng_throwsWhatTheTaskThrows() {
         Exception thrown = new Exception("dummy failure");
-
+        
         Exception caught = assertThrows(Exception.class, () -> EdtSupport.call(() -> {
             throw thrown;
         }));
-
+        
         assertSame(thrown, caught, "The task's own exception should reach the caller, not a wrapper");
     }
-
+    
     @Test
     void call_ng_doesNotPostTheTaskFromAnInterruptedThread() throws Exception {
         AtomicBoolean ran = new AtomicBoolean();
@@ -129,14 +129,14 @@ public class EdtSupportTest {
         }, "interrupted-caller");
         caller.start();
         caller.join(15_000);
-
+        
         assertFalse(caller.isAlive(), "The call should have returned");
         assertInstanceOf(RuntimeException.class, caught.get());
         assertTrue(interruptKept.get(), "The caller's interrupt flag must survive the call");
         SwingUtilities.invokeAndWait(() -> { });
         assertFalse(ran.get(), "A task from an interrupted thread must not run");
     }
-
+    
     @Test
     void call_ng_doesNotRunTheTaskAfterTheCallerIsInterruptedWhileWaiting() throws Exception {
         AtomicBoolean ran = new AtomicBoolean();
@@ -160,7 +160,7 @@ public class EdtSupportTest {
         } finally {
             releaseEdt.countDown();
         }
-
+        
         assertFalse(caller.isAlive(), "The call should have returned");
         assertInstanceOf(RuntimeException.class, caught.get());
         assertInstanceOf(InterruptedException.class, caught.get().getCause());
@@ -169,7 +169,7 @@ public class EdtSupportTest {
         SwingUtilities.invokeAndWait(() -> { });
         assertFalse(ran.get(), "A task whose caller gave up before the EDT reached it must not run");
     }
-
+    
     // Occupies the EDT until the returned latch is released. Always release it in a finally block, or later tests inherit a blocked EDT.
     private static CountDownLatch blockEdt() throws InterruptedException {
         CountDownLatch blocked = new CountDownLatch(1);
@@ -189,7 +189,7 @@ public class EdtSupportTest {
         }
         return release;
     }
-
+    
     private static boolean awaitState(Thread thread, Thread.State state, long timeout, TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
@@ -200,7 +200,7 @@ public class EdtSupportTest {
         }
         return false;
     }
-
+    
     private static boolean awaitNoEventDispatchThread(long timeout, TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {

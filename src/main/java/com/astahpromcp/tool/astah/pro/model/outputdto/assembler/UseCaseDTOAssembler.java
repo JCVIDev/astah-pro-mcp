@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UseCaseDTOAssembler {
     public static UseCaseDTO toDTO(@NonNull IUseCase astahUseCase) throws Exception {
-
+        
         // Includes
         List<NameIdTypeDTO> includes = new ArrayList<>();
         for (IInclude include : astahUseCase.getIncludes()) {

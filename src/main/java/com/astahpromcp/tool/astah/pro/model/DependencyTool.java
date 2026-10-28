@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IDependency.html
 @Slf4j
 public class DependencyTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public DependencyTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class DependencyTool extends AstahToolProvider {
                 DependencyDTO.class)
         );
     }
-
+    
     private DependencyDTO getInfo(IdDTO param) throws Exception {
         IDependency astahDependency = astahProToolSupport.getDependency(param.id());
-
+        
         return DependencyDTOAssembler.toDTO(astahDependency);
     }
 }

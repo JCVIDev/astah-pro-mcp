@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERDomainToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERDomainTool tool;
     private Method getInfo;
@@ -36,7 +36,7 @@ public class ERDomainToolTest {
     private Method setPhysicalName;
     private Method setNotNull;
     private Method setParentERDomain;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -44,79 +44,79 @@ public class ERDomainToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERDomainToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERDomainTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setDatatype() method
         setDatatype = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setDatatype",
             ERDomainWithERDatatypeDTO.class);
-
+        
         // setDefaultValue() method
         setDefaultValue = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setDefaultValue",
             ERDomainWithDefaultValueDTO.class);
-
+        
         // setLengthPrecision() method
         setLengthPrecision = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setLengthPrecision",
             ERDomainWithLengthPrecisionDTO.class);
-
+        
         // setLogicalName() method
         setLogicalName = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setLogicalName",
             ERDomainWithLogicalNameDTO.class);
-
+        
         // setPhysicalName() method
         setPhysicalName = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setPhysicalName",
             ERDomainWithPhysicalNameDTO.class);
-
+        
         // setNotNull() method
         setNotNull = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setNotNull",
             ERDomainWithNotNullDTO.class);
-
+        
         // setParentERDomain() method
         setParentERDomain = TestSupport.getAccessibleMethod(
             ERDomainTool.class,
             "setParentERDomain",
             ERDomainWithParentERDomainDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erDomain.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -125,30 +125,30 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erDomain.getId(), outputDTO.namedElement().element().id());
         assertEquals(erDomain.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void setDatatype_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Get ER datatype
         IERDatatype erDatatype = (IERDatatype) TestSupport.instance().getNamedElementByClassAndName(
             IERDatatype.class,
             "INT");
-
+        
         // Create input DTO
         ERDomainWithERDatatypeDTO inputDTO = new ERDomainWithERDatatypeDTO(
             erDomain.getId(),
             erDatatype.getId());
-
+        
         // ----------------------------------------
         // Call setDatatype()
         // ----------------------------------------
@@ -157,24 +157,24 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erDatatype.getName(), erDomain.getDatatypeName());
     }
-
+    
     @Test
     void setDefaultValue_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         ERDomainWithDefaultValueDTO inputDTO = new ERDomainWithDefaultValueDTO(
             erDomain.getId(),
             "DEFAULT_777");
-
+        
         // ----------------------------------------
         // Call setDefaultValue()
         // ----------------------------------------
@@ -183,24 +183,24 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("DEFAULT_777", erDomain.getDefaultValue());
     }
-
+    
     @Test
     void setLengthPrecision_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         ERDomainWithLengthPrecisionDTO inputDTO = new ERDomainWithLengthPrecisionDTO(
             erDomain.getId(),
             "12,3");
-
+        
         // ----------------------------------------
         // Call setLengthPrecision()
         // ----------------------------------------
@@ -209,24 +209,24 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("12,3", erDomain.getLengthPrecision());
     }
-
+    
     @Test
     void setLogicalName_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         ERDomainWithLogicalNameDTO inputDTO = new ERDomainWithLogicalNameDTO(
             erDomain.getId(),
             "LogicalName_777");
-
+        
         // ----------------------------------------
         // Call setLogicalName()
         // ----------------------------------------
@@ -235,24 +235,24 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("LogicalName_777", erDomain.getLogicalName());
     }
-
+    
     @Test
     void setPhysicalName_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         ERDomainWithPhysicalNameDTO inputDTO = new ERDomainWithPhysicalNameDTO(
             erDomain.getId(),
             "physical_name_777");
-
+        
         // ----------------------------------------
         // Call setPhysicalName()
         // ----------------------------------------
@@ -261,12 +261,12 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("physical_name_777", erDomain.getPhysicalName());
     }
-
+    
     @Test
     void setNotNull_ok() throws Exception {
         // Get ER domain
@@ -274,12 +274,12 @@ public class ERDomainToolTest {
             IERDomain.class,
             "Domain0");
         boolean nextValue = !erDomain.isNotNull();
-
+        
         // Create input DTO
         ERDomainWithNotNullDTO inputDTO = new ERDomainWithNotNullDTO(
             erDomain.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setNotNull()
         // ----------------------------------------
@@ -288,29 +288,29 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erDomain.isNotNull());
     }
-
+    
     @Test
     void setParentERDomain_ok() throws Exception {
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Get parent ER domain
         IERDomain parentDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain1");
-
+        
         // Create input DTO
         ERDomainWithParentERDomainDTO inputDTO = new ERDomainWithParentERDomainDTO(
             erDomain.getId(),
             parentDomain.getId());
-
+        
         // ----------------------------------------
         // Call setParentERDomain()
         // ----------------------------------------
@@ -319,7 +319,7 @@ public class ERDomainToolTest {
             tool,
             inputDTO,
             ERDomainDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(parentDomain.getChildren()[0].getId(), erDomain.getId());

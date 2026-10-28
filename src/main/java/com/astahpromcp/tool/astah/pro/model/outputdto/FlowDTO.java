@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record FlowDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Source activity node")
     NameIdTypeDTO sourceActivityNode,
-
+    
     @JsonPropertyDescription("Target activity node")
     NameIdTypeDTO targetActivityNode,
-
+    
     @JsonPropertyDescription("Action")
     String action,
-
+    
     @JsonPropertyDescription("Guard condition")
     String guard
 ) {

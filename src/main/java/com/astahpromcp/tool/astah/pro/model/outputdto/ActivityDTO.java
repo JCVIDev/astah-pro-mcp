@@ -8,19 +8,19 @@ import java.util.List;
 public record ActivityDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Activity diagram")
     NameIdTypeDTO activityDiagram,
-
+    
     @JsonPropertyDescription("Activity nodes")
     List<NameIdTypeDTO> activityNodes,
-
-    @JsonPropertyDescription("Call behavior actions")
+    
+    @JsonPropertyDescription("Call behavior actions that call this activity. These are the actions that invoke it, not the actions it contains.")
     List<NameIdTypeDTO> callBehaviorActions,
-
+    
     @JsonPropertyDescription("Control flows and object flows")
     List<NameIdTypeDTO> flows,
-
+    
     @JsonPropertyDescription("Partitions")
     List<NameIdTypeDTO> partitions
 ) {

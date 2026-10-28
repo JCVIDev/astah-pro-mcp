@@ -29,7 +29,7 @@ public class DiagramEditorSupport {
         TIMING_DIAGRAM(ITimingDiagram.class, BehaviorDiagramEditor.class),
         TRACEABILITY_MAP(ITraceabilityMap.class, MindmapEditor.class),
         USE_CASE_DIAGRAM(IUseCaseDiagram.class, UseCaseDiagramEditor.class);
-
+        
         public final Class<? extends IDiagram> diagramInterface;
         public final Class<? extends DiagramEditor> diagramEditor;
         
@@ -38,9 +38,9 @@ public class DiagramEditorSupport {
             this.diagramEditor = diagramEditor;
         }
     }
-
+    
     private final List<DiagramEditor> diagramEditors;
-
+    
     public DiagramEditorSupport(ProjectAccessor projectAccessor) {
         try {
             this.diagramEditors = List.of(
@@ -53,12 +53,12 @@ public class DiagramEditorSupport {
                 projectAccessor.getDiagramEditorFactory().getSequenceDiagramEditor(),
                 projectAccessor.getDiagramEditorFactory().getStateMachineDiagramEditor(),
                 projectAccessor.getDiagramEditorFactory().getUseCaseDiagramEditor());
-
+            
         } catch (InvalidUsingException e) {
             throw new RuntimeException(e);
         }
     }
-        
+    
     public DiagramEditor getCorrespondingDiagramEditor(IDiagram diagram) {
         log.debug("Get corresponding diagram editor for diagram: {}", diagram.getClass().getName());
         
@@ -80,21 +80,21 @@ public class DiagramEditorSupport {
             String errorMessage = "Unsupported diagram type: " + diagram.getClass().getName();
             throw new RuntimeException(errorMessage);
         }
-
+        
         return findDiagramEditor(requiredEditorClass);
     }
-
+    
     public DiagramEditor getCorrespondingDiagramEditor(IDiagram diagram, IElement element) {
-
+        
         // Note: A composite structure diagram is the one place where the editor depends on what is being drawn.
         if (diagram instanceof ICompositeStructureDiagram && element instanceof IConnector) {
             log.debug("Drawing a connector on a composite structure diagram, which needs its own editor");
             return findDiagramEditor(CompositeStructureDiagramEditor.class);
         }
-
+        
         return getCorrespondingDiagramEditor(diagram);
     }
-
+    
     private DiagramEditor findDiagramEditor(Class<? extends DiagramEditor> requiredEditorClass) {
         // Look for an editor instance that matches
         for (DiagramEditor editor : diagramEditors) {
@@ -104,7 +104,7 @@ public class DiagramEditorSupport {
                 return editor;
             }
         }
-
+        
         // If no matching editor is found
         String errorMessage = "Corresponding diagram editor not found: " + requiredEditorClass.getName();
         throw new RuntimeException(errorMessage);

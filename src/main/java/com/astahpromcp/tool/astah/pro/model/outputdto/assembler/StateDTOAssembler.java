@@ -27,7 +27,7 @@ public class StateDTOAssembler {
         } else {
             submachineState = NameIdTypeDTO.empty();
         }
-
+        
         // States of region
         List<NameIdTypeDTO> regionStates = new ArrayList<>();
         for (IState state : astahState.getStateRegions()) {

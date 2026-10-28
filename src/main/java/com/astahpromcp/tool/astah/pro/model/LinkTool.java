@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ILink.html
 @Slf4j
 public class LinkTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public LinkTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class LinkTool extends AstahToolProvider {
                 LinkDTO.class)
         );
     }
-
+    
     private LinkDTO getInfo(IdDTO param) throws Exception {
         ILink astahLink = astahProToolSupport.getLink(param.id());
-
+        
         return LinkDTOAssembler.toDTO(astahLink);
     }
 }

@@ -18,13 +18,13 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CompositeStructureModelEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private CompositeStructureModelEditorTool tool;
     private Method createConnector;
     private Method createRealization;
     private Method createUsage;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -33,40 +33,40 @@ public class CompositeStructureModelEditorToolTest {
         CompositeStructureModelEditor compositeStructureModelEditor = projectAccessor.getModelEditorFactory().getCompositeStructureModelEditor();
         projectAccessor.open("src/test/resources/modelfile/editor/CompositeStructureModelEditorToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new CompositeStructureModelEditorTool(
             compositeStructureModelEditor,
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // createConnector() method
         createConnector = TestSupport.getAccessibleMethod(
             CompositeStructureModelEditorTool.class,
             "createConnector",
             NewConnectorBetweenPartsAndPortsDTO.class);
-
+        
         // createRealization() method
         createRealization = TestSupport.getAccessibleMethod(
             CompositeStructureModelEditorTool.class,
             "createRealization",
             NewProvidedInterfaceOfPortDTO.class);
-
+        
         // createUsage() method
         createUsage = TestSupport.getAccessibleMethod(
             CompositeStructureModelEditorTool.class,
             "createUsage",
             NewRequiredInterfaceOfPortDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createConnector_ok_1() throws Exception {
         // Get parts
@@ -76,7 +76,7 @@ public class CompositeStructureModelEditorToolTest {
         IAttribute targetPart = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "Part3");
-
+        
         // Get ports
         IClass sourcePartType = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
@@ -86,14 +86,14 @@ public class CompositeStructureModelEditorToolTest {
             "Class4");
         IPort sourcePort = sourcePartType.getPorts()[0];
         IPort targetPort = targetPartType.getPorts()[0];
-
+        
         // Create input DTO
         NewConnectorBetweenPartsAndPortsDTO inputDTO = new NewConnectorBetweenPartsAndPortsDTO(
             sourcePart.getId(),
             sourcePort.getId(),
             targetPart.getId(),
             targetPort.getId());
-
+        
         // ----------------------------------------
         // Call createConnector()
         // ----------------------------------------
@@ -102,7 +102,7 @@ public class CompositeStructureModelEditorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(sourcePort.getId(), outputDTO.ports().get(0).id());
@@ -110,7 +110,7 @@ public class CompositeStructureModelEditorToolTest {
         assertEquals(sourcePart.getId(), outputDTO.partsWithPort().get(0).id());
         assertEquals(targetPart.getId(), outputDTO.partsWithPort().get(1).id());
     }
-
+    
     @Test
     void createConnector_ok_2() throws Exception {
         // Get parts
@@ -120,14 +120,14 @@ public class CompositeStructureModelEditorToolTest {
         IAttribute targetPart = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "Part1");
-
+        
         // Create input DTO
         NewConnectorBetweenPartsAndPortsDTO inputDTO = new NewConnectorBetweenPartsAndPortsDTO(
             sourcePart.getId(),
             "",
             targetPart.getId(),
             "");
-
+        
         // ----------------------------------------
         // Call createConnector()
         // ----------------------------------------
@@ -136,7 +136,7 @@ public class CompositeStructureModelEditorToolTest {
             tool,
             inputDTO,
             ConnectorDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(sourcePart.getId(), outputDTO.parts().get(0).id());
@@ -144,27 +144,27 @@ public class CompositeStructureModelEditorToolTest {
         assertEquals("", outputDTO.ports().get(0).id());
         assertEquals("", outputDTO.ports().get(1).id());
     }
-
+    
     @Test
     void createConnector_ng_1() throws Exception {
         // Get part
         IAttribute targetPart = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "Part3");
-
+        
         // Get port
         IClass portOwner = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Class3");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Create input DTO
         NewConnectorBetweenPartsAndPortsDTO inputDTO = new NewConnectorBetweenPartsAndPortsDTO(
             port.getId(),
             "",
             targetPart.getId(),
             "");
-
+        
         // ----------------------------------------
         // Call createConnector()
         // ----------------------------------------
@@ -176,7 +176,7 @@ public class CompositeStructureModelEditorToolTest {
                 ConnectorDTO.class);
         });
     }
-
+    
     @Test
     void createConnector_ng_2() throws Exception {
         // Get parts
@@ -186,20 +186,20 @@ public class CompositeStructureModelEditorToolTest {
         IAttribute targetPart = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "Part3");
-
+        
         // Get port
         IClass targetPartType = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Class4");
         IPort targetPort = targetPartType.getPorts()[0];
-
+        
         // Create input DTO
         NewConnectorBetweenPartsAndPortsDTO inputDTO = new NewConnectorBetweenPartsAndPortsDTO(
             sourcePart.getId(),
             targetPort.getId(),
             targetPart.getId(),
             targetPort.getId());
-
+        
         // ----------------------------------------
         // Call createConnector()
         // ----------------------------------------
@@ -211,7 +211,7 @@ public class CompositeStructureModelEditorToolTest {
                 ConnectorDTO.class);
         });
     }
-
+    
     @Test
     void createRealization_ok() throws Exception {
         // Get port
@@ -219,20 +219,20 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class4");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get interface
         IClass targetInterface = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Interface0");
-
+        
         // Check the provided interfaces before creating one
         assertEquals(0, port.getClientRealizations().length);
-
+        
         // Create input DTO
         NewProvidedInterfaceOfPortDTO inputDTO = new NewProvidedInterfaceOfPortDTO(
             port.getId(),
             targetInterface.getId());
-
+        
         // ----------------------------------------
         // Call createRealization()
         // ----------------------------------------
@@ -241,17 +241,17 @@ public class CompositeStructureModelEditorToolTest {
             tool,
             inputDTO,
             RealizationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(port.getId(), outputDTO.client().id());
         assertEquals(targetInterface.getId(), outputDTO.supplier().id());
-
+        
         // Check that the interface became a provided interface of the port
         assertEquals(1, port.getClientRealizations().length);
         assertEquals(targetInterface.getId(), port.getClientRealizations()[0].getSupplier().getId());
     }
-
+    
     @Test
     void createRealization_ng_notInterface() throws Exception {
         // Get port
@@ -259,12 +259,12 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class4");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get class
         IClass targetClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Class0");
-
+        
         // ----------------------------------------
         // Call createRealization()
         // ----------------------------------------
@@ -275,15 +275,15 @@ public class CompositeStructureModelEditorToolTest {
                 new NewProvidedInterfaceOfPortDTO(port.getId(), targetClass.getId()),
                 RealizationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("is not an interface"));
-
+        
         // Check that nothing was created
         assertEquals(0, port.getClientRealizations().length);
     }
-
+    
     @Test
     void createRealization_ng_duplicate() throws Exception {
         // Get port
@@ -291,16 +291,16 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class3");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get interface
         IClass targetInterface = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Interface0");
-
+        
         // Check the provided interfaces before creating one
         assertEquals(1, port.getClientRealizations().length);
         assertEquals(targetInterface.getId(), port.getClientRealizations()[0].getSupplier().getId());
-
+        
         // ----------------------------------------
         // Call createRealization()
         // ----------------------------------------
@@ -311,15 +311,15 @@ public class CompositeStructureModelEditorToolTest {
                 new NewProvidedInterfaceOfPortDTO(port.getId(), targetInterface.getId()),
                 RealizationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("is already a provided interface of the port"));
-
+        
         // Check that nothing was created
         assertEquals(1, port.getClientRealizations().length);
     }
-
+    
     @Test
     void createUsage_ok() throws Exception {
         // Get port
@@ -327,20 +327,20 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class3");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get interface
         IClass targetInterface = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Interface1");
-
+        
         // Check the required interfaces before creating one
         assertEquals(0, port.getClientUsages().length);
-
+        
         // Create input DTO
         NewRequiredInterfaceOfPortDTO inputDTO = new NewRequiredInterfaceOfPortDTO(
             port.getId(),
             targetInterface.getId());
-
+        
         // ----------------------------------------
         // Call createUsage()
         // ----------------------------------------
@@ -349,17 +349,17 @@ public class CompositeStructureModelEditorToolTest {
             tool,
             inputDTO,
             UsageDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(port.getId(), outputDTO.client().id());
         assertEquals(targetInterface.getId(), outputDTO.supplier().id());
-
+        
         // Check that the interface became a required interface of the port
         assertEquals(1, port.getClientUsages().length);
         assertEquals(targetInterface.getId(), port.getClientUsages()[0].getSupplier().getId());
     }
-
+    
     @Test
     void createUsage_ng_notInterface() throws Exception {
         // Get port
@@ -367,12 +367,12 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class3");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get class
         IClass targetClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Class0");
-
+        
         // ----------------------------------------
         // Call createUsage()
         // ----------------------------------------
@@ -383,15 +383,15 @@ public class CompositeStructureModelEditorToolTest {
                 new NewRequiredInterfaceOfPortDTO(port.getId(), targetClass.getId()),
                 UsageDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("is not an interface"));
-
+        
         // Check that nothing was created
         assertEquals(0, port.getClientUsages().length);
     }
-
+    
     @Test
     void createUsage_ng_duplicate() throws Exception {
         // Get port
@@ -399,16 +399,16 @@ public class CompositeStructureModelEditorToolTest {
             IClass.class,
             "Class4");
         IPort port = portOwner.getPorts()[0];
-
+        
         // Get interface
         IClass targetInterface = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Interface1");
-
+        
         // Check the required interfaces before creating one
         assertEquals(1, port.getClientUsages().length);
         assertEquals(targetInterface.getId(), port.getClientUsages()[0].getSupplier().getId());
-
+        
         // ----------------------------------------
         // Call createUsage()
         // ----------------------------------------
@@ -419,11 +419,11 @@ public class CompositeStructureModelEditorToolTest {
                 new NewRequiredInterfaceOfPortDTO(port.getId(), targetInterface.getId()),
                 UsageDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("is already a required interface of the port"));
-
+        
         // Check that nothing was created
         assertEquals(1, port.getClientUsages().length);
     }

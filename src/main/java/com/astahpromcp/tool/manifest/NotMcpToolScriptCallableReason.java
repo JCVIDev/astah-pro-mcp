@@ -5,7 +5,7 @@ import java.util.List;
 
 // Why a tool function cannot be called from 'run_mcp_tool_script'.
 public enum NotMcpToolScriptCallableReason {
-
+    
     RETURNS_NO_STRUCTURED_CONTENT("no_structured_content"),
     PERFORMS_BLOCKING_IO("network"),
     MANAGES_A_PROJECT_FILE("project_file"),
@@ -14,18 +14,18 @@ public enum NotMcpToolScriptCallableReason {
     STARTS_OR_AWAITS_A_BACKGROUND_JOB("background_job"),
     RUNS_AN_ASTAH_API_SCRIPT("astah_api_script"),
     PUBLISHED_DIRECTLY("direct");
-
+    
     // What the manifest writes in its 'reason' column
     private final String code;
-
+    
     NotMcpToolScriptCallableReason(String code) {
         this.code = code;
     }
-
+    
     public String code() {
         return code;
     }
-
+    
     // The reason whose code is exactly the given text, or null when no reason has it
     static NotMcpToolScriptCallableReason ofCode(String code) {
         for (NotMcpToolScriptCallableReason reason : values()) {
@@ -35,7 +35,7 @@ public enum NotMcpToolScriptCallableReason {
         }
         return null;
     }
-
+    
     static List<String> codes() {
         List<String> codes = new ArrayList<>();
         for (NotMcpToolScriptCallableReason reason : values()) {
@@ -43,7 +43,7 @@ public enum NotMcpToolScriptCallableReason {
         }
         return codes;
     }
-
+    
     public String message(String toolName) {
         return switch (this) {
             case RETURNS_NO_STRUCTURED_CONTENT -> "'" + toolName + "' cannot be called from an mcp tool script because it answers with content such as an image or text instead of structured content, and a script receives structured content only. Call '" + toolName + "' directly as an MCP tool instead.";
@@ -56,7 +56,7 @@ public enum NotMcpToolScriptCallableReason {
             case PUBLISHED_DIRECTLY -> "'" + toolName + "' cannot be called from an mcp tool script because this server publishes it directly, and a tool function is never reachable both ways. Call '" + toolName + "' directly as an MCP tool instead.";
         };
     }
-
+    
     // How the programmatic profile's instructions name the given tools that have this reason, or null for the one reason the instructions do not single out
     public String instructionPhrase(List<String> toolNames) {
         return switch (this) {
@@ -70,7 +70,7 @@ public enum NotMcpToolScriptCallableReason {
             case PUBLISHED_DIRECTLY -> null;
         };
     }
-
+    
     private static String quoted(List<String> toolNames) {
         List<String> quoted = new ArrayList<>();
         for (String toolName : toolNames) {

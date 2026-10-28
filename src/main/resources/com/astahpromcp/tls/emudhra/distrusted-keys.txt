@@ -1,0 +1,30 @@
+# Public keys the eMudhra workaround distrusts (CVE-2026-91403, CVE-2026-114820). Read by DistrustedKeys.
+#
+# Each line: <kind> <SHA-256 of the SubjectPublicKeyInfo, lowercase hex> <name>
+#
+#   root          A root OpenJDK removed from its cacerts in JDK-8395690 (openjdk/jdk commit 8e492bf5, 2026-10-24).
+#                 The plugin's own connections stop trusting them, and the status the workaround logs tells whether
+#                 the running Java still trusts any of them.
+#
+#   intermediate  A compromised intermediate CA key OpenJDK blocked in JDK-8395142 (openjdk/jdk commit 22bc7357,
+#                 2026-10-21). That commit blocked 16 certificates, which carry these 8 keys: each key appears once
+#                 in a certificate issued by eMudhra and once in a cross-signature by Sectigo.
+#
+# AAA Certificate Services (Sectigo), which JDK-8395690 also removed, is not listed. Its cross-signatures of the
+# compromised intermediates carry the keys below and are rejected through them, while distrusting the root itself would
+# also break unrelated Sectigo chains.
+#
+# The hashes were computed from the certificates in those two OpenJDK commits on 2026-10-26.
+
+root            376a1a7082a593dccc20d561d119e9ab8d30f11cc321d0a37fa41f0df284e01c    emSign Root CA - G1
+root            71f8adeec2b58adbdf6205c98dde928a4254b03695193d7f9a63a9a2588095d0    emSign Root CA - G2
+root            8d417db2dd8bf5e3084d1e3f196d583849d81bdd4c00c70b9d39369e96b8c782    emSign ECC Root CA - G3
+
+intermediate    ebed6475c2c2d80fcb199f3fe8dd6e6b3ce60b77eb15d4e42c3dec0c6f5b5105    EM DV TLS CA - G3B
+intermediate    49dd353dc2b919a3770645117d0e60c16115e7d1bc259eefe734b00ea434fe5f    EM DV TLS CA - G3C
+intermediate    e0254c7fcdc265e2f0f8a428dabb75ab4ae039b4872d62f5ee57f0877d5a8a41    EM EV TLS CA - G3B
+intermediate    5c0660a2b164910d8ff589c18e14552e9e0ec237dcefe2cb736d41a4811f81a0    EM EV TLS CA - G3C
+intermediate    43bffa19d6ef651451f6841e019931e96f6f2eaeff28ab4b6f1ce4576de2717b    EM OV TLS CA - G3B
+intermediate    63ecefee431d49523bc1136c4e72d0206a477086caf606cd5cf025686c109cf8    EM OV TLS CA - G3C
+intermediate    ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6    EM OV CS CA - G3B
+intermediate    92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30    EM OV CS CA - G3C

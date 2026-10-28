@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERRelationshipToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERRelationshipTool tool;
     private Method getInfo;
@@ -36,7 +36,7 @@ public class ERRelationshipToolTest {
     private Method setParentRequired;
     private Method setVerbPhraseParent;
     private Method setVerbPhraseChild;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -44,79 +44,79 @@ public class ERRelationshipToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERRelationshipToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERRelationshipTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setCardinality() method
         setCardinality = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setCardinality",
             ERRelationshipWithCardinalityDTO.class);
-
+        
         // setERIndex() method
         setERIndex = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setERIndex",
             ERRelationshipWithERIndexDTO.class);
-
+        
         // setLogicalName() method
         setLogicalName = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setLogicalName",
             ERRelationshipWithLogicalNameDTO.class);
-
+        
         // setPhysicalName() method
         setPhysicalName = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setPhysicalName",
             ERRelationshipWithPhysicalNameDTO.class);
-
+        
         // setParentRequired() method
         setParentRequired = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setParentRequired",
             ERRelationshipWithParentRequiredDTO.class);
-
+        
         // setVerbPhraseParent() method
         setVerbPhraseParent = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setVerbPhraseParent",
             ERRelationshipWithParentVerbPhraseDTO.class);
-
+        
         // setVerbPhraseChild() method
         setVerbPhraseChild = TestSupport.getAccessibleMethod(
             ERRelationshipTool.class,
             "setVerbPhraseChild",
             ERRelationshipWithChildVerbPhraseDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erRelationship.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -125,25 +125,25 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erRelationship.getId(), outputDTO.namedElement().element().id());
         assertEquals(erRelationship.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void setCardinality_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         ERRelationshipWithCardinalityDTO inputDTO = new ERRelationshipWithCardinalityDTO(
             erRelationship.getId(),
             "1");
-
+        
         // ----------------------------------------
         // Call setCardinality()
         // ----------------------------------------
@@ -152,29 +152,29 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("1", erRelationship.getCardinality());
     }
-
+    
     @Test
     void setERIndex_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Get ER index
         IERIndex erIndex = (IERIndex) TestSupport.instance().getNamedElementByClassAndName(
             IERIndex.class,
             "Index0");
-
+        
         // Create input DTO
         ERRelationshipWithERIndexDTO inputDTO = new ERRelationshipWithERIndexDTO(
             erRelationship.getId(),
             erIndex.getId());
-
+        
         // ----------------------------------------
         // Call setERIndex()
         // ----------------------------------------
@@ -183,24 +183,24 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erIndex.getId(), erRelationship.getERIndex().getId());
     }
-
+    
     @Test
     void setLogicalName_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         ERRelationshipWithLogicalNameDTO inputDTO = new ERRelationshipWithLogicalNameDTO(
             erRelationship.getId(),
             "LogicalName_777");
-
+        
         // ----------------------------------------
         // Call setLogicalName()
         // ----------------------------------------
@@ -209,24 +209,24 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("LogicalName_777", erRelationship.getLogicalName());
     }
-
+    
     @Test
     void setPhysicalName_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         ERRelationshipWithPhysicalNameDTO inputDTO = new ERRelationshipWithPhysicalNameDTO(
             erRelationship.getId(),
             "physical_name_777");
-
+        
         // ----------------------------------------
         // Call setPhysicalName()
         // ----------------------------------------
@@ -235,12 +235,12 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("physical_name_777", erRelationship.getPhysicalName());
     }
-
+    
     @Test
     void setParentRequired_ok() throws Exception {
         // Get ER relationship
@@ -248,12 +248,12 @@ public class ERRelationshipToolTest {
             IERRelationship.class,
             "Relationship1");
         boolean nextValue = !erRelationship.isParentRequired();
-
+        
         // Create input DTO
         ERRelationshipWithParentRequiredDTO inputDTO = new ERRelationshipWithParentRequiredDTO(
             erRelationship.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setParentRequired()
         // ----------------------------------------
@@ -262,24 +262,24 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erRelationship.isParentRequired());
     }
-
+    
     @Test
     void setVerbPhraseParent_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         ERRelationshipWithParentVerbPhraseDTO inputDTO = new ERRelationshipWithParentVerbPhraseDTO(
             erRelationship.getId(),
             "ParentVerb_777");
-
+        
         // ----------------------------------------
         // Call setVerbPhraseParent()
         // ----------------------------------------
@@ -288,25 +288,25 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("ParentVerb_777", erRelationship.getVerbPhraseParent());
         assertEquals("ParentVerb_777", outputDTO.verbPhraseParentToChild());
     }
-
+    
     @Test
     void setVerbPhraseChild_ok() throws Exception {
         // Get ER relationship
         IERRelationship erRelationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Create input DTO
         ERRelationshipWithChildVerbPhraseDTO inputDTO = new ERRelationshipWithChildVerbPhraseDTO(
             erRelationship.getId(),
             "ChildVerb_777");
-
+        
         // ----------------------------------------
         // Call setVerbPhraseChild()
         // ----------------------------------------
@@ -315,7 +315,7 @@ public class ERRelationshipToolTest {
             tool,
             inputDTO,
             ERRelationshipDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("ChildVerb_777", erRelationship.getVerbPhraseChild());

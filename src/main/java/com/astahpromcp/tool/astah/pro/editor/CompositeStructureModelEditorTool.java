@@ -19,19 +19,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/CompositeStructureModelEditor.html
 @Slf4j
 public class CompositeStructureModelEditorTool extends AstahToolProvider {
-
+    
     private final CompositeStructureModelEditor compositeStructureModelEditor;
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public CompositeStructureModelEditorTool(CompositeStructureModelEditor compositeStructureModelEditor, ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.compositeStructureModelEditor = compositeStructureModelEditor;
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,14 +41,14 @@ public class CompositeStructureModelEditorTool extends AstahToolProvider {
                 this::createConnector,
                 NewConnectorBetweenPartsAndPortsDTO.class,
                 ConnectorDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_provided_interface_of_port",
                 "Create a new realization between the specified port (specified by ID) and the specified interface (specified by ID) so that the interface becomes a provided interface of the port, and return the newly created model element of the realization. The interface must be a class with the stereotype 'interface' and must not already be a provided interface of the port.",
                 this::createRealization,
                 NewProvidedInterfaceOfPortDTO.class,
                 RealizationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_required_interface_of_port",
                 "Create a new usage between the specified port (specified by ID) and the specified interface (specified by ID) so that the interface becomes a required interface of the port, and return the newly created model element of the usage. The interface must be a class with the stereotype 'interface' and must not already be a required interface of the port.",
@@ -57,56 +57,56 @@ public class CompositeStructureModelEditorTool extends AstahToolProvider {
                 UsageDTO.class)
         );
     }
-
+    
     private ConnectorDTO createConnector(NewConnectorBetweenPartsAndPortsDTO param) throws Exception {
         IAttribute astahSourcePart = astahProToolSupport.getAttribute(param.sourcePartId());
         if (astahSourcePart.getAssociation() == null) {
             throw new IllegalArgumentException("Source part for connector must be an association end, not a plain attribute.");
         }
-
+        
         IAttribute astahTargetPart = astahProToolSupport.getAttribute(param.targetPartId());
         if (astahTargetPart.getAssociation() == null) {
             throw new IllegalArgumentException("Target part for connector must be an association end, not a plain attribute.");
         }
-
+        
         IPort astahSourcePort = getPortOfPart(param.sourcePortId(), astahSourcePart, "Source");
         IPort astahTargetPort = getPortOfPart(param.targetPortId(), astahTargetPart, "Target");
-
-        IConnector createdAstahConnector = txnAstah.call( () -> {
+        
+        IConnector createdAstahConnector = txnAstah.call(() -> {
             return compositeStructureModelEditor.createConnector(
                 astahSourcePart,
                 astahSourcePort,
                 astahTargetPart,
                 astahTargetPort);
         });
-
+        
         return ConnectorDTOAssembler.toDTO(createdAstahConnector);
     }
-
+    
     private IPort getPortOfPart(String portId, IAttribute astahPart, String side) throws Exception {
         if (portId.isEmpty()) {
             return null;
         }
-
+        
         // Note: The API accepts only a port owned by the type of the part, and rejects any other port with an InvalidEditingException whose message does not tell which argument is wrong.
         IPort astahPort = astahProToolSupport.getPort(portId);
         if (astahPart.getType() == null || !astahPort.getOwner().equals(astahPart.getType())) {
             throw new IllegalArgumentException(side + " port for connector must be a port owned by the type of the " + side.toLowerCase() + " part.");
         }
-
+        
         return astahPort;
     }
-
+    
     private RealizationDTO createRealization(NewProvidedInterfaceOfPortDTO param) throws Exception {
         IPort astahPort = astahProToolSupport.getPort(param.targetPortId());
         IClass astahInterface = astahProToolSupport.getClass(param.targetInterfaceId());
-
+        
         if (!astahInterface.hasStereotype("interface")) {
             throw new IllegalArgumentException(String.format(
                 "The class '%s' (ID: %s) is not an interface. Specify an interface, which is a class with the stereotype 'interface'.",
                 astahInterface.getName(), astahInterface.getId()));
         }
-
+        
         for (IRealization astahRealization : astahPort.getClientRealizations()) {
             if (astahRealization.getSupplier().getId().equals(astahInterface.getId())) {
                 throw new IllegalArgumentException(String.format(
@@ -114,27 +114,27 @@ public class CompositeStructureModelEditorTool extends AstahToolProvider {
                     astahInterface.getName(), astahInterface.getId(), astahPort.getName(), astahPort.getId(), astahRealization.getId()));
             }
         }
-
-        IRealization createdAstahRealization = txnAstah.call( () -> {
+        
+        IRealization createdAstahRealization = txnAstah.call(() -> {
             return compositeStructureModelEditor.createRealization(
                 astahPort,
                 astahInterface,
                 "");
         });
-
+        
         return RealizationDTOAssembler.toDTO(createdAstahRealization);
     }
-
+    
     private UsageDTO createUsage(NewRequiredInterfaceOfPortDTO param) throws Exception {
         IPort astahPort = astahProToolSupport.getPort(param.targetPortId());
         IClass astahInterface = astahProToolSupport.getClass(param.targetInterfaceId());
-
+        
         if (!astahInterface.hasStereotype("interface")) {
             throw new IllegalArgumentException(String.format(
                 "The class '%s' (ID: %s) is not an interface. Specify an interface, which is a class with the stereotype 'interface'.",
                 astahInterface.getName(), astahInterface.getId()));
         }
-
+        
         for (IUsage astahUsage : astahPort.getClientUsages()) {
             if (astahUsage.getSupplier().getId().equals(astahInterface.getId())) {
                 throw new IllegalArgumentException(String.format(
@@ -142,14 +142,14 @@ public class CompositeStructureModelEditorTool extends AstahToolProvider {
                     astahInterface.getName(), astahInterface.getId(), astahPort.getName(), astahPort.getId(), astahUsage.getId()));
             }
         }
-
-        IUsage createdAstahUsage = txnAstah.call( () -> {
+        
+        IUsage createdAstahUsage = txnAstah.call(() -> {
             return compositeStructureModelEditor.createUsage(
                 astahPort,
                 astahInterface,
                 "");
         });
-
+        
         return UsageDTOAssembler.toDTO(createdAstahUsage);
     }
 }

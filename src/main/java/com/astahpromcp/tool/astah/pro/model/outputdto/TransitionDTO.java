@@ -6,19 +6,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record TransitionDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Source vertex")
     NameIdTypeDTO sourceVertex,
-
+    
     @JsonPropertyDescription("Target vertex")
     NameIdTypeDTO targetVertex,
-
+    
     @JsonPropertyDescription("Action")
     String action,
-
+    
     @JsonPropertyDescription("Event")
     String event,
-
+    
     @JsonPropertyDescription("Guard condition")
     String guard
 ) {

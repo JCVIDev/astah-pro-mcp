@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERAttributeToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERAttributeTool tool;
     private Method getInfo;
@@ -39,7 +39,7 @@ public class ERAttributeToolTest {
     private Method setPhysicalName;
     private Method setPrimaryKey;
     private Method setNotNull;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -47,85 +47,85 @@ public class ERAttributeToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERAttributeToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERAttributeTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setDatatype() method
         setDatatype = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setDatatype",
             ERAttributeWithERDatatypeDTO.class);
-
+        
         // setDomain() method
         setDomain = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setDomain",
             ERAttributeWithERDomainDTO.class);
-
+        
         // setDefaultValue() method
         setDefaultValue = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setDefaultValue",
             ERAttributeWithDefaultValueDTO.class);
-
+        
         // setLengthPrecision() method
         setLengthPrecision = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setLengthPrecision",
             ERAttributeWithLengthPrecisionDTO.class);
-
+        
         // setLogicalName() method
         setLogicalName = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setLogicalName",
             ERAttributeWithLogicalNameDTO.class);
-
+        
         // setPhysicalName() method
         setPhysicalName = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setPhysicalName",
             ERAttributeWithPhysicalNameDTO.class);
-
+        
         // setPrimaryKey() method
         setPrimaryKey = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setPrimaryKey",
             ERAttributeWithPrimaryKeyDTO.class);
-
+        
         // setNotNull() method
         setNotNull = TestSupport.getAccessibleMethod(
             ERAttributeTool.class,
             "setNotNull",
             ERAttributeWithNotNullDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erAttribute.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -134,30 +134,30 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erAttribute.getId(), outputDTO.namedElement().element().id());
         assertEquals(erAttribute.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void setDatatype_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Get ER datatype
         IERDatatype erDatatype = (IERDatatype) TestSupport.instance().getNamedElementByClassAndName(
             IERDatatype.class,
             "INT");
-
+        
         // Create input DTO
         ERAttributeWithERDatatypeDTO inputDTO = new ERAttributeWithERDatatypeDTO(
             erAttribute.getId(),
             erDatatype.getId());
-
+        
         // ----------------------------------------
         // Call setDatatype()
         // ----------------------------------------
@@ -166,29 +166,29 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erDatatype.getId(), erAttribute.getDatatype().getId());
     }
-
+    
     @Test
     void setDomain_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Get ER domain
         IERDomain erDomain = (IERDomain) TestSupport.instance().getNamedElementByClassAndName(
             IERDomain.class,
             "Domain0");
-
+        
         // Create input DTO
         ERAttributeWithERDomainDTO inputDTO = new ERAttributeWithERDomainDTO(
             erAttribute.getId(),
             erDomain.getId());
-
+        
         // ----------------------------------------
         // Call setDomain()
         // ----------------------------------------
@@ -197,24 +197,24 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erDomain.getId(), erAttribute.getDomain().getId());
     }
-
+    
     @Test
     void setDefaultValue_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERAttributeWithDefaultValueDTO inputDTO = new ERAttributeWithDefaultValueDTO(
             erAttribute.getId(),
             "DEFAULT_777");
-
+        
         // ----------------------------------------
         // Call setDefaultValue()
         // ----------------------------------------
@@ -223,24 +223,24 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("DEFAULT_777", erAttribute.getDefaultValue());
     }
-
+    
     @Test
     void setLengthPrecision_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERAttributeWithLengthPrecisionDTO inputDTO = new ERAttributeWithLengthPrecisionDTO(
             erAttribute.getId(),
             "12,3");
-
+        
         // ----------------------------------------
         // Call setLengthPrecision()
         // ----------------------------------------
@@ -249,24 +249,24 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("12,3", erAttribute.getLengthPrecision());
     }
-
+    
     @Test
     void setLogicalName_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERAttributeWithLogicalNameDTO inputDTO = new ERAttributeWithLogicalNameDTO(
             erAttribute.getId(),
             "LogicalName_777");
-
+        
         // ----------------------------------------
         // Call setLogicalName()
         // ----------------------------------------
@@ -275,24 +275,24 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("LogicalName_777", erAttribute.getLogicalName());
     }
-
+    
     @Test
     void setPhysicalName_ok() throws Exception {
         // Get ER attribute
         IERAttribute erAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERAttributeWithPhysicalNameDTO inputDTO = new ERAttributeWithPhysicalNameDTO(
             erAttribute.getId(),
             "physical_name_777");
-
+        
         // ----------------------------------------
         // Call setPhysicalName()
         // ----------------------------------------
@@ -301,12 +301,12 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("physical_name_777", erAttribute.getPhysicalName());
     }
-
+    
     @Test
     void setPrimaryKey_ok() throws Exception {
         // Get ER attribute
@@ -314,12 +314,12 @@ public class ERAttributeToolTest {
             IERAttribute.class,
             "Attribute0");
         boolean nextValue = !erAttribute.isPrimaryKey();
-
+        
         // Create input DTO
         ERAttributeWithPrimaryKeyDTO inputDTO = new ERAttributeWithPrimaryKeyDTO(
             erAttribute.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setPrimaryKey()
         // ----------------------------------------
@@ -328,12 +328,12 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erAttribute.isPrimaryKey());
     }
-
+    
     @Test
     void setNotNull_ok() throws Exception {
         // Get ER attribute
@@ -341,12 +341,12 @@ public class ERAttributeToolTest {
             IERAttribute.class,
             "Attribute0");
         boolean nextValue = !erAttribute.isNotNull();
-
+        
         // Create input DTO
         ERAttributeWithNotNullDTO inputDTO = new ERAttributeWithNotNullDTO(
             erAttribute.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setNotNull()
         // ----------------------------------------
@@ -355,10 +355,10 @@ public class ERAttributeToolTest {
             tool,
             inputDTO,
             ERAttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erAttribute.isNotNull());
     }
-
+    
 }

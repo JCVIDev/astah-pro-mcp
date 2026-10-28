@@ -1,4 +1,4 @@
-package com.astahpromcp.tool.astah.pro.common.outputdto;
+package com.astahpromcp.tool.common.outputdto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 

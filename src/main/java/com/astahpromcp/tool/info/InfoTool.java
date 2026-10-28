@@ -13,10 +13,10 @@ import java.util.List;
 // Tool for obtaining Astah Pro MCP server information
 @Slf4j
 public class InfoTool implements ToolProvider {
-
+    
     public InfoTool() {
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -28,7 +28,7 @@ public class InfoTool implements ToolProvider {
                 AstahProMcpVersionDTO.class)
         );
     }
-
+    
     private AstahProMcpVersionDTO getAstahProMcpVersion(NoInputDTO param) throws Exception {
         return new AstahProMcpVersionDTO(McpServerInfo.VERSION);
     }

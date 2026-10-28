@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MindmapEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private MindmapEditorTool tool;
     private Method createMindmapDiagram;
@@ -51,7 +51,7 @@ public class MindmapEditorToolTest {
     private Method deleteChildTopics;
     private Method deleteImageFromTopic;
     private Method setBoundaryOfTopic;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -64,7 +64,7 @@ public class MindmapEditorToolTest {
         ImageCaptureSupport imageCaptureSupport = mock(ImageCaptureSupport.class);
         when(imageCaptureSupport.createThumbnailContent(anyString()))
             .thenReturn(McpSchema.ImageContent.builder("", "image/png").build());
-
+        
         // Tool
         tool = new MindmapEditorTool(
             projectAccessor,
@@ -73,99 +73,99 @@ public class MindmapEditorToolTest {
             astahProToolSupport,
             imageConvertSupport,
             imageCaptureSupport);
-
+        
         // createMindmapDiagram() method
         createMindmapDiagram = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "createMindmapDiagram",
             NewDiagramInPackageDTO.class);
-
+        
         // changeToFloatingTopic() method
         changeToFloatingTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "changeToFloatingTopic",
             ChangeToFloatingTopicDTO.class);
-
+        
         // createFloatingTopic() method
         createFloatingTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "createFloatingTopic",
             NewFloatingTopicDTO.class);
-
+        
         // createTopic() method
         createTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "createTopic",
             NewTopicDTO.class);
-
+        
         // createTopicLink() method
         createTopicLink = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "createTopicLink",
             NewLinkBetweenTopicsDTO.class);
-
+        
         // changeParentOfTopic() method
         changeParentOfTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "changeParentOfTopic",
             ChangeParentOfTopicDTO.class);
-
+        
         // moveTopicWithinSiblingOrder() method
         moveTopicWithinSiblingOrder = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "moveTopicWithinSiblingOrder",
             MoveTopicWithinSiblingOrderDTO.class);
-
+        
         // insertSvgImageIntoTopic() method
         insertSvgImageIntoTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "insertSvgImageIntoTopic",
             NewSvgImageIntoTopicDTO.class);
-
+        
         // insertPngOrJpgImageIntoTopic() method
         insertPngOrJpgImageIntoTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "insertPngOrJpgImageIntoTopic",
             NewPngOrJpgImageIntoTopicDTO.class);
-
+        
         // deleteChildTopics() method
         deleteChildTopics = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "deleteChildTopics",
             DeleteChildTopicsDTO.class);
-
+        
         // deleteImageFromTopic() method
         deleteImageFromTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "deleteImageFromTopic",
             DeleteImageFromTopicDTO.class);
-
+        
         // setBoundaryOfTopic() method
         setBoundaryOfTopic = TestSupport.getAccessibleMethod(
             MindmapEditorTool.class,
             "setBoundaryOfTopic",
             TopicWithBoundaryVisibilityDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createMindmapDiagram_ok() throws Exception {
         // Get package
         IPackage astahPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewDiagramInPackageDTO inputDTO = new NewDiagramInPackageDTO(
             astahPackage.getId(),
             "Test Mind Map Diagram");
-
+        
         // ----------------------------------------
         // Call createMindmapDiagram()
         // ----------------------------------------
@@ -174,25 +174,25 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             DiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createFloatingTopic_ok() throws Exception {
         // Get mind map diagram
         IMindMapDiagram mindMapDiagram = (IMindMapDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IMindMapDiagram.class,
             "Mindmap0");
-
+        
         // Create input DTO
         NewFloatingTopicDTO inputDTO = new NewFloatingTopicDTO(
             mindMapDiagram.getId(),
             "Test Floating Topic",
             200,
             150);
-
+        
         // ----------------------------------------
         // Call createFloatingTopic()
         // ----------------------------------------
@@ -201,11 +201,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createTopic_ok() throws Exception {
         // Get mind map diagram and root topic
@@ -213,13 +213,13 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         // Create input DTO
         NewTopicDTO inputDTO = new NewTopicDTO(
             mindMapDiagram.getId(),
             rootTopic.getID(),
             "Test Child Topic");
-
+        
         // ----------------------------------------
         // Call createTopic()
         // ----------------------------------------
@@ -228,11 +228,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createTopic_ng_parentIsNotTopic() throws Exception {
         // Get mind map diagram and a child topic of the root topic
@@ -240,7 +240,7 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation childTopic = createChildTopicOfRoot(mindMapDiagram, "Test Bounded Topic");
-
+        
         // Show a boundary, which is a node on the same mind map diagram but not a topic
         TestSupport.instance().invokeToolMethodReturningDtoAndContents(
             setBoundaryOfTopic,
@@ -251,9 +251,9 @@ public class MindmapEditorToolTest {
             .filter(presentation -> "MMBoundary".equals(presentation.getType()))
             .findFirst()
             .orElseThrow();
-
+        
         int presentationCountBefore = mindMapDiagram.getPresentations().length;
-
+        
         // ----------------------------------------
         // Call createTopic()
         // ----------------------------------------
@@ -264,22 +264,22 @@ public class MindmapEditorToolTest {
                 new NewTopicDTO(mindMapDiagram.getId(), boundary.getID(), "Test Child Topic"),
                 NodePresentationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("The parent topic must be a topic on the target mind map diagram (actual type: MMBoundary, actual diagram: Mindmap0)."), exception.getCause().getMessage());
-
+        
         // Check that nothing was drawn on the diagram
         assertEquals(presentationCountBefore, mindMapDiagram.getPresentations().length);
     }
-
+    
     @Test
     void createTopic_ng_parentOnAnotherMindMap() throws Exception {
         // Get mind map diagram
         IMindMapDiagram mindMapDiagram = (IMindMapDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IMindMapDiagram.class,
             "Mindmap0");
-
+        
         // Another mind map diagram, whose root topic an agent may pass by mistake
         TestSupport.instance().invokeToolMethodReturningDto(
             createMindmapDiagram,
@@ -290,10 +290,10 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Another Mind Map Diagram");
         INodePresentation anotherRootTopic = anotherMindMapDiagram.getRoot();
-
+        
         int presentationCountBefore = mindMapDiagram.getPresentations().length;
         int anotherPresentationCountBefore = anotherMindMapDiagram.getPresentations().length;
-
+        
         // ----------------------------------------
         // Call createTopic()
         // ----------------------------------------
@@ -304,16 +304,16 @@ public class MindmapEditorToolTest {
                 new NewTopicDTO(mindMapDiagram.getId(), anotherRootTopic.getID(), "Test Child Topic"),
                 NodePresentationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("The parent topic must be a topic on the target mind map diagram (actual type: Topic, actual diagram: Another Mind Map Diagram)."), exception.getCause().getMessage());
-
+        
         // Check that nothing was drawn on either diagram
         assertEquals(presentationCountBefore, mindMapDiagram.getPresentations().length);
         assertEquals(anotherPresentationCountBefore, anotherMindMapDiagram.getPresentations().length);
     }
-
+    
     @Test
     void createTopicLink_ok() throws Exception {
         // Get mind map diagram, root topic and a floating topic
@@ -322,16 +322,16 @@ public class MindmapEditorToolTest {
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
         INodePresentation[] floatingTopics = mindMapDiagram.getFloatingTopics();
-
+        
         assumeTrue(floatingTopics.length > 0, "Mindmap0 needs at least one floating topic");
         INodePresentation floatingTopic = floatingTopics[0];
-
+        
         // Create input DTO
         NewLinkBetweenTopicsDTO inputDTO = new NewLinkBetweenTopicsDTO(
             mindMapDiagram.getId(),
             rootTopic.getID(),
             floatingTopic.getID());
-
+        
         // ----------------------------------------
         // Call createTopicLink()
         // ----------------------------------------
@@ -340,11 +340,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             LinkPresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void changeToFloatingTopic_ok() throws Exception {
         // Get mind map diagram and a child topic (not root, not floating)
@@ -353,15 +353,15 @@ public class MindmapEditorToolTest {
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
         INodePresentation[] children = rootTopic.getChildren();
-
+        
         assumeTrue(children.length > 0, "Root topic needs at least one child for changeToFloatingTopic");
         INodePresentation childTopic = children[0];
-
+        
         // Create input DTO
         ChangeToFloatingTopicDTO inputDTO = new ChangeToFloatingTopicDTO(
             mindMapDiagram.getId(),
             childTopic.getID());
-
+        
         // ----------------------------------------
         // Call changeToFloatingTopic()
         // ----------------------------------------
@@ -370,11 +370,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void changeParentOfTopic_ok() throws Exception {
         // Get mind map diagram, target topic and new parent
@@ -383,17 +383,17 @@ public class MindmapEditorToolTest {
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
         INodePresentation[] children = rootTopic.getChildren();
-
+        
         assumeTrue(children.length >= 2, "Root topic needs at least two children for changeParentOfTopic");
         INodePresentation targetTopic = children[0];
         INodePresentation newParentTopic = children[1];
-
+        
         // Create input DTO
         ChangeParentOfTopicDTO inputDTO = new ChangeParentOfTopicDTO(
             mindMapDiagram.getId(),
             targetTopic.getID(),
             newParentTopic.getID());
-
+        
         // ----------------------------------------
         // Call changeParentOfTopic()
         // ----------------------------------------
@@ -402,11 +402,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void moveTopicWithinSiblingOrder_ok() throws Exception {
         // Get mind map diagram and a topic with siblings
@@ -415,16 +415,16 @@ public class MindmapEditorToolTest {
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
         INodePresentation[] children = rootTopic.getChildren();
-
+        
         assumeTrue(children.length >= 2, "Root topic needs at least two children for moveTopicWithinSiblingOrder");
         INodePresentation targetTopic = children[0];
-
+        
         // Create input DTO (move to index 1)
         MoveTopicWithinSiblingOrderDTO inputDTO = new MoveTopicWithinSiblingOrderDTO(
             mindMapDiagram.getId(),
             targetTopic.getID(),
             1);
-
+        
         // ----------------------------------------
         // Call moveTopicWithinSiblingOrder()
         // ----------------------------------------
@@ -433,11 +433,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void insertSvgImageIntoTopic_ok() throws Exception {
         // Get mind map diagram and a topic
@@ -445,15 +445,15 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         String svgCode = "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><rect width='20' height='20' fill='blue'/></svg>";
-
+        
         // Create input DTO
         NewSvgImageIntoTopicDTO inputDTO = new NewSvgImageIntoTopicDTO(
             mindMapDiagram.getId(),
             rootTopic.getID(),
             svgCode);
-
+        
         // ----------------------------------------
         // Call insertSvgImageIntoTopic()
         // ----------------------------------------
@@ -462,11 +462,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void insertPngOrJpgImageIntoTopic_ok_insertsAPngImage() throws Exception {
         // Get mind map diagram and a topic
@@ -474,17 +474,17 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         URL pngResource = getClass().getClassLoader().getResource("img/topic-image.png");
         assumeTrue(pngResource != null, "Test image img/topic-image.png must exist in src/test/resources/img/");
         String imageUrl = pngResource.toExternalForm();
-
+        
         // Create input DTO
         NewPngOrJpgImageIntoTopicDTO inputDTO = new NewPngOrJpgImageIntoTopicDTO(
             mindMapDiagram.getId(),
             rootTopic.getID(),
             imageUrl);
-
+        
         // ----------------------------------------
         // Call insertPngOrJpgImageIntoTopic()
         // ----------------------------------------
@@ -493,11 +493,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void insertPngOrJpgImageIntoTopic_ok_insertsAJpgImage() throws Exception {
         // Get mind map diagram and a topic
@@ -505,17 +505,17 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         URL jpgResource = getClass().getClassLoader().getResource("img/topic-image.jpg");
         assumeTrue(jpgResource != null, "Test image img/topic-image.jpg must exist in src/test/resources/img/");
         String imageUrl = jpgResource.toExternalForm();
-
+        
         // Create input DTO
         NewPngOrJpgImageIntoTopicDTO inputDTO = new NewPngOrJpgImageIntoTopicDTO(
             mindMapDiagram.getId(),
             rootTopic.getID(),
             imageUrl);
-
+        
         // ----------------------------------------
         // Call insertPngOrJpgImageIntoTopic()
         // ----------------------------------------
@@ -524,11 +524,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void deleteChildTopics_ok() throws Exception {
         // Get mind map diagram and a topic (use root - deleteChildren on empty is no-op)
@@ -536,12 +536,12 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         // Create input DTO
         DeleteChildTopicsDTO inputDTO = new DeleteChildTopicsDTO(
             mindMapDiagram.getId(),
             rootTopic.getID());
-
+        
         // ----------------------------------------
         // Call deleteChildTopics()
         // ----------------------------------------
@@ -550,11 +550,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void deleteImageFromTopic_ok() throws Exception {
         // Get mind map diagram and root topic
@@ -563,12 +563,12 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         // Create input DTO for delete
         DeleteImageFromTopicDTO inputDTO = new DeleteImageFromTopicDTO(
             mindMapDiagram.getId(),
             rootTopic.getID());
-
+        
         // ----------------------------------------
         // Call deleteImageFromTopic()
         // ----------------------------------------
@@ -577,11 +577,11 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setBoundaryOfTopic_ok() throws Exception {
         // Get mind map diagram and a child topic of the root topic
@@ -589,13 +589,13 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation childTopic = createChildTopicOfRoot(mindMapDiagram, "Test Bounded Topic");
-
+        
         // Create input DTO
         TopicWithBoundaryVisibilityDTO inputDTO = new TopicWithBoundaryVisibilityDTO(
             mindMapDiagram.getId(),
             childTopic.getID(),
             true);
-
+        
         // ----------------------------------------
         // Call setBoundaryOfTopic()
         // ----------------------------------------
@@ -604,14 +604,14 @@ public class MindmapEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the boundary was set on the topic
         assertEquals(1, countBoundariesOf(mindMapDiagram, childTopic));
     }
-
+    
     @Test
     void setBoundaryOfTopic_ng_rootTopic() throws Exception {
         // Get mind map diagram and root topic
@@ -619,9 +619,9 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         int presentationCountBefore = mindMapDiagram.getPresentations().length;
-
+        
         // ----------------------------------------
         // Call setBoundaryOfTopic()
         // ----------------------------------------
@@ -632,15 +632,15 @@ public class MindmapEditorToolTest {
                 new TopicWithBoundaryVisibilityDTO(mindMapDiagram.getId(), rootTopic.getID(), true),
                 NodePresentationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("A boundary cannot be shown on the root topic: " + rootTopic.getLabel() + "(" + rootTopic.getID() + ")."), exception.getCause().getMessage());
-
+        
         // Check that no boundary was created
         assertEquals(presentationCountBefore, mindMapDiagram.getPresentations().length);
     }
-
+    
     @Test
     void setBoundaryOfTopic_ng_floatingTopic() throws Exception {
         // Get mind map diagram and create a floating topic
@@ -653,9 +653,9 @@ public class MindmapEditorToolTest {
             new NewFloatingTopicDTO(mindMapDiagram.getId(), "Test Floating Topic", 200, 150),
             NodePresentationDTO.class);
         INodePresentation floatingTopic = findNodePresentation(mindMapDiagram, floatingTopicDTO.presentation().id());
-
+        
         int presentationCountBefore = mindMapDiagram.getPresentations().length;
-
+        
         // ----------------------------------------
         // Call setBoundaryOfTopic()
         // ----------------------------------------
@@ -666,15 +666,15 @@ public class MindmapEditorToolTest {
                 new TopicWithBoundaryVisibilityDTO(mindMapDiagram.getId(), floatingTopic.getID(), true),
                 NodePresentationDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("A boundary cannot be shown on a floating topic: Test Floating Topic(" + floatingTopic.getID() + ")."), exception.getCause().getMessage());
-
+        
         // Check that no boundary was created
         assertEquals(presentationCountBefore, mindMapDiagram.getPresentations().length);
     }
-
+    
     @Test
     void setBoundaryOfTopic_ok_hideOnRootTopic() throws Exception {
         // Get mind map diagram and root topic
@@ -682,7 +682,7 @@ public class MindmapEditorToolTest {
             IMindMapDiagram.class,
             "Mindmap0");
         INodePresentation rootTopic = mindMapDiagram.getRoot();
-
+        
         // Create a boundary on the root topic through the Astah API directly, as the tool did before it rejected this.
         // Astah does not draw this boundary, but it is in the project.
         MindmapEditor mindmapEditor = projectAccessor.getDiagramEditorFactory().getMindmapEditor();
@@ -691,7 +691,7 @@ public class MindmapEditorToolTest {
             mindmapEditor.setBoundaryVisibility(rootTopic, true);
         });
         assertEquals(1, countBoundariesOf(mindMapDiagram, rootTopic));
-
+        
         // ----------------------------------------
         // Call setBoundaryOfTopic()
         // ----------------------------------------
@@ -700,14 +700,14 @@ public class MindmapEditorToolTest {
             tool,
             new TopicWithBoundaryVisibilityDTO(mindMapDiagram.getId(), rootTopic.getID(), false),
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the boundary was removed
         assertEquals(0, countBoundariesOf(mindMapDiagram, rootTopic));
     }
-
+    
     // Create a child topic of the root topic with the tool, and return it
     private INodePresentation createChildTopicOfRoot(IMindMapDiagram mindMapDiagram, String label) throws Exception {
         NodePresentationDTO childTopicDTO = TestSupport.instance().invokeToolMethodReturningDtoAndContents(
@@ -717,14 +717,14 @@ public class MindmapEditorToolTest {
             NodePresentationDTO.class);
         return findNodePresentation(mindMapDiagram, childTopicDTO.presentation().id());
     }
-
+    
     private static INodePresentation findNodePresentation(IMindMapDiagram mindMapDiagram, String id) throws Exception {
         return (INodePresentation) Arrays.stream(mindMapDiagram.getPresentations())
             .filter(presentation -> presentation.getID().equals(id))
             .findFirst()
             .orElseThrow();
     }
-
+    
     // Count the boundaries set on the topic. The parent of a boundary is the topic it is set on.
     private static long countBoundariesOf(IMindMapDiagram mindMapDiagram, INodePresentation topic) throws Exception {
         return Arrays.stream(mindMapDiagram.getPresentations())

@@ -8,14 +8,14 @@ import lombok.NonNull;
 
 public class SlotDTOAssembler {
     public static SlotDTO toDTO(@NonNull ISlot astahSlot) throws Exception {
-
+        
         NameIdTypeDTO definingAttribute;
         if (astahSlot.getDefiningAttribute() != null) {
             definingAttribute = NameIdTypeDTOAssembler.toDTO(astahSlot.getDefiningAttribute());
         } else {
             definingAttribute = NameIdTypeDTO.empty();
         }
-
+        
         return new SlotDTO(
             NamedElementDTOAssembler.toDTO(astahSlot),
             definingAttribute,

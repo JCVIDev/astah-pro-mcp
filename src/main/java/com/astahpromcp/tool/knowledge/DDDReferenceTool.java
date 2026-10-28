@@ -16,18 +16,18 @@ import java.util.List;
 
 @Slf4j
 public class DDDReferenceTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
     
     private final Path outputDirectory;
-
+    
     private final String dddReferenceUrl = "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf";
-
+    
     public DDDReferenceTool(Path outputDirectory) {
         this.outputDirectory = outputDirectory;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -38,7 +38,7 @@ public class DDDReferenceTool implements ToolProvider {
                     this::getDDDReference,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_ddd_reference",
                     "Return the chunk data of Domain-Driven Design Reference. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -51,31 +51,31 @@ public class DDDReferenceTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getDDDReference(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("Domain-Driven Design Reference already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading Domain-Driven Design Reference from PDF URL.");
         try (InputStream is = KnowledgeToolSupport.openUrlStream(dddReferenceUrl)) {
             if (is == null) {
                 throw new IOException("Domain-Driven Design Reference PDF resource not found.");
             }
-
+            
             byte[] bytes = is.readAllBytes();
             String text = KnowledgeToolSupport.convertPdfToMarkdown(bytes, outputDirectory, "ddd_reference_2015_03");
-
+            
             return KnowledgeToolSupport.chunkAndCache(text, contentCache);
-
+            
         } catch (IOException e) {
             log.error("Failed to load Domain-Driven Design Reference from URL: {}", dddReferenceUrl, e);
             throw e;
         }
     }
-
+    
     private DocumentChunkDTO getDDDReferenceChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

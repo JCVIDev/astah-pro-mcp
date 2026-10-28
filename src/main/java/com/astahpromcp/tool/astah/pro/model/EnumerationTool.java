@@ -18,18 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IEnumeration.html
 @Slf4j
 public class EnumerationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public EnumerationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,10 +40,10 @@ public class EnumerationTool extends AstahToolProvider {
                 EnumerationDTO.class)
         );
     }
-
+    
     private EnumerationDTO getInfo(IdDTO param) throws Exception {
         IEnumeration astahEnumeration = astahProToolSupport.getEnumeration(param.id());
-
+        
         return EnumerationDTOAssembler.toDTO(astahEnumeration);
     }
 }

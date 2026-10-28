@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CombinedFragmentDTOAssembler {
     public static CombinedFragmentDTO toDTO(@NonNull ICombinedFragment astahCombinedFragment) throws Exception {
-
+        
         CombinedFragmentKind kind;
         if (astahCombinedFragment.isAlt()) {
             kind = CombinedFragmentKind.ALT;
@@ -42,12 +42,12 @@ public class CombinedFragmentDTOAssembler {
         } else {
             throw new Exception("Invalid combined fragment kind");
         }
-
+        
         List<NameIdTypeDTO> interactionOperands = new ArrayList<>();
         for (IInteractionOperand interactionOperand : astahCombinedFragment.getInteractionOperands()) {
             interactionOperands.add(NameIdTypeDTOAssembler.toDTO(interactionOperand));
         }
-
+        
         return new CombinedFragmentDTO(
             NamedElementDTOAssembler.toDTO(astahCombinedFragment),
             kind.toString(),

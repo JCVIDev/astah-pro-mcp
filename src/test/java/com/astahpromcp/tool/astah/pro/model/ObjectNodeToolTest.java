@@ -19,12 +19,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectNodeToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ObjectNodeTool tool;
     private Method getInfo;
     private Method setBase;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -32,43 +32,43 @@ public class ObjectNodeToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ObjectNodeTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ObjectNodeTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ObjectNodeTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setBase() method
         setBase = TestSupport.getAccessibleMethod(
             ObjectNodeTool.class,
             "setBase",
             ObjectNodeWithBaseDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get object node
         IObjectNode objectNode = (IObjectNode) TestSupport.instance().getNamedElementByClassAndName(
             IObjectNode.class,
             "Object0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(objectNode.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -77,31 +77,31 @@ public class ObjectNodeToolTest {
             tool,
             inputDTO,
             ObjectNodeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setBase_ok() throws Exception {
         // Get object node
         IObjectNode objectNode = (IObjectNode) TestSupport.instance().getNamedElementByClassAndName(
             IObjectNode.class,
             "Object0");
-
+        
         // Get base class
         IClass baseClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         ObjectNodeWithBaseDTO inputDTO = new ObjectNodeWithBaseDTO(
             objectNode.getId(),
             baseClass.getId());
-
+        
         // Check base before setting
         assertNotEquals(baseClass, objectNode.getBase());
-
+        
         // ----------------------------------------
         // Call setBase()
         // ----------------------------------------
@@ -110,10 +110,10 @@ public class ObjectNodeToolTest {
             tool,
             inputDTO,
             ObjectNodeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check base after setting
         assertEquals(baseClass, objectNode.getBase());
     }

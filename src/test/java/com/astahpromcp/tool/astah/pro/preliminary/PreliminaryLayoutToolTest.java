@@ -12,53 +12,53 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PreliminaryLayoutToolTest {
-
+    
     private PreliminaryLayoutTool tool;
     private Method getSteps;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         // Tool
         tool = new PreliminaryLayoutTool();
-
+        
         // getSteps() method
         getSteps = TestSupport.getAccessibleMethod(
             PreliminaryLayoutTool.class,
             "getSteps",
             NoInputDTO.class);
     }
-
+    
     // The tool holds no Astah state, so the method is invoked directly rather than through TestSupport.instance(),
     // which would need the Astah API.
     @SuppressWarnings("unchecked")
     private List<McpSchema.Content> invokeGetSteps() throws Exception {
         return (List<McpSchema.Content>) getSteps.invoke(tool, new NoInputDTO());
     }
-
+    
     @Test
     void getSteps_ok() throws Exception {
         // ----------------------------------------
         // Call getSteps()
         // ----------------------------------------
         List<McpSchema.Content> contents = invokeGetSteps();
-
+        
         // Check the steps, which come first
         assertNotNull(contents);
         McpSchema.TextContent steps = assertInstanceOf(McpSchema.TextContent.class, contents.get(0));
         assertFalse(steps.text().isBlank());
-
+        
         // The output directory is interpolated into the steps, so no format specifier may survive
         assertFalse(steps.text().contains("%1$s"));
         assertTrue(steps.text().contains("preliminary-layout"));
     }
-
+    
     @Test
     void getSteps_ok_svgAndPngExamplePerDiagramType() throws Exception {
         // ----------------------------------------
         // Call getSteps()
         // ----------------------------------------
         List<McpSchema.Content> contents = invokeGetSteps();
-
+        
         // The steps, then seven diagram types each contributing its SVG code followed by the PNG image it renders to
         assertNotNull(contents);
         assertEquals(15, contents.size());
@@ -68,7 +68,7 @@ public class PreliminaryLayoutToolTest {
             assertInstanceOf(McpSchema.ImageContent.class, contents.get(i + 1));
         }
     }
-
+    
     // The provider always returns its whole definition; which profiles publish it is decided by the manifest,
     // where preliminary_layout_steps is published to the direct and programmatic profiles.
     @Test

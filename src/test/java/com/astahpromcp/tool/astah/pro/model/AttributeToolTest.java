@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AttributeToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private AttributeTool tool;
     private Method getInfo;
@@ -29,7 +29,7 @@ public class AttributeToolTest {
     private Method setStatic;
     private Method setType;
     private Method setTypeExpression;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -37,67 +37,67 @@ public class AttributeToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/AttributeToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new AttributeTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setInitialValue() method
         setInitialValue = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "setInitialValue",
             AttributeWithInitialValueDTO.class);
-
+        
         // setStatic() method
         setStatic = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "setStatic",
             AttributeWithStaticDTO.class);
-
+        
         // setType() method
         setType = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "setType",
             AttributeWithTypeDTO.class);
-
+        
         // setTypeExpression() method
         setTypeExpression = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "setTypeExpression",
             AttributeWithTypeExpressionDTO.class);
-
+        
         // setMultiplicity() method
         setMultiplicity = TestSupport.getAccessibleMethod(
             AttributeTool.class,
             "setMultiplicity",
             AttributeWithMultiplicityDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(attribute.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -106,28 +106,28 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(attribute.getId(), outputDTO.namedElement().element().id());
         assertEquals(attribute.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void setInitialValue_ok() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithInitialValueDTO inputDTO = new AttributeWithInitialValueDTO(
             attribute.getId(),
             "777");
-
+        
         // Check initial value before setting
         assertNotEquals("777", attribute.getInitialValue());
-
+        
         // ----------------------------------------
         // Call setInitialValue()
         // ----------------------------------------
@@ -136,29 +136,29 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check initial value after setting
         assertEquals("777", attribute.getInitialValue());
     }
-
+    
     @Test
     void setStatic_ok() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithStaticDTO inputDTO = new AttributeWithStaticDTO(
             attribute.getId(),
             true);
-
+        
         // Check static before setting
         assertFalse(attribute.isStatic());
-
+        
         // ----------------------------------------
         // Call setStatic()
         // ----------------------------------------
@@ -167,34 +167,34 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check static after setting
         assertTrue(attribute.isStatic());
     }
-
+    
     @Test
     void setType_ok() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "String");
-
+        
         // Create input DTO
         AttributeWithTypeDTO inputDTO = new AttributeWithTypeDTO(
             attribute.getId(),
             clazz.getId());
-
+        
         // Check type before setting
         assertNotEquals(clazz.getId(), attribute.getType().getId());
-
+        
         // ----------------------------------------
         // Call setType()
         // ----------------------------------------
@@ -203,14 +203,14 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check type after setting
         assertEquals(clazz.getId(), attribute.getType().getId());
     }
-
+    
     @Test
     void setType_ng_withAssociationEnd() throws Exception {
         // Create an association between the owner of "sum" and "String"
@@ -224,18 +224,18 @@ public class AttributeToolTest {
         IAssociation association = new TransactionSupport(projectAccessor.getTransactionManager()).call(() -> {
             return projectAccessor.getModelEditorFactory().getBasicModelEditor().createAssociation(classA, classB, "", "", "");
         });
-
+        
         // Get association ends
         IAttribute associationEndA = association.getMemberEnds()[0];
         IAttribute associationEndB = association.getMemberEnds()[1];
         String endBTypeIdBefore = associationEndB.getType().getId();
         String endAOwnerIdBefore = associationEndA.getOwner().getId();
-
+        
         // Create input DTO
         AttributeWithTypeDTO inputDTO = new AttributeWithTypeDTO(
             associationEndB.getId(),
             classA.getId());
-
+        
         // ----------------------------------------
         // Call setType()
         // ----------------------------------------
@@ -246,31 +246,31 @@ public class AttributeToolTest {
                 inputDTO,
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("because it is an end of an association"));
-
+        
         // Check that neither the type of end B nor the owner of end A moved
         assertEquals(endBTypeIdBefore, associationEndB.getType().getId());
         assertEquals(endAOwnerIdBefore, associationEndA.getOwner().getId());
     }
-
+    
     @Test
     void setTypeExpression_ok() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithTypeExpressionDTO inputDTO = new AttributeWithTypeExpressionDTO(
             attribute.getId(),
             "long");
-
+        
         // Check type expression before setting
         assertNotEquals("long", attribute.getTypeExpression());
-
+        
         // ----------------------------------------
         // Call setTypeExpression()
         // ----------------------------------------
@@ -279,14 +279,14 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check type expression after setting
         assertEquals("long", attribute.getTypeExpression());
     }
-
+    
     @Test
     void setTypeExpression_ng_withAssociationEnd() throws Exception {
         // Create an association between the owner of "sum" and "String"
@@ -300,18 +300,18 @@ public class AttributeToolTest {
         IAssociation association = new TransactionSupport(projectAccessor.getTransactionManager()).call(() -> {
             return projectAccessor.getModelEditorFactory().getBasicModelEditor().createAssociation(classA, classB, "", "", "");
         });
-
+        
         // Get association ends
         IAttribute associationEndA = association.getMemberEnds()[0];
         IAttribute associationEndB = association.getMemberEnds()[1];
         String endBTypeIdBefore = associationEndB.getType().getId();
         String endAOwnerIdBefore = associationEndA.getOwner().getId();
-
+        
         // Create input DTO
         AttributeWithTypeExpressionDTO inputDTO = new AttributeWithTypeExpressionDTO(
             associationEndB.getId(),
             "int");
-
+        
         // ----------------------------------------
         // Call setTypeExpression()
         // ----------------------------------------
@@ -322,32 +322,32 @@ public class AttributeToolTest {
                 inputDTO,
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("because it is an end of an association"));
-
+        
         // Check that neither the type of end B nor the owner of end A moved
         assertEquals(endBTypeIdBefore, associationEndB.getType().getId());
         assertEquals(endAOwnerIdBefore, associationEndA.getOwner().getId());
     }
-
+    
     @Test
     void setMultiplicity_ok_byInt_1() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "2",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("2..5", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -356,30 +356,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("2..5", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byInt_2() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "10",
             "*");
-
+        
         // Check multiplicity before setting
         assertNotEquals("10..*", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -388,30 +388,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("10..*", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byString() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "MIN",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..MAX", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -420,30 +420,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..MAX", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byIntAndString() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "0",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("0..MAX", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -452,30 +452,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("0..MAX", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byStringAndInt() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "MIN",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MIN..5", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -484,30 +484,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MIN..5", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byString_withOneValue_1() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "MAX",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -516,30 +516,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byString_withOneValue_2() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "",
             "MAX");
-
+        
         // Check multiplicity before setting
         assertNotEquals("MAX", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -548,30 +548,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("MAX", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byInt_withOneValue_1() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "5",
             "");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -580,30 +580,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_byInt_withOneValue_2() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -612,30 +612,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ok_withSameValue() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "5",
             "5");
-
+        
         // Check multiplicity before setting
         assertNotEquals("5", attribute.getMultiplicityRangeString());
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -644,30 +644,30 @@ public class AttributeToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check multiplicity after setting
         assertEquals("5", attribute.getMultiplicityRangeString());
     }
-
+    
     @Test
     void setMultiplicity_ng_withRange() throws Exception {
         // Get attribute
         IAttribute attribute = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "sum");
-
+        
         // Create input DTO (Astah would store '5..2' as '0..*')
         AttributeWithMultiplicityDTO inputDTO = new AttributeWithMultiplicityDTO(
             attribute.getId(),
             "5..2",
             "");
-
+        
         // Keep multiplicity before setting
         String multiplicityBefore = attribute.getMultiplicityRangeString();
-
+        
         // ----------------------------------------
         // Call setMultiplicity()
         // ----------------------------------------
@@ -678,11 +678,11 @@ public class AttributeToolTest {
                 inputDTO,
                 AttributeDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("Invalid multiplicity bound '5..2'"));
-
+        
         // Check that the multiplicity is not changed
         assertEquals(multiplicityBefore, attribute.getMultiplicityRangeString());
     }

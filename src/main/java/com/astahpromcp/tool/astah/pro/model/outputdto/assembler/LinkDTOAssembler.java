@@ -12,12 +12,12 @@ import java.util.List;
 
 public class LinkDTOAssembler {
     public static LinkDTO toDTO(@NonNull ILink astahLink) throws Exception {
-
+        
         List<NameIdTypeDTO> linkEndDTOs = new ArrayList<>();
         for (ILinkEnd astahLinkEnd : astahLink.getMemberEnds()) {
             linkEndDTOs.add(NameIdTypeDTOAssembler.toDTO(astahLinkEnd));
         }
-
+        
         return new LinkDTO(
             NamedElementDTOAssembler.toDTO(astahLink),
             linkEndDTOs);

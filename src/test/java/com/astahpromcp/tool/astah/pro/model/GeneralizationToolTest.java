@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GeneralizationToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private GeneralizationTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class GeneralizationToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/GeneralizationToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new GeneralizationTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             GeneralizationTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get generalization
         IGeneralization generalization = (IGeneralization) TestSupport.instance().getNamedElementByClassAndName(
             IGeneralization.class,
             "");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(generalization.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class GeneralizationToolTest {
             tool,
             inputDTO,
             GeneralizationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

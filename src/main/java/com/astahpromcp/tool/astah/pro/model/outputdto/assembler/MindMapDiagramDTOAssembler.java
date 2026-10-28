@@ -13,19 +13,19 @@ import java.util.List;
 
 public class MindMapDiagramDTOAssembler {
     public static MindMapDiagramDTO toDTO(@NonNull IMindMapDiagram astahMindMapDiagram) throws Exception {
-
+        
         LabelIdTypeDTO rootTopic;
         if (astahMindMapDiagram.getRoot() != null) {
             rootTopic = LabelIdTypeDTOAssembler.toDTO(astahMindMapDiagram.getRoot());
         } else {
             rootTopic = LabelIdTypeDTO.empty();
         }
-
+        
         List<LabelIdTypeDTO> floatingTopics = new ArrayList<>();
         for (INodePresentation presentation : astahMindMapDiagram.getFloatingTopics()) {
             floatingTopics.add(LabelIdTypeDTOAssembler.toDTO(presentation));
         }
-
+        
         return new MindMapDiagramDTO(
             DiagramDTOAssembler.toDTO(astahMindMapDiagram),
             rootTopic,

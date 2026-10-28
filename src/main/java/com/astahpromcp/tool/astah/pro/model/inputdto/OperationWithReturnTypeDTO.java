@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record OperationWithReturnTypeDTO(
     @JsonPropertyDescription("Target operation identifier")
     String targetOperationId,
-
+    
     @JsonPropertyDescription("Return type identifier")
     String returnTypeId
 ) {

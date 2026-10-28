@@ -12,34 +12,34 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DiagramLayoutGuideToolTest {
-
+    
     private DiagramLayoutGuideTool tool;
     private Method getGuide;
     private Method getAntiPatterns;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         // Tool
         tool = new DiagramLayoutGuideTool();
-
+        
         // getGuide() method
         getGuide = TestSupport.getAccessibleMethod(
             DiagramLayoutGuideTool.class,
             "getGuide",
             NoInputDTO.class);
-
+        
         // getAntiPatterns() method
         getAntiPatterns = TestSupport.getAccessibleMethod(
             DiagramLayoutGuideTool.class,
             "getAntiPatterns",
             NoInputDTO.class);
     }
-
+    
     @Test
     void getGuide_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getGuide()
         // ----------------------------------------
@@ -47,7 +47,7 @@ public class DiagramLayoutGuideToolTest {
             getGuide,
             tool,
             inputDTO);
-
+        
         // Check the contents
         assertNotNull(contents);
         assertEquals(6, contents.size());
@@ -58,12 +58,12 @@ public class DiagramLayoutGuideToolTest {
         assertInstanceOf(McpSchema.ImageContent.class, contents.get(4));
         assertInstanceOf(McpSchema.ImageContent.class, contents.get(5));
     }
-
+    
     @Test
     void getAntiPatterns_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAntiPatterns()
         // ----------------------------------------
@@ -71,7 +71,7 @@ public class DiagramLayoutGuideToolTest {
             getAntiPatterns,
             tool,
             inputDTO);
-
+        
         // Check the contents
         assertNotNull(contents);
         assertEquals(4, contents.size());

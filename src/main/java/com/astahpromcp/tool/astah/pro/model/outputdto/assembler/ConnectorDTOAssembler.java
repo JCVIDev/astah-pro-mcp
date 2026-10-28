@@ -17,24 +17,24 @@ public class ConnectorDTOAssembler {
         for (IAttribute part : astahConnector.getParts()) {
             parts.add(part != null ? NameIdTypeDTOAssembler.toDTO(part) : NameIdTypeDTO.empty());
         }
-
+        
         List<NameIdTypeDTO> ports = new ArrayList<>();
         for (IPort port : astahConnector.getPorts()) {
             ports.add(port != null ? NameIdTypeDTOAssembler.toDTO(port) : NameIdTypeDTO.empty());
         }
-
+        
         List<NameIdTypeDTO> partsWithPort = new ArrayList<>();
         for (IAttribute partWithPort : astahConnector.getPartsWithPort()) {
             partsWithPort.add(partWithPort != null ? NameIdTypeDTOAssembler.toDTO(partWithPort) : NameIdTypeDTO.empty());
         }
-
+        
         NameIdTypeDTO type;
         try {
             type = NameIdTypeDTOAssembler.toDTO(astahConnector.getType());
         } catch (Exception e) {
             type = NameIdTypeDTO.empty();
         }
-
+        
         return new ConnectorDTO(
             NamedElementDTOAssembler.toDTO(astahConnector),
             parts,

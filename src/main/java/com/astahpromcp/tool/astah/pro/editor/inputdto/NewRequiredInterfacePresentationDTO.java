@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record NewRequiredInterfacePresentationDTO(
     @JsonPropertyDescription("Target composite structure diagram identifier")
     String targetCompositeStructureDiagramId,
-
+    
     @JsonPropertyDescription("Target node presentation identifier. Must be one of the following node presentation types: Port, or Part.")
     String targetNodePresentationId,
-
+    
     @JsonPropertyDescription("Target interface identifier. Must be an interface (a class with the 'interface' stereotype).")
     String targetInterfaceId,
-
+    
     @JsonPropertyDescription("Location X coordinate")
     int locationX,
-
+    
     @JsonPropertyDescription("Location Y coordinate")
     int locationY
 ) {

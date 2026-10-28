@@ -29,32 +29,32 @@ public class NamedElementDTOAssembler {
         for (IDependency dependency : astahNamedElement.getClientDependencies()) {
             clientDependencies.add(DependencyDTOAssembler.toDTO(dependency));
         }
-
+        
         List<DependencyDTO> supplierDependencies = new ArrayList<>();
         for (IDependency dependency : astahNamedElement.getSupplierDependencies()) {
             supplierDependencies.add(DependencyDTOAssembler.toDTO(dependency));
         }
-
+        
         List<RealizationDTO> clientRealizations = new ArrayList<>();
         for (IRealization realization : astahNamedElement.getClientRealizations()) {
             clientRealizations.add(RealizationDTOAssembler.toDTO(realization));
         }
-
+        
         List<RealizationDTO> supplierRealizations = new ArrayList<>();
         for (IRealization realization : astahNamedElement.getSupplierRealizations()) {
             supplierRealizations.add(RealizationDTOAssembler.toDTO(realization));
         }
-
+        
         List<UsageDTO> clientUsages = new ArrayList<>();
         for (IUsage usage : astahNamedElement.getClientUsages()) {
             clientUsages.add(UsageDTOAssembler.toDTO(usage));
         }
-
+        
         List<UsageDTO> supplierUsages = new ArrayList<>();
         for (IUsage usage : astahNamedElement.getSupplierUsages()) {
             supplierUsages.add(UsageDTOAssembler.toDTO(usage));
         }
-
+        
         List<NameIdTypeDTO> ownedDiagrams = new ArrayList<>();
         // Workaround: Some diagrams caused an exception when trying to cast them.
         try {
@@ -64,18 +64,18 @@ public class NamedElementDTOAssembler {
         } catch (Exception e) {
             log.warn("Failed to get diagrams: {}", e.getMessage());
         }
-
+        
         // Each diagram is listed once, even when this element is drawn on it more than once
         List<NameIdTypeDTO> renderedInDiagrams = new ArrayList<>();
         for (IDiagram diagram : AstahProToolSupport.getRenderedInDiagrams(astahNamedElement)) {
             renderedInDiagrams.add(NameIdTypeDTOAssembler.toDTO(diagram));
         }
-
+        
         List<NameIdTypeDTO> constraints = new ArrayList<>();
         for (IConstraint constraint : astahNamedElement.getConstraints()) {
             constraints.add(NameIdTypeDTOAssembler.toDTO(constraint));
         }
-
+        
         VisibilityKind visibility;
         if (astahNamedElement.isPublicVisibility()) {
             visibility = VisibilityKind.PUBLIC;
@@ -88,7 +88,7 @@ public class NamedElementDTOAssembler {
         } else {
             visibility = VisibilityKind.PUBLIC;
         }
-
+        
         List<UrlHyperlinkDTO> urlHyperlinks = new ArrayList<>();
         List<FilePathHyperlinkDTO> filePathHyperlinks = new ArrayList<>();
         List<NamedElementHyperlinkDTO> namedElementHyperlinks = new ArrayList<>();
@@ -98,7 +98,7 @@ public class NamedElementDTOAssembler {
                     new UrlHyperlinkDTO(
                         hyperlink.getName(),
                         hyperlink.getComment()));
-            
+                
             } else if (hyperlink.isFile()) {
                 String filePath;
                 try {
@@ -110,15 +110,15 @@ public class NamedElementDTOAssembler {
                     new FilePathHyperlinkDTO(
                         filePath,
                         hyperlink.getComment()));
-            
+                
             } else if (hyperlink.isModel()) {
                 namedElementHyperlinks.add(
                     new NamedElementHyperlinkDTO(
                         hyperlink.getName(),
                         hyperlink.getComment()));
             }
-        }   
-
+        }
+        
         return new NamedElementDTO(
             ElementDTOAssembler.toDTO(astahNamedElement),
             NamedElementDTO.Type.getCorrespondingType(astahNamedElement).typeName,

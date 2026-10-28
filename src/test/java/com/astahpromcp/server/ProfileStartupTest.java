@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // The profiles start together or not at all
 public class ProfileStartupTest {
-
+    
     private McpServerApp app;
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (app != null) {
@@ -24,7 +24,7 @@ public class ProfileStartupTest {
             app = null;
         }
     }
-
+    
     private static boolean canConnect(int port) {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(InetAddress.getByName(McpServerConfig.HOST), port), 2_000);
@@ -33,7 +33,7 @@ public class ProfileStartupTest {
             return false;
         }
     }
-
+    
     // Occupy the programmatic port so startup fails after the direct profile has started.
     @Test
     void start_ng_leavesNoProfileRunningWhenAPortIsTaken() throws Exception {
@@ -41,12 +41,12 @@ public class ProfileStartupTest {
             occupied.setReuseAddress(false);
             occupied.bind(new InetSocketAddress(InetAddress.getByName(McpServerConfig.HOST),
                     McpServerConfig.PORT_FOR_PROGRAMMATIC), 1);
-
+            
             app = new McpServerApp();
-
+            
             assertThrows(Exception.class, () -> app.start(),
                     "A port that cannot be bound must disable the plugin rather than leave it half started");
-
+            
             assertFalse(canConnect(McpServerConfig.PORT_FOR_DIRECT),
                     "The direct profile started before the failure and must have been stopped again");
         }

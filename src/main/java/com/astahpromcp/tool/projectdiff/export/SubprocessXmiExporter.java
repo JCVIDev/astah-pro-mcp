@@ -18,64 +18,73 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Writes the XMI of a project file in a separate process on Astah's own Java runtime, rather than by opening the file in
 // Astah, which would replace the project the user has open.
 @Slf4j
 public final class SubprocessXmiExporter {
-
+    
     public static final String PROJECT_FILE_NAME = "project.asta";
     public static final String XMI_FILE_NAME = "out.xmi";
     public static final String INFORMATION_FILE_NAME = "info.json";
     public static final String LOG_FILE_NAME = "child.log";
-
+    
     // The process has a home directory and a temporary directory of its own, so that it neither changes the user's
     // settings nor leaves files behind
     private static final String HOME_DIRECTORY = "home";
     private static final String TEMPORARY_DIRECTORY = "tmp";
     private static final String CLASSES_DIRECTORY = "classes";
-
+    
     // Environment variables that a Java runtime reads options from. Set for Astah, they would apply to the process too,
     // and could switch on headless mode, for instance.
     private static final List<String> JAVA_OPTION_VARIABLES = List.of("JAVA_TOOL_OPTIONS", "_JAVA_OPTIONS", "JDK_JAVA_OPTIONS");
-
+    
     // The exit code of a process that wrote the XMI
     private static final int EXIT_OK = 0;
-
+    
     private static final long POLL_MILLIS = 200;
-
+    
     // How much of the end of a process's log an error message quotes
     private static final int LOG_TAIL_BYTES = 1_500;
-
+    
+    // How much of the end of a process's log is searched for the exception it reported
+    private static final int LOG_SCAN_BYTES = 64 * 1024;
+    
+    // A line of a log that names an exception
+    private static final Pattern EXCEPTION_LINE = Pattern.compile(
+            "(?:Caused by: |Exception in thread \"[^\"]*\" )?((?:[A-Za-z_$][\\w$]*\\.)+[A-Za-z_$][\\w$]*(?:Exception|Error)(?::.*)?)");
+    
     // How to start the process: the Java runtime, the Astah jars, and the main class that writes the XMI
     public record Plan(Path javaExecutable, Path astahProJar, Path astahApiJar, Path libraryDirectory, Class<?> mainClass) {
     }
-
+    
     // A process that is writing an XMI
     public record Running(Process process, Path workDirectory, long deadlineNanos) {
     }
-
+    
     private SubprocessXmiExporter() {
     }
-
+    
     // astahInstallPath is what ProjectAccessor.getAstahInstallPath() reports
     public static Plan plan(String javaHome, String astahInstallPath, Class<?> mainClass) {
         Path javaExecutable = Path.of(javaHome, "bin", File.separatorChar == '\\' ? "java.exe" : "java");
         if (!Files.isRegularFile(javaExecutable)) {
             throw new IllegalStateException("The Java runtime Astah runs on has no java executable at " + javaExecutable + ".");
         }
-
+        
         Path install = installDirectory(astahInstallPath);
         Path astahProJar = install.resolve("astah-pro.jar");
         Path astahApiJar = install.resolve("astah-api.jar");
         if (!Files.isRegularFile(astahProJar) || !Files.isRegularFile(astahApiJar)) {
             throw new IllegalStateException("Astah's installation at " + install + " does not have astah-pro.jar and astah-api.jar, which writing the XMI of a project file needs.");
         }
-
+        
         Path library = install.resolve("lib").resolve("rlm");
         return new Plan(javaExecutable, astahProJar, astahApiJar, Files.isDirectory(library) ? library : null, mainClass);
     }
-
+    
     // ProjectAccessor.getAstahInstallPath() reports a path such as "/C:/Program Files/astah-professional/" on Windows.
     // Package-private so that a test can check it on a Windows path on any platform.
     static Path installDirectory(String reported) {
@@ -85,7 +94,7 @@ public final class SubprocessXmiExporter {
         }
         return Path.of(path);
     }
-
+    
     // The command that starts the process. Every path of the job is relative to its working directory, because the Java
     // launcher reads the command line in the system code page, which cannot hold every character a path may have.
     // Package-private so that a test can check the command without starting it.
@@ -107,7 +116,7 @@ public final class SubprocessXmiExporter {
         command.add(Long.toString(timeoutSeconds));
         return command;
     }
-
+    
     // The values of the command that the system code page cannot hold. Those would reach the process as '?'.
     // Package-private so that a test can check it with a code page of its choice.
     static List<String> unencodable(List<String> command, Charset charset) {
@@ -120,7 +129,7 @@ public final class SubprocessXmiExporter {
         }
         return found;
     }
-
+    
     private static Charset commandLineCharset() {
         String name = System.getProperty("sun.jnu.encoding");
         try {
@@ -129,7 +138,7 @@ public final class SubprocessXmiExporter {
             return Charset.defaultCharset();
         }
     }
-
+    
     // Check, before anything is copied, that a process can be started at all from this installation
     public static void checkCommandLine(Plan plan) {
         List<String> found = unencodable(command(plan, McpServerConfig.PROJECT_DIFF_CHILD_MAX_HEAP, McpServerConfig.PROJECT_DIFF_EXPORT_TIMEOUT_SECONDS), commandLineCharset());
@@ -138,22 +147,22 @@ public final class SubprocessXmiExporter {
                     + commandLineCharset().name() + ") cannot hold, so the process could not be started: " + found);
         }
     }
-
+    
     // Prepare the work directory, which already holds the project file as project.asta, for the process
     public static void prepare(Path workDirectory, Plan plan) {
         try {
             Files.createDirectories(workDirectory.resolve(HOME_DIRECTORY));
             Files.createDirectories(workDirectory.resolve(TEMPORARY_DIRECTORY));
             writeMainClass(workDirectory.resolve(CLASSES_DIRECTORY), plan.mainClass());
-
+            
         } catch (IOException e) {
             throw new IllegalStateException("Failed to prepare the work directory " + workDirectory + ": " + e.getMessage(), e);
         }
     }
-
+    
     public static Running start(Path workDirectory, Plan plan, ProcessLauncher launcher) {
         checkCommandLine(plan);
-
+        
         ProcessBuilder builder = new ProcessBuilder(command(plan, McpServerConfig.PROJECT_DIFF_CHILD_MAX_HEAP, McpServerConfig.PROJECT_DIFF_EXPORT_TIMEOUT_SECONDS))
                 .directory(workDirectory.toFile())
                 .redirectErrorStream(true)
@@ -161,17 +170,17 @@ public final class SubprocessXmiExporter {
         for (String variable : JAVA_OPTION_VARIABLES) {
             builder.environment().remove(variable);
         }
-
+        
         try {
             Process process = launcher.start(builder);
             log.debug("Started the process {} that writes the XMI in {}", process.pid(), workDirectory);
             return new Running(process, workDirectory, System.nanoTime() + TimeUnit.SECONDS.toNanos(McpServerConfig.PROJECT_DIFF_EXPORT_TIMEOUT_SECONDS));
-
+            
         } catch (IOException e) {
             throw new IllegalStateException("Failed to start the process that writes the XMI: " + e.getMessage(), e);
         }
     }
-
+    
     // Wait for the process to write the XMI, and return what it reports. The process is stopped when the time runs out,
     // when its log or its XMI grows beyond the limit, or when the comparison is stopped.
     public static ExportInformation await(Running running, ProcessLauncher launcher, BooleanSupplier stopRequested) throws InterruptedException {
@@ -192,32 +201,32 @@ public final class SubprocessXmiExporter {
                     throw new IllegalStateException(String.format("The XMI grew beyond %,d bytes, which is more than this server compares.", McpServerConfig.PROJECT_DIFF_MAX_XMI_BYTES));
                 }
             }
-
+            
             int exit = process.exitValue();
             Path xmi = work.resolve(XMI_FILE_NAME);
             if (exit != EXIT_OK || !Files.isRegularFile(xmi)) {
-                throw new IllegalStateException("The process that writes the XMI ended with code " + exit + " without writing it. Its log ends with: " + tail(work.resolve(LOG_FILE_NAME)));
+                throw new IllegalStateException("The process that writes the XMI ended with code " + exit + " without writing it" + reportOf(work.resolve(LOG_FILE_NAME)));
             }
-
+            
             try {
                 return JsonSupport.OBJ_MAPPER.readValue(Files.readString(work.resolve(INFORMATION_FILE_NAME), StandardCharsets.UTF_8), ExportInformation.class);
-
+                
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to read what the process that writes the XMI reported: " + e.getMessage(), e);
             }
-
+            
         } finally {
             stop(process);
             launcher.finished(process);
         }
     }
-
+    
     // Give up on a process that nobody will wait for any more, because the comparison failed before it got to it
     public static void abandon(Running running, ProcessLauncher launcher) {
         stop(running.process());
         launcher.finished(running.process());
     }
-
+    
     // Stop the process if it is still running, and wait for it to end
     private static void stop(Process process) {
         if (!process.isAlive()) {
@@ -232,7 +241,7 @@ public final class SubprocessXmiExporter {
             Thread.currentThread().interrupt();
         }
     }
-
+    
     // Copy the class file of the main class to where the process finds it. The plugin is an OSGi bundle, whose classes
     // are not files on disk that a class path could name, so the class is read through the class loader instead.
     // Package-private so that a test can check the copy without starting a process.
@@ -247,7 +256,7 @@ public final class SubprocessXmiExporter {
             Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
         }
     }
-
+    
     private static long sizeOf(Path file) {
         try {
             return Files.exists(file) ? Files.size(file) : 0;
@@ -255,12 +264,30 @@ public final class SubprocessXmiExporter {
             return 0;
         }
     }
-
-    // The end of a log, for an error message
-    private static String tail(Path logFile) {
+    
+    // What the log of a process that failed says went wrong, for an error message.
+    private static String reportOf(Path logFile) {
+        String exception = lastExceptionOf(tail(logFile, LOG_SCAN_BYTES));
+        return exception.isEmpty() ? ". Its log ends with: " + tail(logFile, LOG_TAIL_BYTES) : ": " + exception;
+    }
+    
+    // The last exception a log reports
+    static String lastExceptionOf(String log) {
+        String found = "";
+        for (String line : log.split("\\R")) {
+            Matcher matcher = EXCEPTION_LINE.matcher(line);
+            if (matcher.matches()) {
+                found = matcher.group(1).strip();
+            }
+        }
+        return found;
+    }
+    
+    // The end of a log, at most the given number of bytes of it
+    private static String tail(Path logFile, int maxBytes) {
         try (RandomAccessFile file = new RandomAccessFile(logFile.toFile(), "r")) {
             long length = file.length();
-            int size = (int) Math.min(length, LOG_TAIL_BYTES);
+            int size = (int) Math.min(length, maxBytes);
             byte[] bytes = new byte[size];
             file.seek(length - size);
             file.readFully(bytes);

@@ -17,36 +17,36 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class McpServerAppTest {
-
+    
     private static final int[] SERVER_PORTS = {
             McpServerConfig.PORT_FOR_DIRECT,
             McpServerConfig.PORT_FOR_PROGRAMMATIC
     };
-
+    
     private McpServerApp app;
-
+    
     @BeforeEach
     void setUp() {
         app = new McpServerApp();
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (app != null) {
             app.stop();
         }
     }
-
+    
     // Starts the Jetty server; only tests that exercise the network layer need this.
     private void startServer() throws Exception {
         app.start();
         waitForServerReady();
     }
-
+    
     @Test
     void start_ok_rejectsConnectionsFromNonLoopbackAddresses() throws Exception {
         startServer();
-
+        
         InetAddress loopback = InetAddress.getByName("127.0.0.1");
         InetAddress nonLoopback = findNonLoopbackAddress();
         for (int port : SERVER_PORTS) {
@@ -54,47 +54,47 @@ public class McpServerAppTest {
             assertDoesNotThrow(
                     () -> attemptConnection(loopback, targetPort),
                     () -> "Loopback connection should succeed on port " + targetPort);
-
+            
             IOException exception = assertThrows(IOException.class,
                     () -> attemptConnection(nonLoopback, targetPort),
                     () -> "Expected connection to be rejected for " + nonLoopback + " on port " + targetPort);
-
+            
             assertTrue(exception instanceof ConnectException ||
-                       exception instanceof NoRouteToHostException ||
-                       exception instanceof SocketTimeoutException,
+                    exception instanceof NoRouteToHostException ||
+                    exception instanceof SocketTimeoutException,
                     "Expected the connection to be refused or timeout, but got: " + exception);
         }
     }
-
+    
     @Test
     void start_ok_everyJettyConnectorBindsOnlyToLoopbackHost() throws Exception {
         startServer();
-
+        
         List<Server> jettyServers = app.getJettyServers();
         assertEquals(SERVER_PORTS.length, jettyServers.size(), "Every profile should have its own Jetty server");
-
+        
         for (Server jettyServer : jettyServers) {
             Connector[] connectors = jettyServer.getConnectors();
             assertTrue(connectors.length > 0, "Expected at least one connector to be configured");
-
+            
             for (Connector connector : connectors) {
                 ServerConnector serverConnector = assertInstanceOf(
                         ServerConnector.class, connector, "Connector should be a ServerConnector");
                 String boundHost = serverConnector.getHost();
-
+                
                 assertNotNull(boundHost, "ServerConnector host should be explicitly set");
                 assertEquals("127.0.0.1", boundHost, "ServerConnector must bind to 127.0.0.1");
                 assertNotEquals("0.0.0.0", boundHost, "ServerConnector must not bind to 0.0.0.0");
             }
         }
     }
-
+    
     private void waitForServerReady() throws InterruptedException, UnknownHostException {
         for (int port : SERVER_PORTS) {
             waitForPortReady(port);
         }
     }
-
+    
     private void waitForPortReady(int port) throws InterruptedException, UnknownHostException {
         long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
         InetAddress loopback = InetAddress.getByName("127.0.0.1");
@@ -108,13 +108,13 @@ public class McpServerAppTest {
         }
         fail("Server did not start accepting loopback connections within timeout for port " + port);
     }
-
+    
     private void attemptConnection(InetAddress address, int port) throws IOException {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(address, port), 5_000);
         }
     }
-
+    
     private InetAddress findNonLoopbackAddress() throws SocketException {
         InetAddress ipv6Candidate = null;
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();

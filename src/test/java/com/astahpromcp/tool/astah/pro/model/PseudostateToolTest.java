@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PseudostateToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private PseudostateTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class PseudostateToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/PseudostateToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new PseudostateTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             PseudostateTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get pseudostate
         IPseudostate pseudostate = (IPseudostate) TestSupport.instance().getNamedElementByClassAndName(
             IPseudostate.class,
             "InitialPseudostate0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(pseudostate.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class PseudostateToolTest {
             tool,
             inputDTO,
             PseudostateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

@@ -45,9 +45,9 @@ import java.util.Set;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/DiagramEditor.html
 @Slf4j
 public class DiagramEditorTool extends AstahToolProvider {
-
+    
     private static final double SVG_IMAGE_RASTERIZATION_SCALE = 4.0;
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
@@ -55,7 +55,7 @@ public class DiagramEditorTool extends AstahToolProvider {
     private final DiagramEditorSupport diagramEditorSupport;
     private final ImageConvertSupport imageConvertSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public DiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, SystemPropertySupport systemPropertySupport, DiagramEditorSupport diagramEditorSupport, ImageConvertSupport imageConvertSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -65,7 +65,7 @@ public class DiagramEditorTool extends AstahToolProvider {
         this.imageConvertSupport = imageConvertSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -75,35 +75,35 @@ public class DiagramEditorTool extends AstahToolProvider {
                 this::insertSvgImage,
                 NewSvgImageWithPointDTO.class,
                 RectangleDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "insert_png_or_jpg_img_on_dgm",
                 "Insert a PNG or JPG image (specified by image URL) at the specified point (specified by x and y coordinates) on the specified diagram (specified by ID), and return the rectangle (x, y, width, height) representing the boundary of the newly created image rectangle along with the updated diagram image in low resolution. When specifying a local image file, use the 'file:///' protocol.",
                 this::insertPngOrJpgImage,
                 NewPngOrJpgImageWithPointDTO.class,
                 RectangleDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "insert_rect_on_dgm",
                 "Insert a rectangle on the specified diagram (specified by ID), and return the newly created rectangle presentation along with the updated diagram image in low resolution. For example, use this tool when you want to draw a system boundary on a use case diagram.",
                 this::insertRect,
                 NewRectDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "insert_txt_on_dgm",
                 "Insert a text at the specified point (specified by x and y coordinates) on the specified diagram (specified by ID), and return the newly created node presentation of the text along with the updated diagram image in low resolution.",
                 this::insertText,
                 NewTextWithPointDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "delete_dgm",
                 "Delete the specified diagram (specified by ID), and return the deleted diagram.",
                 this::deleteDiagram,
                 DeleteDiagramDTO.class,
                 DiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "delete_prst",
                 "Delete the specified presentation (specified by ID) on the specified diagram (specified by ID), and return the deleted presentation along with the updated diagram image in low resolution. Note that deleting a presentation does not delete the corresponding model element. However, some presentations have a model element that is hidden from the model browser, and such a model element is deleted when that presentation is deleted.",
@@ -112,38 +112,38 @@ public class DiagramEditorTool extends AstahToolProvider {
                 PresentationDTO.class)
         );
     }
-
+    
     private Pair<RectangleDTO, List<McpSchema.Content>> insertSvgImage(NewSvgImageWithPointDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
+        
         INodePresentation astahImagePresentation = createSvgImagePresentation(
                 astahDiagram,
                 diagramEditor,
                 param.imageSvgCode(),
                 param.locationX(),
                 param.locationY());
-
+        
         RectangleDTO dto = RectangleDTOAssembler.toDTO(astahImagePresentation.getRectangle());
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private INodePresentation createSvgImagePresentation(IDiagram astahDiagram, DiagramEditor diagramEditor, String imageSvgCode, double locationX, double locationY) throws Exception {
-
+        
         ParsedSvg svg = imageConvertSupport.parseSvg(imageSvgCode);
         imageConvertSupport.requireInsertableSize(svg);
-
+        
         RasterizedSvgImage svgImage = imageConvertSupport.rasterizeScaled(svg, SVG_IMAGE_RASTERIZATION_SCALE);
         int displayWidth = svgImage.displayWidth();
         int displayHeight = svgImage.displayHeight();
@@ -151,49 +151,49 @@ public class DiagramEditorTool extends AstahToolProvider {
         for (IPresentation presentation : AstahProToolSupport.getPresentationsOnDiagram(astahDiagram)) {
             beforePresentationIds.add(presentation.getID());
         }
-
+        
         try {
             // Insert the high-resolution image and shrink only its display size, so that the image stays sharp when the diagram is zoomed in or exported.
-            return txnAstah.call( () -> {
+            return txnAstah.call(() -> {
                 // Note: The return value of createImage() is null, so the newly created presentation is identified by diffing the diagram's presentation IDs.
                 INodePresentation createdPresentation = diagramEditor.createImage(
                         svgImage.image(),
                         new Point2D.Double(locationX, locationY));
-
+                
                 INodePresentation imagePresentation = createdPresentation != null ? createdPresentation : findNewNodePresentation(astahDiagram, beforePresentationIds);
                 if (imagePresentation == null) {
                     throw new RuntimeException("Failed to identify the created image presentation.");
                 }
-
+                
                 imagePresentation.setWidth(displayWidth);
                 imagePresentation.setHeight(displayHeight);
-
+                
                 return imagePresentation;
             });
-
+            
         } catch (InvalidEditingException e) {
             // Note: Some diagrams (e.g. sequence diagrams) reject resizing of an image presentation.
             log.info("Resizing an image presentation is not supported on {}. Inserting an image rasterized at {}x{} instead.", astahDiagram.getClass().getName(), displayWidth, displayHeight);
-
+            
             Image exactSizeImage = imageConvertSupport.rasterize(svg, displayWidth, displayHeight);
-
-            return txnAstah.call( () -> {
+            
+            return txnAstah.call(() -> {
                 INodePresentation createdPresentation = diagramEditor.createImage(
                         exactSizeImage,
                         new Point2D.Double(locationX, locationY));
-
+                
                 INodePresentation imagePresentation = createdPresentation != null ? createdPresentation : findNewNodePresentation(astahDiagram, beforePresentationIds);
                 if (imagePresentation == null) {
                     throw new RuntimeException("Failed to identify the created image presentation.");
                 }
-
+                
                 return imagePresentation;
             });
         }
     }
-
+    
     private INodePresentation findNewNodePresentation(IDiagram astahDiagram, Set<String> beforePresentationIds) throws Exception {
-
+        
         for (IPresentation presentation : AstahProToolSupport.getPresentationsOnDiagram(astahDiagram)) {
             if (beforePresentationIds.contains(presentation.getID())) {
                 continue;
@@ -202,25 +202,25 @@ public class DiagramEditorTool extends AstahToolProvider {
                 return nodePresentation;
             }
         }
-
+        
         return null;
     }
-
+    
     private Pair<RectangleDTO, List<McpSchema.Content>> insertPngOrJpgImage(NewPngOrJpgImageWithPointDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
+        
         Image image = imageConvertSupport.urlToImage(param.imageUrl());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             // Note: The return value of createImage() is null (likely due to an API bug), so the return value cannot be used.
             diagramEditor.createImage(
                 image,
@@ -228,31 +228,31 @@ public class DiagramEditorTool extends AstahToolProvider {
                         param.locationX(),
                         param.locationY()));
         });
-
+        
         RectangleDTO dto = new RectangleDTO(
             param.locationX(),
             param.locationY(),
             image.getWidth(null),
             image.getHeight(null));
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> insertRect(NewRectDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return diagramEditor.createRect(
                 new Point2D.Double(
                         param.locationX(),
@@ -260,95 +260,95 @@ public class DiagramEditorTool extends AstahToolProvider {
                 param.width(),
                 param.height());
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> insertText(NewTextWithPointDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return diagramEditor.createText(
                 param.textContent(),
                 new Point2D.Double(
                         param.locationX(),
                         param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private DiagramDTO deleteDiagram(DeleteDiagramDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         // Delete target diagram
         DiagramDTO diagramDTO = DiagramDTOAssembler.toDTO(astahDiagram);
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
-        systemPropertySupport.deleteWithoutConfirmationDialog( () -> {
-            txnAstah.run( () -> {
+        
+        systemPropertySupport.deleteWithoutConfirmationDialog(() -> {
+            txnAstah.run(() -> {
                 diagramEditor.deleteDiagram();
             });
         });
-
+        
         astahProToolSupport.verifyDeleted(param.targetDiagramId());
-
+        
         return diagramDTO;
     }
-
+    
     private Pair<PresentationDTO, List<McpSchema.Content>> deletePresentation(DeletePresentationDTO param) throws Exception {
         IPresentation astahPresentation = astahProToolSupport.getPresentation(param.targetPresentationId());
-
+        
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         // Delete target presentation
         PresentationDTO presentationDTO = PresentationDTOAssembler.toDTO(astahPresentation);
-
+        
         DiagramEditor diagramEditor;
         try {
             diagramEditor = diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get diagram editor.", e);
         }
-
+        
         diagramEditor.setDiagram(astahDiagram);
-
-        systemPropertySupport.deleteWithoutConfirmationDialog( () -> {
-            txnAstah.run( () -> {
+        
+        systemPropertySupport.deleteWithoutConfirmationDialog(() -> {
+            txnAstah.run(() -> {
                 diagramEditor.deletePresentation(astahPresentation);
             });
         });
-
+        
         astahProToolSupport.verifyDeleted(param.targetPresentationId());
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(presentationDTO, List.of(thumbnailContent));
     }
-
+    
 }

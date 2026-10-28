@@ -8,12 +8,11 @@ public record ImageFileDTO(
     
     @JsonPropertyDescription("Image format (e.g., 'png', 'jpg', 'gif')")
     String imageFormat,
-
+    
     @JsonPropertyDescription("Image width in pixels")
     int imageWidth,
-
+    
     @JsonPropertyDescription("Image height in pixels")
     int imageHeight
 ) {
 }
-

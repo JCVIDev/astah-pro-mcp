@@ -38,7 +38,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NamedElementToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private TransactionSupport transactionSupport;
     private NamedElementTool tool;
@@ -49,7 +49,7 @@ public class NamedElementToolTest {
     private Method setAlias2;
     private Method setDefinition;
     private Method setVisibility;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -57,73 +57,73 @@ public class NamedElementToolTest {
         transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/NamedElementToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new NamedElementTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // getAllTypes() method
         getAllTypes = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "getAllTypes",
             NoInputDTO.class);
-
+        
         // setName() method
         setName = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "setName",
             NamedElementWithNameDTO.class);
-
+        
         // setAlias1() method
         setAlias1 = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "setAlias1",
             NamedElementWithAlias1DTO.class);
-
+        
         // setAlias2() method
         setAlias2 = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "setAlias2",
             NamedElementWithAlias2DTO.class);
-
+        
         // setDefinition() method
         setDefinition = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "setDefinition",
             NamedElementWithDefinitionDTO.class);
-
+        
         // setVisibility() method
         setVisibility = TestSupport.getAccessibleMethod(
             NamedElementTool.class,
             "setVisibility",
             NamedElementWithVisibilityDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(namedElement.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -132,7 +132,7 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(namedElement.getId(), outputDTO.element().id());
@@ -141,14 +141,14 @@ public class NamedElementToolTest {
         assertEquals("C:\\data\\sample2.xlsx", outputDTO.filePathHyperlinks().get(1).filePath());
         assertFalse(outputDTO.namedElementHyperlinks().get(0).namedElementId().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_ownedDiagramsAndRenderedInDiagrams() throws Exception {
         IModel project = projectAccessor.getProject();
         BasicModelEditor basicModelEditor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
         ClassDiagramEditor classDiagramEditor = projectAccessor.getDiagramEditorFactory().getClassDiagramEditor();
         StateMachineDiagramEditor stateMachineDiagramEditor = projectAccessor.getDiagramEditorFactory().getStateMachineDiagramEditor();
-
+        
         // A class drawn twice on a class diagram owned by the root package, and owning a state machine diagram
         IClass clazz = transactionSupport.call(() -> basicModelEditor.createClass(project, "DiagramOwner"));
         IClassDiagram classDiagram = transactionSupport.call(() -> {
@@ -160,7 +160,7 @@ public class NamedElementToolTest {
         });
         IStateMachineDiagram stateMachineDiagram = transactionSupport.call(() ->
             stateMachineDiagramEditor.createStatemachineDiagram(clazz, "OwnedStateMachineDiagram"));
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -174,19 +174,19 @@ public class NamedElementToolTest {
             tool,
             new IdDTO(classDiagram.getId()),
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertEquals(List.of(stateMachineDiagram.getId()), idsOf(classDTO.ownedDiagrams()));
         assertEquals(List.of(classDiagram.getId()), idsOf(classDTO.renderedInDiagrams()));
         assertTrue(classDiagramDTO.renderedInDiagrams().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_ownedDiagramsIncludeBehaviorDiagramsButNotNestedOnes() throws Exception {
         IModel project = projectAccessor.getProject();
         BasicModelEditor basicModelEditor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
         IDiagramEditorFactory diagramEditorFactory = projectAccessor.getDiagramEditorFactory();
-
+        
         IPackage pkg = transactionSupport.call(() -> basicModelEditor.createPackage(project, "DiagramOwnerPackage"));
         IClass clazz = transactionSupport.call(() -> basicModelEditor.createClass(pkg, "DiagramOwnerClass"));
         IDiagram packageDiagram = transactionSupport.call(() ->
@@ -197,7 +197,7 @@ public class NamedElementToolTest {
             diagramEditorFactory.getStateMachineDiagramEditor().createStatemachineDiagram(clazz, "ClassStateMachineDiagram"),
             diagramEditorFactory.getActivityDiagramEditor().createActivityDiagram(clazz, "ClassActivityDiagram"),
             diagramEditorFactory.getSequenceDiagramEditor().createSequenceDiagram(clazz, "ClassSequenceDiagram")));
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -211,26 +211,26 @@ public class NamedElementToolTest {
             tool,
             new IdDTO(clazz.getId()),
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertEquals(List.of(packageDiagram.getId()), idsOf(packageDTO.ownedDiagrams()));
         assertEquals(classDiagrams.stream().map(IDiagram::getId).sorted().toList(), idsOf(classDTO.ownedDiagrams()).stream().sorted().toList());
         assertTrue(packageDTO.renderedInDiagrams().isEmpty());
         assertTrue(classDTO.renderedInDiagrams().isEmpty());
     }
-
+    
     @Test
     void getInfo_ok_lifelineOwnsNoDiagramsAndIsRenderedInItsSequenceDiagram() throws Exception {
         IModel project = projectAccessor.getProject();
         SequenceDiagramEditor sequenceDiagramEditor = projectAccessor.getDiagramEditorFactory().getSequenceDiagramEditor();
-
+        
         ISequenceDiagram sequenceDiagram = transactionSupport.call(() ->
             sequenceDiagramEditor.createSequenceDiagram(project, "LifelineSequenceDiagram"));
         ILifeline lifeline = transactionSupport.call(() -> {
             sequenceDiagramEditor.setDiagram(sequenceDiagram);
             return (ILifeline) sequenceDiagramEditor.createLifeline("lifeline", 0).getModel();
         });
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -239,17 +239,17 @@ public class NamedElementToolTest {
             tool,
             new IdDTO(lifeline.getId()),
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertTrue(outputDTO.ownedDiagrams().isEmpty());
         assertEquals(List.of(sequenceDiagram.getId()), idsOf(outputDTO.renderedInDiagrams()));
     }
-
+    
     @Test
     void getInfo_ok_clientListsHoldRelationshipsWhoseClientIsThisElement() throws Exception {
         IModel project = projectAccessor.getProject();
         BasicModelEditor basicModelEditor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
-
+        
         // A client class that uses one class, depends on another and realizes an interface
         IClass client = transactionSupport.call(() -> basicModelEditor.createClass(project, "RelationshipClient"));
         IClass usedClass = transactionSupport.call(() -> basicModelEditor.createClass(project, "UsedClass"));
@@ -259,7 +259,7 @@ public class NamedElementToolTest {
         // Unlike createUsage and createRealization, createDependency takes the supplier first
         transactionSupport.call(() -> basicModelEditor.createDependency(dependedClass, client, ""));
         transactionSupport.call(() -> basicModelEditor.createRealization(client, realizedInterface, ""));
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -283,7 +283,7 @@ public class NamedElementToolTest {
             tool,
             new IdDTO(realizedInterface.getId()),
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertEquals(List.of(usedClass.getId()), clientDTO.clientUsages().stream().map(usage -> usage.supplier().id()).toList());
         assertEquals(List.of(dependedClass.getId()), clientDTO.clientDependencies().stream().map(dependency -> dependency.supplier().id()).toList());
@@ -291,25 +291,25 @@ public class NamedElementToolTest {
         assertTrue(clientDTO.supplierUsages().isEmpty());
         assertTrue(clientDTO.supplierDependencies().isEmpty());
         assertTrue(clientDTO.supplierRealizations().isEmpty());
-
+        
         assertEquals(List.of(client.getId()), usedClassDTO.supplierUsages().stream().map(usage -> usage.client().id()).toList());
         assertEquals(List.of(client.getId()), dependedClassDTO.supplierDependencies().stream().map(dependency -> dependency.client().id()).toList());
         assertEquals(List.of(client.getId()), realizedInterfaceDTO.supplierRealizations().stream().map(realization -> realization.client().id()).toList());
         assertTrue(usedClassDTO.clientUsages().isEmpty());
-
+        
         assertTrue(usedClassDTO.supplierDependencies().isEmpty());
         assertTrue(realizedInterfaceDTO.supplierDependencies().isEmpty());
     }
-
+    
     private static List<String> idsOf(List<NameIdTypeDTO> diagrams) {
         return diagrams.stream().map(NameIdTypeDTO::id).toList();
     }
-
+    
     @Test
     void getAllTypes_ok() throws Exception {
         // Create input DTO
         NoInputDTO inputDTO = new NoInputDTO();
-
+        
         // ----------------------------------------
         // Call getAllTypes()
         // ----------------------------------------
@@ -318,28 +318,28 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementTypeListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(NamedElementDTO.Type.values().length - 1, outputDTO.value().size());
         assertFalse(outputDTO.value().contains("Unknown"));
     }
-
+    
     @Test
     void setName_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NamedElementWithNameDTO inputDTO = new NamedElementWithNameDTO(
             namedElement.getId(),
             "NewFoo");
-
+        
         // Check name before setting
         assertNotEquals("NewFoo", namedElement.getName());
-
+        
         // ----------------------------------------
         // Call setName()
         // ----------------------------------------
@@ -348,27 +348,27 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check name after setting
         assertEquals("NewFoo", namedElement.getName());
     }
-
+    
     @Test
     void setName_ng_lineBreakInClassName() throws Exception {
         IModel project = projectAccessor.getProject();
         BasicModelEditor basicModelEditor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
-
+        
         // A class rejects a line break in its name
         IClass clazz = transactionSupport.call(() -> basicModelEditor.createClass(project, "LineBreakTarget"));
-
+        
         // Create input DTO
         NamedElementWithNameDTO inputDTO = new NamedElementWithNameDTO(
             clazz.getId(),
             "Line\nBreak");
-
+        
         // ----------------------------------------
         // Call setName()
         // ----------------------------------------
@@ -379,28 +379,28 @@ public class NamedElementToolTest {
                 inputDTO,
                 NamedElementDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(InvalidEditingException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("line breaks"));
         assertEquals("LineBreakTarget", clazz.getName());
     }
-
+    
     @Test
     void setAlias1_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NamedElementWithAlias1DTO inputDTO = new NamedElementWithAlias1DTO(
             namedElement.getId(),
             "Alias1");
-
+        
         // Check alias1 before setting
         assertNotEquals("Alias1", namedElement.getAlias1());
-
+        
         // ----------------------------------------
         // Call setAlias1()
         // ----------------------------------------
@@ -409,29 +409,29 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check alias1 after setting
         assertEquals("Alias1", namedElement.getAlias1());
     }
-
+    
     @Test
     void setAlias2_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NamedElementWithAlias2DTO inputDTO = new NamedElementWithAlias2DTO(
             namedElement.getId(),
             "Alias2");
-
+        
         // Check alias2 before setting
         assertNotEquals("Alias2", namedElement.getAlias2());
-
+        
         // ----------------------------------------
         // Call setAlias2()
         // ----------------------------------------
@@ -440,29 +440,29 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check alias2 after setting
         assertEquals("Alias2", namedElement.getAlias2());
     }
-
+    
     @Test
     void setDefinition_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NamedElementWithDefinitionDTO inputDTO = new NamedElementWithDefinitionDTO(
             namedElement.getId(),
             "This is a test definition");
-
+        
         // Check definition before setting
         assertNotEquals("This is a test definition", namedElement.getDefinition());
-
+        
         // ----------------------------------------
         // Call setDefinition()
         // ----------------------------------------
@@ -471,29 +471,29 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check definition after setting
         assertEquals("This is a test definition", namedElement.getDefinition());
     }
-
+    
     @Test
     void setVisibility_ok() throws Exception {
         // Get named element
         INamedElement namedElement = (INamedElement) TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NamedElementWithVisibilityDTO inputDTO = new NamedElementWithVisibilityDTO(
             namedElement.getId(),
             VisibilityKind.PRIVATE);
-
+        
         // Check visibility before setting
         assertFalse(namedElement.isPrivateVisibility());
-
+        
         // ----------------------------------------
         // Call setVisibility()
         // ----------------------------------------
@@ -502,10 +502,10 @@ public class NamedElementToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check visibility after setting
         assertTrue(namedElement.isPrivateVisibility());
     }

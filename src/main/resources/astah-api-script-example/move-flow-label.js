@@ -30,51 +30,51 @@ var ILinkPresentation = Java.type('com.change_vision.jude.api.inf.presentation.I
 
 // A control flow and an object flow are both an IFlow, told apart only by the nodes they connect.
 function isFlowLink(entity) {
-  return entity instanceof ILinkPresentation && entity.getModel() instanceof IFlow;
+    return entity instanceof ILinkPresentation && entity.getModel() instanceof IFlow;
 }
 
 // findElements matches the name exactly, but two diagrams are free to share a name.
 function findDiagram(name) {
-  var hits = astah.findElements(IDiagram.class, name);
-  if (hits.length !== 1) {
-    throw new Error('Expected 1 diagram named "' + name + '", found ' + hits.length + '.');
-  }
-  return hits[0];
+    var hits = astah.findElements(IDiagram.class, name);
+    if (hits.length !== 1) {
+        throw new Error('Expected 1 diagram named "' + name + '", found ' + hits.length + '.');
+    }
+    return hits[0];
 }
 
 // Two flows are free to join the same pair of nodes.
 function findFlowLink(diagram) {
-  var hits = [];
-  var presentations = diagram.getPresentations();
-
-  for (var i = 0; i < presentations.length; i++) {
-    if (!isFlowLink(presentations[i])) { continue; }
-
-    var model = presentations[i].getModel();
-    if (model.getSource().getName() === sourceNodeName && model.getTarget().getName() === targetNodeName) {
-      hits.push(presentations[i]);
+    var hits = [];
+    var presentations = diagram.getPresentations();
+    
+    for (var i = 0; i < presentations.length; i++) {
+        if (!isFlowLink(presentations[i])) { continue; }
+        
+        var model = presentations[i].getModel();
+        if (model.getSource().getName() === sourceNodeName && model.getTarget().getName() === targetNodeName) {
+            hits.push(presentations[i]);
+        }
     }
-  }
-
-  if (hits.length !== 1) {
-    throw new Error('Expected 1 flow from ' + sourceNodeName + ' to ' + targetNodeName + ' on "'
-      + diagram.getName() + '", found ' + hits.length + '. Put the ID of its link presentation in linkPresentationId.');
-  }
-  return hits[0];
+    
+    if (hits.length !== 1) {
+        throw new Error('Expected 1 flow from ' + sourceNodeName + ' to ' + targetNodeName + ' on "'
+            + diagram.getName() + '", found ' + hits.length + '. Put the ID of its link presentation in linkPresentationId.');
+    }
+    return hits[0];
 }
 
 // getEntity looks up presentations as well as model elements, and answers null for an ID it does not know.
 var link;
 if (linkPresentationId !== '') {
-  link = astah.getEntity(linkPresentationId);
-  if (link === null) {
-    throw new Error('No presentation in the current project has ID ' + linkPresentationId + '.');
-  }
-  if (!isFlowLink(link)) {
-    throw new Error(linkPresentationId + ' is not the line of a control flow or an object flow.');
-  }
+    link = astah.getEntity(linkPresentationId);
+    if (link === null) {
+        throw new Error('No presentation in the current project has ID ' + linkPresentationId + '.');
+    }
+    if (!isFlowLink(link)) {
+        throw new Error(linkPresentationId + ' is not the line of a control flow or an object flow.');
+    }
 } else {
-  link = findFlowLink(findDiagram(diagramName));
+    link = findFlowLink(findDiagram(diagramName));
 }
 
 
@@ -87,7 +87,7 @@ if (linkPresentationId !== '') {
 // it. A flow with neither shows no label, so there is nothing to move.
 var label = link.getLabel();
 if (label === '') {
-  throw new Error('The flow link ' + link.getID() + ' has neither a guard nor an action, so it shows no label to move.');
+    throw new Error('The flow link ' + link.getID() + ' has neither a guard nor an action, so it shows no label to move.');
 }
 
 // A flow keeps no position for its label while its name is hidden, and getProperty answers null. Nor does it in
@@ -95,8 +95,8 @@ if (label === '') {
 var x = link.getProperty(Key.NAME_X);
 var y = link.getProperty(Key.NAME_Y);
 if (x === null || y === null) {
-  throw new Error('The flow link ' + link.getID() + ' (label "' + label + '") keeps no label position.'
-    + ' Show its name, or end the transaction that set its guard or action before moving the label.');
+    throw new Error('The flow link ' + link.getID() + ' (label "' + label + '") keeps no label position.'
+        + ' Show its name, or end the transaction that set its guard or action before moving the label.');
 }
 
 // A position is held as a string, so it is read as a number and written back as a string.
@@ -106,19 +106,19 @@ var newY = parseFloat(y) + (move.down || 0) - (move.up || 0);
 var transactionManager = astah.getTransactionManager();
 transactionManager.beginTransaction();
 try {
-  link.setProperty(Key.NAME_X, String(newX));
-  link.setProperty(Key.NAME_Y, String(newY));
-  transactionManager.endTransaction();
+    link.setProperty(Key.NAME_X, String(newX));
+    link.setProperty(Key.NAME_Y, String(newY));
+    transactionManager.endTransaction();
 } catch (e) {
-  transactionManager.abortTransaction();
-  throw e;
+    transactionManager.abortTransaction();
+    throw e;
 }
 
 
 // A position is kept to many decimal places, so the output rounds it to one.
 function rounded(value) {
-  return Math.round(value * 10) / 10;
+    return Math.round(value * 10) / 10;
 }
 
 print('Moved the label "' + label + '" of the flow link ' + link.getID() + ' from ('
-  + rounded(parseFloat(x)) + ', ' + rounded(parseFloat(y)) + ') to (' + rounded(newX) + ', ' + rounded(newY) + ').');
+    + rounded(parseFloat(x)) + ', ' + rounded(parseFloat(y)) + ') to (' + rounded(newX) + ', ' + rounded(newY) + ').');

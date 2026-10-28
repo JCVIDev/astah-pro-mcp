@@ -12,13 +12,13 @@ import java.util.List;
 
 @Slf4j
 public class SvgOverlayTool implements ToolProvider {
-
+    
     private final SvgOverlaySupport svgOverlaySupport;
-
+    
     public SvgOverlayTool(SvgOverlaySupport svgOverlaySupport) {
         this.svgOverlaySupport = svgOverlaySupport;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -29,7 +29,7 @@ public class SvgOverlayTool implements ToolProvider {
                 SvgOverlayOnDiagramDTO.class)
         );
     }
-
+    
     private List<McpSchema.Content> overlaySvgImageOnDiagramImage(SvgOverlayOnDiagramDTO param) throws Exception {
         // A diagram with nothing drawn on it yields an explanatory text alongside the image, so the contents are
         // returned as the support built them rather than wrapped into a fixed single-image list.

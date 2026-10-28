@@ -11,79 +11,79 @@ import java.util.Objects;
 
 public class AttributeDTOAssembler {
     public static AttributeDTO toDTO(@NonNull IAttribute astahAttribute) throws Exception {
-
+        
         // Note: For the Port element, an exception occurs when retrieving the following values, so the access must be wrapped in a try-catch block.
-
+        
         boolean isAggregate;
         try {
             isAggregate = astahAttribute.isAggregate();
         } catch (Exception e) {
             isAggregate = false;
         }
-
+        
         boolean isChangeable;
         try {
             isChangeable = astahAttribute.isChangeable();
         } catch (Exception e) {
             isChangeable = false;
         }
-
+        
         NameIdTypeDTO type;
         try {
             type = NameIdTypeDTOAssembler.toDTO(astahAttribute.getType());
         } catch (Exception e) {
             type = NameIdTypeDTO.empty();
         }
-
+        
         boolean isComposite;
         try {
             isComposite = astahAttribute.isComposite();
         } catch (Exception e) {
             isComposite = false;
         }
-
+        
         boolean isDerived;
         try {
             isDerived = astahAttribute.isDerived();
         } catch (Exception e) {
             isDerived = false;
         }
-
+        
         boolean isStatic;
         try {
             isStatic = astahAttribute.isStatic();
         } catch (Exception e) {
             isStatic = false;
         }
-
+        
         String initialValue;
         try {
             initialValue = Objects.requireNonNullElse(astahAttribute.getInitialValue(), "");
         } catch (Exception e) {
             initialValue = "";
         }
-
+        
         String multiplicity;
         try {
             multiplicity = Objects.requireNonNullElse(astahAttribute.getMultiplicityRangeString(), "");
         } catch (Exception e) {
             multiplicity = "";
         }
-
+        
         String navigability;
         try {
             navigability = Objects.requireNonNullElse(astahAttribute.getNavigability(), "");
         } catch (Exception e) {
             navigability = "";
         }
-
+        
         String typeExpression;
         try {
             typeExpression = Objects.requireNonNullElse(astahAttribute.getTypeExpression(), "");
         } catch (Exception e) {
             typeExpression = "";
         }
-
+        
         return new AttributeDTO(
             NamedElementDTOAssembler.toDTO(astahAttribute),
             isAggregate,

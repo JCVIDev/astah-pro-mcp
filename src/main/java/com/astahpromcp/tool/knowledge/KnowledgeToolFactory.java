@@ -10,19 +10,19 @@ import java.util.List;
 // Factory for creating knowledge tools
 @Slf4j
 public class KnowledgeToolFactory {
-
+    
     private final Path workspaceDir;
     private final HttpClient httpClient;
-
+    
     public KnowledgeToolFactory(Path workspaceDir) {
         this(workspaceDir, KnowledgeToolSupport.newHttpClient());
     }
-
+    
     public KnowledgeToolFactory(Path workspaceDir, HttpClient httpClient) {
         this.workspaceDir = workspaceDir;
         this.httpClient = httpClient;
     }
-
+    
     public List<ToolProvider> createToolProviders() {
         try {
             return List.of(

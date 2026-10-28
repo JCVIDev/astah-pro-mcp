@@ -7,7 +7,7 @@ public record TestCaseDTO(
     @JsonPropertyDescription("Class info")
     @JsonProperty("class")
     ClassDTO class_,   // For avoiding Java keyword collision
-
+    
     @JsonPropertyDescription("Test case identifier")
     String testCaseId
 ) {

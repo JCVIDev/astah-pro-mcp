@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SequenceDiagramToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private SequenceDiagramTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class SequenceDiagramToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/SequenceDiagramToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new SequenceDiagramTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             SequenceDiagramTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get sequence diagram
         ISequenceDiagram sequenceDiagram = (ISequenceDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ISequenceDiagram.class,
             "Sequence Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(sequenceDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class SequenceDiagramToolTest {
             tool,
             inputDTO,
             SequenceDiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(sequenceDiagram.getId(), outputDTO.diagram().namedElement().element().id());

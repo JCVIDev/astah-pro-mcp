@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record NewSendSignalActionDTO(
     @JsonPropertyDescription("Target activity diagram identifier")
     String targetActivityDiagramId,
-
+    
     @JsonPropertyDescription("New send signal action name. An empty string is not allowed as an action name.")
     String newSendSignalActionName,
-
+    
     @JsonPropertyDescription("Location X coordinate")
     int locationX,
-
+    
     @JsonPropertyDescription("Location Y coordinate")
     int locationY
 ) {

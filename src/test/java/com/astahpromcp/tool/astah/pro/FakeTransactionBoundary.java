@@ -1,7 +1,7 @@
 package com.astahpromcp.tool.astah.pro;
 
 public class FakeTransactionBoundary implements TransactionBoundary {
-
+    
     private boolean inTransaction;
     private int beginCount;
     private int commitCount;
@@ -10,7 +10,7 @@ public class FakeTransactionBoundary implements TransactionBoundary {
     private boolean failOnBegin;
     private boolean failOnAbort;
     private boolean failOnFirstAbortOnly;
-
+    
     @Override
     public void begin() {
         beginCount++;
@@ -19,7 +19,7 @@ public class FakeTransactionBoundary implements TransactionBoundary {
         }
         inTransaction = true;
     }
-
+    
     @Override
     public void commit() {
         commitCount++;
@@ -29,7 +29,7 @@ public class FakeTransactionBoundary implements TransactionBoundary {
         }
         inTransaction = false;
     }
-
+    
     @Override
     public void abort() {
         abortCount++;
@@ -41,36 +41,36 @@ public class FakeTransactionBoundary implements TransactionBoundary {
         }
         inTransaction = false;
     }
-
+    
     @Override
     public boolean isInTransaction() {
         return inTransaction;
     }
-
+    
     public int beginCount() {
         return beginCount;
     }
-
+    
     public int commitCount() {
         return commitCount;
     }
-
+    
     public int abortCount() {
         return abortCount;
     }
-
+    
     public void failOnCommit() {
         failOnCommit = true;
     }
-
+    
     public void failOnBegin() {
         failOnBegin = true;
     }
-
+    
     public void failOnAbort() {
         failOnAbort = true;
     }
-
+    
     // Refuses the next abort only, as a transaction does that is still busy the first time it is asked.
     public void failOnFirstAbort() {
         failOnAbort = true;

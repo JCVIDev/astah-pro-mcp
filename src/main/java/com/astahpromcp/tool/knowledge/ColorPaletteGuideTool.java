@@ -19,21 +19,21 @@ import java.util.List;
 // Tool that fetches Color Palette guide content and returns it in chunks
 @Slf4j
 public class ColorPaletteGuideTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
     private final Path outputDirectory;
     private final HttpClient httpClient;
-
+    
     public ColorPaletteGuideTool(Path outputDirectory) {
         this(outputDirectory, KnowledgeToolSupport.newHttpClient());
     }
-
+    
     public ColorPaletteGuideTool(Path outputDirectory, HttpClient httpClient) {
         this.outputDirectory = outputDirectory;
         this.httpClient = httpClient;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -44,7 +44,7 @@ public class ColorPaletteGuideTool implements ToolProvider {
                     this::getColorPaletteGuideInfo,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_color_palette_guide",
                     "Return the chunk data of Color Palette guide. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -57,30 +57,30 @@ public class ColorPaletteGuideTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getColorPaletteGuideInfo(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("Color Palette guide already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading Color Palette guide from web pages.");
         List<String> urls = KnowledgeToolSupport.readUrlsFromResource(getClass(), "color-palette-guide-url.txt");
         if (urls.isEmpty()) {
             throw new IOException("Color Palette guide URL resource not found or is empty.");
         }
-
+        
         String allTextContentString = KnowledgeToolSupport.fetchAllOrFail(httpClient, urls, "Color Palette guide");
-
+        
         String outputFileName = "color_palette_guide.md";
         Path outputPath = outputDirectory.resolve(outputFileName);
         Files.writeString(outputPath, allTextContentString, StandardCharsets.UTF_8);
         log.info("Color Palette guide saved to file: {}", outputPath.toAbsolutePath());
-
+        
         return KnowledgeToolSupport.chunkAndCache(allTextContentString, contentCache);
     }
-
+    
     private DocumentChunkDTO getColorPaletteGuideChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

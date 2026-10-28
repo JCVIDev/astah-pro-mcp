@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record SequenceDiagramDTO(
     @JsonPropertyDescription("Diagram info")
     DiagramDTO diagram,
-
+    
     @JsonPropertyDescription("Interaction")
     NameIdTypeDTO interaction
 ) {

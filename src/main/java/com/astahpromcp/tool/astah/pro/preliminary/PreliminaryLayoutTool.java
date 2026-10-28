@@ -17,11 +17,11 @@ import java.util.List;
 
 @Slf4j
 public class PreliminaryLayoutTool extends AstahToolProvider {
-
+    
     private static final String EXAMPLE_RESOURCE_DIR = "/preliminary-layout/";
     private static final String EXAMPLE_SVG_SUFFIX = "-preliminary-layout-example.svg";
     private static final String EXAMPLE_PNG_SUFFIX = "-preliminary-layout-example.png";
-
+    
     private static final List<DiagramTypeExample> EXAMPLES = List.of(
         new DiagramTypeExample("use-case-diagram", "Use Case Diagram"),
         new DiagramTypeExample("class-diagram", "Class Diagram"),
@@ -30,14 +30,13 @@ public class PreliminaryLayoutTool extends AstahToolProvider {
         new DiagramTypeExample("activity-diagram", "Activity Diagram"),
         new DiagramTypeExample("state-machine-diagram", "State Machine Diagram"),
         new DiagramTypeExample("requirement-diagram", "Requirement Diagram"));
-
+    
     private record DiagramTypeExample(String resourceBaseName, String displayName) {
     }
-
-
+    
     public PreliminaryLayoutTool() {
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -47,7 +46,7 @@ public class PreliminaryLayoutTool extends AstahToolProvider {
                 this::getSteps,
                 NoInputDTO.class));
     }
-
+    
     private List<McpSchema.Content> getSteps(NoInputDTO param) throws Exception {
         String contents = """
 # Introspection Loop for Creating a Preliminary Layout Before Laying Out a New Diagram
@@ -255,38 +254,38 @@ Requirement Diagram:
 
         List<McpSchema.Content> results = new ArrayList<>();
         results.add(McpSchema.TextContent.builder(contents).build());
-
+        
         // Pair each example's SVG source with the image it renders to, so that the correspondence is explicit.
         for (DiagramTypeExample example : EXAMPLES) {
             results.add(loadSvgTextContent(example));
             results.add(loadPngImageContent(example));
         }
-
+        
         return results;
     }
-
+    
     private McpSchema.TextContent loadSvgTextContent(DiagramTypeExample example) throws Exception {
         String resourcePath = EXAMPLE_RESOURCE_DIR + example.resourceBaseName() + EXAMPLE_SVG_SUFFIX;
         String svgCode = loadResource(resourcePath, StandardCharsets.UTF_8);
-
+        
         String text = "%s - preliminary layout SVG code example. The PNG image that follows is what this SVG code renders to.%n%n%s"
                 .formatted(example.displayName(), svgCode);
-
+        
         return McpSchema.TextContent.builder(text).build();
     }
-
+    
     private McpSchema.ImageContent loadPngImageContent(DiagramTypeExample example) throws Exception {
         String resourcePath = EXAMPLE_RESOURCE_DIR + example.resourceBaseName() + EXAMPLE_PNG_SUFFIX;
         byte[] bytes = loadResource(resourcePath);
-
+        
         String encoded = Base64.getEncoder().encodeToString(bytes);
         return McpSchema.ImageContent.builder(encoded, "image/png").build();
     }
-
+    
     private String loadResource(String resourcePath, Charset charset) throws Exception {
         return new String(loadResource(resourcePath), charset);
     }
-
+    
     private byte[] loadResource(String resourcePath) throws Exception {
         try (InputStream stream = getClass().getResourceAsStream(resourcePath)) {
             if (stream == null) {

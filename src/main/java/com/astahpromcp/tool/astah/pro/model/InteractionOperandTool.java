@@ -21,19 +21,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IInteractionOperand.html
 @Slf4j
 public class InteractionOperandTool extends AstahToolProvider {
-
+    
     private final BasicModelEditor basicModelEditor;
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public InteractionOperandTool(BasicModelEditor basicModelEditor, ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.basicModelEditor = basicModelEditor;
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -43,8 +43,7 @@ public class InteractionOperandTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 InteractionOperandDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_guard_of_interaction_operand",
                 "Set the guard of the specified interaction operand (specified by ID), and return the model element of the interaction operand after it is set.",
@@ -53,22 +52,22 @@ public class InteractionOperandTool extends AstahToolProvider {
                 InteractionOperandDTO.class)
         );
     }
-
+    
     private InteractionOperandDTO getInfo(IdDTO param) throws Exception {
         IInteractionOperand astahInteractionOperand = astahProToolSupport.getInteractionOperand(param.id());
-
+        
         return InteractionOperandDTOAssembler.toDTO(
             astahInteractionOperand,
             SequenceDiagramLayout.drawnContentsOf(projectAccessor, astahInteractionOperand));
     }
-
+    
     private InteractionOperandDTO setGuard(InteractionOperandWithGuardDTO param) throws Exception {
         IInteractionOperand astahInteractionOperand = astahProToolSupport.getInteractionOperand(param.targetInteractionOperandId());
-
+        
         // A null or blank guard means no guard. Surrounding whitespace is removed up front.
         String guard = param.guard() == null ? "" : param.guard().strip();
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             // Workaround: IInteractionOperand.setGuard() adds another guard constraint instead of replacing the current one, and leaves the old guard in the model. So rewrite, or delete, the constraint that holds the current guard rather than calling setGuard() on an operand that already has one.
             // An empty current guard counts as no guard.
             String currentGuard = astahInteractionOperand.getGuard();
@@ -80,7 +79,7 @@ public class InteractionOperandTool extends AstahToolProvider {
                     }
                 }
             }
-
+            
             if (guard.isEmpty()) {
                 // An empty guard means no guard. Astah refuses an empty specification, and setGuard("") adds an empty guard beside the current one, so delete the constraint that holds the current guard instead.
                 if (currentGuardConstraint != null) {
@@ -92,7 +91,7 @@ public class InteractionOperandTool extends AstahToolProvider {
                 astahInteractionOperand.setGuard(guard);
             }
         });
-
+        
         return InteractionOperandDTOAssembler.toDTO(
             astahInteractionOperand,
             SequenceDiagramLayout.drawnContentsOf(projectAccessor, astahInteractionOperand));

@@ -23,19 +23,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/view/IProjectViewManager.html
 @Slf4j
 public class ProjectViewManagerTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final IProjectViewManager projectViewManager;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ProjectViewManagerTool(ProjectAccessor projectAccessor, IProjectViewManager projectViewManager, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.projectViewManager = projectViewManager;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -45,14 +45,14 @@ public class ProjectViewManagerTool extends AstahToolProvider {
                 this::showInPropertyView,
                 IdDTO.class,
                 ElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "show_in_structure_tree",
                 "Show the element (specified by ID) in the structure tree (aka model browser), and return the model element of the target element.",
                 this::showInStructureTree,
                 IdDTO.class,
                 ElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_selected_elements",
                 "Get the model elements of the selected elements in the project view (including the structure tree (aka model browser)).",
@@ -61,7 +61,7 @@ public class ProjectViewManagerTool extends AstahToolProvider {
                 ElementListDTO.class)
         );
     }
-
+    
     private ElementListDTO getSelectedElements(NoInputDTO param) throws Exception {
         List<ElementDTO> elementDTOs = new ArrayList<>();
         for (IEntity astahEntity : projectViewManager.getSelectedEntities()) {
@@ -72,34 +72,34 @@ public class ProjectViewManagerTool extends AstahToolProvider {
                 // Skip when the entity is not an element
                 continue;
             }
-
+            
             elementDTOs.add(ElementDTOAssembler.toDTO(astahElement));
         }
-
+        
         return new ElementListDTO(elementDTOs);
     }
-
+    
     private ElementDTO showInPropertyView(IdDTO param) throws Exception {
         IElement astahElement = astahProToolSupport.getElement(param.id());
-
+        
         try {
             projectViewManager.showInPropertyView(astahElement);
         } catch (Exception e) {
             throw new RuntimeException("Failed to show in property view.", e);
         }
-
+        
         return ElementDTOAssembler.toDTO(astahElement);
     }
-
+    
     private ElementDTO showInStructureTree(IdDTO param) throws Exception {
         IElement astahElement = astahProToolSupport.getElement(param.id());
-
+        
         try {
             projectViewManager.showInStructureTree(astahElement);
         } catch (Exception e) {
             throw new RuntimeException("Failed to show in structure tree.", e);
         }
-
+        
         return ElementDTOAssembler.toDTO(astahElement);
     }
 }

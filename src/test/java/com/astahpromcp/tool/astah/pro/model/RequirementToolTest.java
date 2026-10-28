@@ -19,13 +19,13 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequirementToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private RequirementTool tool;
     private Method getInfo;
     private Method setRequirementId;
     private Method setRequirementText;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -33,49 +33,49 @@ public class RequirementToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/RequirementToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new RequirementTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             RequirementTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setRequirementId() method
         setRequirementId = TestSupport.getAccessibleMethod(
             RequirementTool.class,
             "setRequirementId",
             RequirementWithIdDTO.class);
-
+        
         // setRequirementText() method
         setRequirementText = TestSupport.getAccessibleMethod(
             RequirementTool.class,
             "setRequirementText",
             RequirementWithTextDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get requirement
         IRequirement requirement = (IRequirement) TestSupport.instance().getNamedElementByClassAndName(
             IRequirement.class,
             "Requirement0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(requirement.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -84,26 +84,26 @@ public class RequirementToolTest {
             tool,
             inputDTO,
             RequirementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setRequirementId_ok() throws Exception {
         // Get requirement
         IRequirement requirement = (IRequirement) TestSupport.instance().getNamedElementByClassAndName(
             IRequirement.class,
             "Requirement0");
-
+        
         // Create input DTO
         RequirementWithIdDTO inputDTO = new RequirementWithIdDTO(
             requirement.getId(),
             "REQ-001");
-
+        
         // Check requirement ID before setting
         assertNotEquals("REQ-001", requirement.getRequirementID());
-
+        
         // ----------------------------------------
         // Call setRequirementId()
         // ----------------------------------------
@@ -112,29 +112,29 @@ public class RequirementToolTest {
             tool,
             inputDTO,
             RequirementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check requirement ID after setting
         assertEquals("REQ-001", requirement.getRequirementID());
     }
-
+    
     @Test
     void setRequirementText_ok() throws Exception {
         // Get requirement
         IRequirement requirement = (IRequirement) TestSupport.instance().getNamedElementByClassAndName(
             IRequirement.class,
             "Requirement0");
-
+        
         // Create input DTO
         RequirementWithTextDTO inputDTO = new RequirementWithTextDTO(
             requirement.getId(),
             "This is a test requirement text");
-
+        
         // Check requirement text before setting
         assertNotEquals("This is a test requirement text", requirement.getRequirementText());
-
+        
         // ----------------------------------------
         // Call setRequirementText()
         // ----------------------------------------
@@ -143,10 +143,10 @@ public class RequirementToolTest {
             tool,
             inputDTO,
             RequirementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check requirement text after setting
         assertEquals("This is a test requirement text", requirement.getRequirementText());
     }

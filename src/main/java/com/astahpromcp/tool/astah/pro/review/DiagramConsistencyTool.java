@@ -14,17 +14,17 @@ import java.util.List;
 
 @Slf4j
 public class DiagramConsistencyTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public DiagramConsistencyTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -35,7 +35,7 @@ public class DiagramConsistencyTool extends AstahToolProvider {
                 NoInputDTO.class,
                 StepsDTO.class));
     }
-
+    
     private StepsDTO getSteps(NoInputDTO param) throws Exception {
         String contents = """
 Follow these steps to maintain the semantic consistency of diagrams. Do not skip, reorder, or merge steps. Every rule has an ID (e.g., CLS-05); every rule of every applicable group MUST appear as one row in the verdict table of step 5 — silently omitting a rule is forbidden.
@@ -125,7 +125,7 @@ Follow these steps to maintain the semantic consistency of diagrams. Do not skip
    6-2. If exactly one repair is reasonable given the model's intent, apply it. Otherwise present the options to the user and get confirmation before changing anything.
    6-3. Apply the confirmed corrections with the edit tools of this MCP server, re-run the check for each corrected rule to confirm the violation is resolved, and report the correction details.
         """;
-
+        
         return new StepsDTO(contents);
     }
 }

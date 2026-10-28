@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StateToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private TransactionSupport transactionSupport;
     private StateTool tool;
@@ -36,7 +36,7 @@ public class StateToolTest {
     private Method setEntry;
     private Method setDoActivity;
     private Method setExit;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -44,67 +44,67 @@ public class StateToolTest {
         transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/StateToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new StateTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             StateTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // addInternalTransition() method
         addInternalTransition = TestSupport.getAccessibleMethod(
             StateTool.class,
             "addInternalTransition",
             StateWithInternalTransitionDTO.class);
-
+        
         // deleteAllInternalTransitions() method
         deleteAllInternalTransitions = TestSupport.getAccessibleMethod(
             StateTool.class,
             "deleteAllInternalTransitions",
             IdDTO.class);
-
+        
         // setEntry() method
         setEntry = TestSupport.getAccessibleMethod(
             StateTool.class,
             "setEntry",
             StateWithEntryDTO.class);
-
+        
         // setDoActivity() method
         setDoActivity = TestSupport.getAccessibleMethod(
             StateTool.class,
             "setDoActivity",
             StateWithDoActivityDTO.class);
-
+        
         // setExit() method
         setExit = TestSupport.getAccessibleMethod(
             StateTool.class,
             "setExit",
             StateWithExitDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(state.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -113,25 +113,25 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void addInternalTransition_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         StateWithInternalTransitionDTO inputDTO = new StateWithInternalTransitionDTO(
             state.getId(),
             "testEvent",
             "testGuard",
             "testAction");
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -140,27 +140,27 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void addInternalTransition_ok_nullGuardAndActionTreatedAsEmpty() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         int countBefore = state.getInternalTransitions().length;
-
+        
         // Create input DTO
         StateWithInternalTransitionDTO inputDTO = new StateWithInternalTransitionDTO(
             state.getId(),
             " nullTestEvent ",
             null,
             null);
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -169,10 +169,10 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the event is stripped and that the guard and the action are empty rather than the text "null"
         ITransition[] transitions = state.getInternalTransitions();
         assertEquals(countBefore + 1, transitions.length);
@@ -181,16 +181,16 @@ public class StateToolTest {
         assertEquals("", added.getGuard());
         assertEquals("", added.getAction());
     }
-
+    
     @Test
     void addInternalTransition_ok_sameEventDifferentGuard() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         int countBefore = state.getInternalTransitions().length;
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -204,23 +204,23 @@ public class StateToolTest {
             tool,
             new StateWithInternalTransitionDTO(state.getId(), "guardTestEvent", "x <= 0", "testAction"),
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that both internal transitions are added
         assertEquals(countBefore + 2, state.getInternalTransitions().length);
     }
-
+    
     @Test
     void addInternalTransition_ng_blankEvent() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         int countBefore = state.getInternalTransitions().length;
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -231,30 +231,30 @@ public class StateToolTest {
                 new StateWithInternalTransitionDTO(state.getId(), " ", "testGuard", "testAction"),
                 StateDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("The event of an internal transition must not be empty or blank."));
-
+        
         // Check that nothing was added
         assertEquals(countBefore, state.getInternalTransitions().length);
     }
-
+    
     @Test
     void addInternalTransition_ng_duplicate() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         int countBefore = state.getInternalTransitions().length;
-
+        
         TestSupport.instance().invokeToolMethodReturningDto(
             addInternalTransition,
             tool,
             new StateWithInternalTransitionDTO(state.getId(), "dupEvent", "testGuard", "testAction"),
             StateDTO.class);
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -265,15 +265,15 @@ public class StateToolTest {
                 new StateWithInternalTransitionDTO(state.getId(), " dupEvent ", "testGuard ", " testAction"),
                 StateDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("already has the internal transition 'dupEvent [testGuard] / testAction'"));
-
+        
         // Check that only the first one was added
         assertEquals(countBefore + 1, state.getInternalTransitions().length);
     }
-
+    
     @Test
     void addInternalTransition_ng_finalState() throws Exception {
         // Create final state
@@ -283,7 +283,7 @@ public class StateToolTest {
             stateMachineDiagramEditor.setDiagram(diagram);
             return (IFinalState) stateMachineDiagramEditor.createFinalState(null, new Point2D.Double(100, 100)).getModel();
         });
-
+        
         // ----------------------------------------
         // Call addInternalTransition()
         // ----------------------------------------
@@ -294,25 +294,25 @@ public class StateToolTest {
                 new StateWithInternalTransitionDTO(finalState.getId(), "testEvent", "testGuard", "testAction"),
                 StateDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("The state (ID: " + finalState.getId() + ") is a final state."));
-
+        
         // Check that nothing was added
         assertEquals(0, finalState.getInternalTransitions().length);
     }
-
+    
     @Test
     void deleteAllInternalTransitions_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(state.getId());
-
+        
         // ----------------------------------------
         // Call deleteAllInternalTransitions()
         // ----------------------------------------
@@ -321,23 +321,23 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setEntry_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         StateWithEntryDTO inputDTO = new StateWithEntryDTO(
             state.getId(),
             "testEntry");
-
+        
         // ----------------------------------------
         // Call setEntry()
         // ----------------------------------------
@@ -346,23 +346,23 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setDoActivity_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         StateWithDoActivityDTO inputDTO = new StateWithDoActivityDTO(
             state.getId(),
             "testDoActivity");
-
+        
         // ----------------------------------------
         // Call setDoActivity()
         // ----------------------------------------
@@ -371,23 +371,23 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setExit_ok() throws Exception {
         // Get state
         IState state = (IState) TestSupport.instance().getNamedElementByClassAndName(
             IState.class,
             "State0");
-
+        
         // Create input DTO
         StateWithExitDTO inputDTO = new StateWithExitDTO(
             state.getId(),
             "testExit");
-
+        
         // ----------------------------------------
         // Call setExit()
         // ----------------------------------------
@@ -396,7 +396,7 @@ public class StateToolTest {
             tool,
             inputDTO,
             StateDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

@@ -20,18 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IInstanceSpecification.html
 @Slf4j
 public class InstanceSpecificationTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public InstanceSpecificationTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,8 +40,7 @@ public class InstanceSpecificationTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 InstanceSpecificationDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_classifier_to_instance_spec",
                 "Set the classifier (specified by ID) to the instance specification (specified by ID), and return the model element of the instance specification after it is edited.",
@@ -51,21 +49,21 @@ public class InstanceSpecificationTool extends AstahToolProvider {
                 InstanceSpecificationDTO.class)
         );
     }
-
+    
     private InstanceSpecificationDTO getInfo(IdDTO param) throws Exception {
         IInstanceSpecification astahInstanceSpecification = astahProToolSupport.getInstanceSpecification(param.id());
-
+        
         return InstanceSpecificationDTOAssembler.toDTO(astahInstanceSpecification);
     }
-
+    
     private InstanceSpecificationDTO setClassifier(InstanceSpecificationWithClassifierDTO param) throws Exception {
         IClass astahClass = astahProToolSupport.getClassOrPrimitiveType(param.targetClassifierId());
         IInstanceSpecification astahInstanceSpecification = astahProToolSupport.getInstanceSpecification(param.targetInstanceSpecificationId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahInstanceSpecification.setClassifier(astahClass);
         });
-
+        
         return InstanceSpecificationDTOAssembler.toDTO(astahInstanceSpecification);
     }
 }

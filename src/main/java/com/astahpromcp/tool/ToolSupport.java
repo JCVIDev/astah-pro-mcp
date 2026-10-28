@@ -14,16 +14,16 @@ import java.util.stream.Collectors;
 // Utility methods for building tool schemas and handlers
 @Slf4j
 public final class ToolSupport {
-
+    
     private ToolSupport() {
     }
-
+    
     // Tool function returning DTO
     @FunctionalInterface
     public interface ToolFunctionReturningDto<INPUT_DTO, OUTPUT_DTO> {
         OUTPUT_DTO apply(INPUT_DTO input) throws Exception;
     }
-
+    
     // Create a tool definition returning DTO
     public static <INPUT_DTO, OUTPUT_DTO> ToolDefinition toolDefinitionReturningDto(
             String name,
@@ -31,7 +31,7 @@ public final class ToolSupport {
             ToolFunctionReturningDto<INPUT_DTO, OUTPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType,
             Class<OUTPUT_DTO> outputDtoType) {
-
+        
         // Create a tool schema
         McpSchema.Tool schema = toolSchemaReturningDto(
             name,
@@ -45,41 +45,41 @@ public final class ToolSupport {
             name,
             function,
             inputDtoType);
-
+        
         return new ToolDefinition(schema, ToolDefinition.ResultKind.DTO, handler);
     }
-
+    
     // Create a tool schema for tools returning DTO
     public static <INPUT_DTO, OUTPUT_DTO> McpSchema.Tool toolSchemaReturningDto(
             String toolName,
             String toolDescription,
             Class<INPUT_DTO> inputDtoType,
             Class<OUTPUT_DTO> outputDtoType) {
-
+        
         String inputSchema = SchemaSupport.generateSchema(inputDtoType);
         String outputSchema = SchemaSupport.generateSchema(outputDtoType);
-
+        
         log.trace("inputSchema: {}", inputSchema);
         log.trace("outputSchema: {}", outputSchema);
-
+        
         return McpSchema.Tool.builder(toolName, JsonSupport.MCP_JSON_MAPPER, inputSchema)
                 .description(toolDescription)
                 .outputSchema(JsonSupport.MCP_JSON_MAPPER, outputSchema)
                 .build();
     }
-
+    
     // Create a tool handler for tools returning DTO
     public static <INPUT_DTO, OUTPUT_DTO> McpSchema.CallToolResult toolHandlerReturningDto(
             McpSchema.CallToolRequest request,
             String toolName,
             ToolFunctionReturningDto<INPUT_DTO, OUTPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType) {
-
+        
         DtoBinder.BindResult<INPUT_DTO> parsed = DtoBinder.bind(request.arguments(), inputDtoType);
         if (parsed.error() != null) {
             return parsed.error();
         }
-
+        
         try {
             INPUT_DTO inputDto = parsed.dto();
             logInput(toolName, inputDto);
@@ -103,22 +103,22 @@ public final class ToolSupport {
             return ResponseSupport.error(msg);
         }
     }
-
+    
     // ----------
-
+    
     // Tool function returning contents
     @FunctionalInterface
     public interface ToolFunctionReturningContents<INPUT_DTO> {
         List<McpSchema.Content> apply(INPUT_DTO input) throws Exception;
     }
-
+    
     // Create a tool definition returning contents
     public static <INPUT_DTO> ToolDefinition toolDefinitionReturningContents(
             String name,
             String description,
             ToolFunctionReturningContents<INPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType) {
-
+        
         // Create a tool schema
         McpSchema.Tool schema = toolSchemaReturningContents(
             name,
@@ -131,37 +131,37 @@ public final class ToolSupport {
             name,
             function,
             inputDtoType);
-
+        
         return new ToolDefinition(schema, ToolDefinition.ResultKind.CONTENTS, handler);
     }
-
+    
     // Create a tool schema for tools returning contents
     public static <INPUT_DTO> McpSchema.Tool toolSchemaReturningContents(
             String toolName,
             String toolDescription,
             Class<INPUT_DTO> inputDtoType) {
-
+        
         String inputSchema = SchemaSupport.generateSchema(inputDtoType);
-
+        
         log.trace("inputSchema: {}", inputSchema);
-
+        
         return McpSchema.Tool.builder(toolName, JsonSupport.MCP_JSON_MAPPER, inputSchema)
                 .description(toolDescription)
                 .build();
     }
-
+    
     // Create a tool handler for tools returning contents
     public static <INPUT_DTO> McpSchema.CallToolResult toolHandlerReturningContents(
             McpSchema.CallToolRequest request,
             String toolName,
             ToolFunctionReturningContents<INPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType) {
-
+        
         DtoBinder.BindResult<INPUT_DTO> parsed = DtoBinder.bind(request.arguments(), inputDtoType);
         if (parsed.error() != null) {
             return parsed.error();
         }
-
+        
         try {
             INPUT_DTO inputDto = parsed.dto();
             logInput(toolName, inputDto);
@@ -185,7 +185,7 @@ public final class ToolSupport {
             return ResponseSupport.error(msg);
         }
     }
-
+    
     // Log the input of a tool call
     private static void logInput(String toolName, Object inputDto) {
         log.atDebug()
@@ -194,13 +194,13 @@ public final class ToolSupport {
                 .addArgument(() -> ReflectionToStringBuilder.toString(inputDto, ToStringStyle.SHORT_PREFIX_STYLE))
                 .log();
     }
-
+    
     // Summarize contents for debug logging
     static String summarizeContents(List<McpSchema.Content> contents) {
         if (contents == null) {
             return "null";
         }
-
+        
         return contents.stream()
                 .map(content -> content instanceof McpSchema.ImageContent image
                         ? String.format("ImageContent(mimeType=%s, base64 %d chars)",
@@ -208,13 +208,13 @@ public final class ToolSupport {
                         : String.valueOf(content))
                 .collect(Collectors.joining(",\n", "[", "]"));
     }
-
+    
     // Tool function returning DTO and contents
     @FunctionalInterface
     public interface ToolFunctionReturningDtoAndContents<INPUT_DTO, OUTPUT_DTO> {
         Pair<OUTPUT_DTO, List<McpSchema.Content>> apply(INPUT_DTO input) throws Exception;
     }
-
+    
     // Create a tool definition returning DTO and contents
     public static <INPUT_DTO, OUTPUT_DTO> ToolDefinition toolDefinitionReturningDtoAndContents(
             String name,
@@ -222,36 +222,36 @@ public final class ToolSupport {
             ToolFunctionReturningDtoAndContents<INPUT_DTO, OUTPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType,
             Class<OUTPUT_DTO> outputDtoType) {
-
+        
         // Create a tool schema
         McpSchema.Tool schema = toolSchemaReturningDto(
             name,
             description,
             inputDtoType,
             outputDtoType);
-
+        
         // Create a tool handler
         BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> handler = (ignoredExchange, request) -> toolHandlerReturningDtoAndContents(
             request,
             name,
             function,
             inputDtoType);
-
+        
         return new ToolDefinition(schema, ToolDefinition.ResultKind.DTO_AND_CONTENTS, handler);
     }
-
+    
     // Create a tool handler for tools returning DTO and contents
     public static <INPUT_DTO, OUTPUT_DTO> McpSchema.CallToolResult toolHandlerReturningDtoAndContents(
             McpSchema.CallToolRequest request,
             String toolName,
             ToolFunctionReturningDtoAndContents<INPUT_DTO, OUTPUT_DTO> function,
             Class<INPUT_DTO> inputDtoType) {
-
+        
         DtoBinder.BindResult<INPUT_DTO> parsed = DtoBinder.bind(request.arguments(), inputDtoType);
         if (parsed.error() != null) {
             return parsed.error();
         }
-
+        
         try {
             INPUT_DTO inputDto = parsed.dto();
             logInput(toolName, inputDto);
@@ -261,7 +261,7 @@ public final class ToolSupport {
                 log.error(msg);
                 return ResponseSupport.error(msg);
             }
-
+            
             OUTPUT_DTO outputDto = result.getLeft();
             List<McpSchema.Content> contents = result.getRight();
             log.atDebug()
@@ -274,30 +274,30 @@ public final class ToolSupport {
                     .addArgument(toolName)
                     .addArgument(() -> summarizeContents(contents))
                     .log();
-
+            
             return ResponseSupport.success(outputDto, contents);
-
+            
         } catch (Throwable t) {
             String msg = String.format("Exception @tool=%s: %s", toolName, describeThrowable(t));
             logFailure(msg, t);
             return ResponseSupport.error(msg);
         }
     }
-
+    
     static String describeThrowable(Throwable t) {
         String message = t.getMessage();
         if (message == null || message.isBlank()) {
             return String.valueOf(t);
         }
-
+        
         return message;
     }
-
+    
     // Log a failed tool call
     static void logFailure(String msg, Throwable t) {
         logFailure(msg, t, t instanceof IllegalArgumentException);
     }
-
+    
     // An invalid input stays out of ERROR, which is kept for faults of this server
     static void logFailure(String msg, Throwable t, boolean invalidInput) {
         if (invalidInput) {
@@ -305,7 +305,7 @@ public final class ToolSupport {
             log.debug("Stack trace of the rejected input above", t);
             return;
         }
-
+        
         log.error(msg, t);
     }
 }

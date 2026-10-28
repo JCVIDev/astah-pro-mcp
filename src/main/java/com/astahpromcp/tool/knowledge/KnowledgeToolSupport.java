@@ -1,6 +1,7 @@
 package com.astahpromcp.tool.knowledge;
 
 import com.astahpromcp.config.McpServerConfig;
+import com.astahpromcp.tls.emudhra.EmudhraWorkaround;
 import com.astahpromcp.tool.knowledge.outputdto.DocumentDTO;
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -35,35 +36,37 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class KnowledgeToolSupport {
-
+    
     static final int MAX_CHUNK_CHARS = 49152; // Characters 48KB (48 * 1024)
-
+    
     static final int CHUNK_OVERLAP_MAX_CHARS = 2048; // Characters 2KB (2 * 1024)
-
+    
     private static final int CHUNK_SIZE = MAX_CHUNK_CHARS - CHUNK_OVERLAP_MAX_CHARS; // Characters, before the overlap prefix is added
     private static final int CHUNK_OVERLAP_LINES = 3; // Lines of the previous chunk repeated at the start of the next chunk
-
+    
     // Reusable, thread-safe HTML-to-Markdown converter
     private static final FlexmarkHtmlConverter HTML_TO_MARKDOWN_CONVERTER = FlexmarkHtmlConverter.builder(
             new MutableDataSet().set(FlexmarkHtmlConverter.SETEXT_HEADINGS, false)).build();
-
+    
     // Creates an HttpClient for fetching knowledge documents, with a bounded connect timeout
     public static HttpClient newHttpClient() {
-        return HttpClient.newBuilder()
+        HttpClient.Builder builder = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(McpServerConfig.KNOWLEDGE_FETCH_CONNECT_TIMEOUT_SECONDS))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+                .followRedirects(HttpClient.Redirect.NORMAL);
+        EmudhraWorkaround.apply(builder); // EMUDHRA-WORKAROUND
+        return builder.build();
     }
-
+    
     // Opens a stream to the given URL with bounded connect and read timeouts
     public static InputStream openUrlStream(String urlString) throws IOException {
         URLConnection connection = URI.create(urlString).toURL().openConnection();
+        EmudhraWorkaround.apply(connection); // EMUDHRA-WORKAROUND
         connection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(McpServerConfig.KNOWLEDGE_FETCH_CONNECT_TIMEOUT_SECONDS));
         connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(McpServerConfig.KNOWLEDGE_FETCH_REQUEST_TIMEOUT_SECONDS));
         return connection.getInputStream();
     }
-
+    
     // Converts a PDF file to Markdown using OpenDataLoader PDF and saves it as <outputBaseName>.md in the output directory.
     public static synchronized String convertPdfToMarkdown(Path pdfFile, Path outputDirectory, String outputBaseName) throws IOException {
         Config config = new Config();
@@ -72,7 +75,7 @@ public class KnowledgeToolSupport {
         config.setGenerateJSON(false);
         config.setImageOutput(Config.IMAGE_OUTPUT_OFF);
         OpenDataLoaderPDF.processFile(pdfFile.toString(), config);
-
+        
         // OpenDataLoader PDF names the output <pdfBaseName>.md; rename it to <outputBaseName>.md
         String pdfFileName = pdfFile.getFileName().toString();
         String generatedName = pdfFileName.replaceAll("(?i)\\.pdf$", "") + ".md";
@@ -81,22 +84,22 @@ public class KnowledgeToolSupport {
         if (!generatedPath.equals(outputPath)) {
             Files.move(generatedPath, outputPath, StandardCopyOption.REPLACE_EXISTING);
         }
-
+        
         // Written back so that the saved file holds the same text this method returns
         String markdown = unescapeHtmlSpecialChars(Files.readString(outputPath, StandardCharsets.UTF_8));
         Files.writeString(outputPath, markdown, StandardCharsets.UTF_8);
         log.info("Markdown saved to file: {}", outputPath.toAbsolutePath());
-
+        
         return markdown;
     }
-
+    
     // Reverts the escaping OpenDataLoader PDF applies to '<', '>' and '&' for HTML renderers.
     // The Markdown reaches the MCP client as plain text, where the entities would corrupt expressions such as OCL's '->'.
     // '&amp;' goes last, so that an escaped entity such as "&amp;lt;" comes back as the literal "&lt;" rather than '<'.
     static String unescapeHtmlSpecialChars(String markdown) {
         return markdown.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
     }
-
+    
     // Converts PDF bytes to Markdown via a temporary <outputBaseName>.pdf file in the output directory
     public static String convertPdfToMarkdown(byte[] pdfBytes, Path outputDirectory, String outputBaseName) throws IOException {
         Files.createDirectories(outputDirectory);
@@ -108,46 +111,46 @@ public class KnowledgeToolSupport {
             Files.deleteIfExists(pdfPath);
         }
     }
-
+    
     public static List<String> splitText(String text, int chunkSize) {
         if (text == null || text.isEmpty()) {
             return new ArrayList<>();
         }
-
+        
         List<String> chunks = new ArrayList<>();
         for (int i = 0; i < text.length(); i += chunkSize) {
             chunks.add(text.substring(i, Math.min(text.length(), i + chunkSize)));
         }
-
+        
         return chunks;
     }
-
+    
     // Splits the text into chunks with overlap
     public static List<String> splitTextWithOverlap(String text, int chunkSize, int overlapLines) {
         List<String> chunks = splitText(text, chunkSize);
         if (chunks.size() <= 1 || overlapLines <= 0) {
             return chunks;
         }
-
+        
         List<String> overlappedChunks = new ArrayList<>(chunks.size());
         overlappedChunks.add(chunks.get(0));
         for (int i = 1; i < chunks.size(); i++) {
             overlappedChunks.add(overlapPrefix(chunks.get(i - 1), overlapLines) + chunks.get(i));
         }
-
+        
         return overlappedChunks;
     }
-
+    
     // Returns the overlap to put in front of the next chunk: the last `overlapLines` lines of the previous chunk,
     private static String overlapPrefix(String previousChunk, int overlapLines) {
         String overlap = lastLines(previousChunk, overlapLines);
         if (overlap.length() <= CHUNK_OVERLAP_MAX_CHARS) {
             return overlap;
         }
-
+        
         return overlap.substring(overlap.length() - CHUNK_OVERLAP_MAX_CHARS);
     }
-
+    
     // Returns the last `lineCount` lines of the text
     private static String lastLines(String text, int lineCount) {
         int index = text.endsWith("\n") ? text.length() - 1 : text.length();
@@ -160,17 +163,17 @@ public class KnowledgeToolSupport {
         }
         return text.substring(index + 1);
     }
-
+    
     // A loaded document, held as one immutable list that is replaced as a whole.
     public static final class ContentCache {
-
+        
         private volatile List<String> chunks = List.of();
-
+        
         // Whether the document has been loaded yet
         public boolean isLoaded() {
             return !chunks.isEmpty();
         }
-
+        
         // The shape of the loaded document, or null when nothing is loaded.
         // Read from a single snapshot, so the count and the first chunk always describe the same document.
         public DocumentDTO describe() {
@@ -180,7 +183,7 @@ public class KnowledgeToolSupport {
             }
             return new DocumentDTO(snapshot.size(), snapshot.get(0));
         }
-
+        
         // One chunk of the loaded document, read from a single snapshot
         public String chunkAt(int index) {
             List<String> snapshot = chunks;
@@ -192,24 +195,24 @@ public class KnowledgeToolSupport {
             }
             return snapshot.get(index);
         }
-
+        
         private void replace(List<String> newChunks) {
             chunks = List.copyOf(newChunks);
         }
     }
-
+    
     // Splits text into overlapping chunks and replaces the contents of contentCache with them.
     public static DocumentDTO chunkAndCache(String text, ContentCache contentCache) {
         List<String> chunks = splitTextWithOverlap(text, CHUNK_SIZE, CHUNK_OVERLAP_LINES);
         if (chunks.isEmpty()) {
             chunks.add(""); // Ensure there is at least one empty chunk
         }
-
+        
         contentCache.replace(chunks);
-
+        
         return new DocumentDTO(chunks.size(), chunks.get(0));
     }
-
+    
     public static List<String> readUrlsFromResource(Class<?> clazz, String resourceName) throws IOException {
         List<String> urls = new ArrayList<>();
         try (InputStream is = clazz.getClassLoader().getResourceAsStream(resourceName)) {
@@ -226,10 +229,10 @@ public class KnowledgeToolSupport {
                 }
             }
         }
-
+        
         return urls;
     }
-
+    
     public static String convertHtmlToMarkdown(String html) {
         Document document = Jsoup.parse(html);
         document.select("script, style, nav, header, footer, aside").remove();
@@ -245,7 +248,7 @@ public class KnowledgeToolSupport {
             content = document.body();
         }
         String contentHtml = content != null ? content.outerHtml() : html;
-
+        
         try {
             return HTML_TO_MARKDOWN_CONVERTER.convert(contentHtml);
         } catch (Throwable e) {
@@ -253,24 +256,24 @@ public class KnowledgeToolSupport {
             return Jsoup.parse(contentHtml).text();
         }
     }
-
+    
     // The outcome of fetching one page: either its text or the reason it could not be fetched.
     // Kept apart so that a failure can never travel on as page content and be cached as a loaded document.
     public record FetchResult(String url, String text, String error) {
-
+        
         static FetchResult ok(String url, String text) {
             return new FetchResult(url, text, null);
         }
-
+        
         static FetchResult error(String url, String reason) {
             return new FetchResult(url, null, reason);
         }
-
+        
         public boolean isError() {
             return error != null;
         }
     }
-
+    
     public static CompletableFuture<FetchResult> fetchAndParse(HttpClient httpClient, String urlString) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -280,7 +283,7 @@ public class KnowledgeToolSupport {
                         .header("User-Agent", "Java HttpClient Bot")
                         .build();
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
+                
                 // Check HTTP status code
                 int statusCode = response.statusCode();
                 if (statusCode == 403) {
@@ -293,9 +296,9 @@ public class KnowledgeToolSupport {
                     log.warn("HTTP error when fetching {}: Status code {}", urlString, statusCode);
                     return FetchResult.error(urlString, "HTTP " + statusCode);
                 }
-
+                
                 return FetchResult.ok(urlString, convertHtmlToMarkdown(response.body()));
-
+                
             } catch (ConnectException e) {
                 log.warn("Connection error when fetching {}: {}", urlString, e.getMessage());
                 return FetchResult.error(urlString, "Connection failed");
@@ -315,7 +318,7 @@ public class KnowledgeToolSupport {
             }
         });
     }
-
+    
     // Fetches every page in parallel and joins them into one document.
     // All or nothing: a single failed page fails the whole load, so a transient network failure is never kept as a loaded
     // document and the next call to the tool fetches again. Returning here means every page was fetched.
@@ -324,20 +327,20 @@ public class KnowledgeToolSupport {
                 .filter(url -> !url.trim().isEmpty())
                 .map(url -> fetchAndParse(httpClient, url))
                 .toList();
-
+        
         List<FetchResult> results = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenApply(v -> futures.stream().map(CompletableFuture::join).toList())
                 .join();
-
+        
         if (results.isEmpty()) {
             throw new IOException(String.format("No page to fetch for %s: the URL list is empty.", documentName));
         }
-
+        
         List<String> failures = results.stream()
                 .filter(FetchResult::isError)
                 .map(result -> result.url() + " (" + result.error() + ")")
                 .toList();
-
+        
         if (!failures.isEmpty()) {
             String message = String.format(
                     "Failed to fetch %d of %d pages of %s, so none of it was loaded. Call this tool again once the connection is back. Failed pages: %s",
@@ -345,12 +348,12 @@ public class KnowledgeToolSupport {
             log.warn(message);
             throw new IOException(message);
         }
-
+        
         StringBuilder allTextContent = new StringBuilder();
         for (FetchResult result : results) {
             allTextContent.append(result.text()).append(System.lineSeparator()).append(System.lineSeparator());
         }
-
+        
         return allTextContent.toString();
     }
 }

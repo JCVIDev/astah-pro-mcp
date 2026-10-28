@@ -26,34 +26,34 @@ import java.util.function.Supplier;
 // Tool for listing the tool functions an mcp tool script can call.
 @Slf4j
 public class CallableToolInfoTool implements ToolProvider {
-
+    
     // The list split into chunks, and how many tool functions it holds
     private record Listing(List<List<CallableToolSummaryDTO>> chunks, int totalTools) {
     }
-
+    
     // Read on use rather than taken at construction
     private final Supplier<AstahToolRegistry> registry;
     private final int chunkMaxBytes;
-
+    
     private Listing listing;
-
+    
     public CallableToolInfoTool(AstahToolRegistry registry) {
         this(() -> registry);
     }
-
+    
     public CallableToolInfoTool(Supplier<AstahToolRegistry> registry) {
         this(registry, McpServerConfig.CALLABLE_TOOL_CHUNK_MAX_BYTES);
     }
-
+    
     CallableToolInfoTool(AstahToolRegistry registry, int chunkMaxBytes) {
         this(() -> registry, chunkMaxBytes);
     }
-
+    
     CallableToolInfoTool(Supplier<AstahToolRegistry> registry, int chunkMaxBytes) {
         this.registry = registry;
         this.chunkMaxBytes = chunkMaxBytes;
     }
-
+    
     // Built on the first call and kept, since the registry does not change once the server has started
     private synchronized Listing listing() {
         if (listing == null) {
@@ -62,12 +62,12 @@ public class CallableToolInfoTool implements ToolProvider {
                 McpSchema.Tool schema = definition.toolSchema();
                 summaries.add(new CallableToolSummaryDTO(schema.name(), nullToEmpty(schema.description()), argumentNames(schema)));
             }
-
+            
             listing = new Listing(splitIntoChunks(summaries, chunkMaxBytes), summaries.size());
         }
         return listing;
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         return List.of(
@@ -77,7 +77,7 @@ public class CallableToolInfoTool implements ToolProvider {
                 this::getChunkOfCallableTools,
                 ChunkDTO.class,
                 CallableToolChunkDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_info_of_tools_callable_from_mcp_tool_script",
                 "Return the name, the description and the JSON schemas of the arguments and of the result of the named tool functions, so that you can call them from 'run_mcp_tool_script' as tools.<name>({ ... }) with the right arguments. Find the names in the chunks of 'get_chunk_of_tools_callable_from_mcp_tool_script' first.",
@@ -86,11 +86,11 @@ public class CallableToolInfoTool implements ToolProvider {
                 CallableToolInfoListDTO.class)
         );
     }
-
+    
     private CallableToolChunkDTO getChunkOfCallableTools(ChunkDTO param) throws Exception {
         Listing listing = listing();
         List<List<CallableToolSummaryDTO>> chunks = listing.chunks();
-
+        
         int index = param.chunkIndex();
         if (index < 0 || index >= chunks.size()) {
             String range = chunks.size() == 1
@@ -98,72 +98,72 @@ public class CallableToolInfoTool implements ToolProvider {
                     : "the list of tool functions is split into " + chunks.size() + " chunks, so it must be from 0 to " + (chunks.size() - 1);
             throw new IllegalArgumentException("'chunkIndex' is " + index + ", but " + range + ".");
         }
-
+        
         return new CallableToolChunkDTO(index, chunks.size(), listing.totalTools(), chunks.get(index));
     }
-
+    
     private CallableToolInfoListDTO getInfoOfCallableTools(CallableToolNamesDTO param) throws Exception {
         Set<String> names = requestedNames(param.toolNames());
         AstahToolRegistry registry = this.registry.get();
-
+        
         List<CallableToolInfoDTO> tools = new ArrayList<>();
         List<String> problems = new ArrayList<>();
         int responseBytes = 0;
-
+        
         for (String name : names) {
             String problem = problemWith(registry, name);
             if (problem != null) {
                 problems.add(problem);
                 continue;
             }
-
+            
             CallableToolInfoDTO info = toInfo(registry.find(name).toolSchema());
             int infoBytes = JsonSupport.OBJ_MAPPER.writeValueAsString(info).getBytes(StandardCharsets.UTF_8).length;
-
+            
             // The result schema alone runs to several kilobytes for many tool functions, so a request at the name limit can still outgrow one answer.
             if (!tools.isEmpty() && responseBytes + infoBytes > McpServerConfig.CALLABLE_TOOL_INFO_MAX_RESULT_BYTES) {
                 problems.add("'" + name + "' was left out because its schemas did not fit in the room left in this answer. A later, smaller one may still have fitted, so this says nothing about the ones that did. Ask for it again in a call with fewer names.");
                 continue;
             }
-
+            
             tools.add(info);
             responseBytes += infoBytes;
         }
-
+        
         // Nothing answered leaves no partial result to keep, and failing is what stops the caller reading an empty answer as a full one.
         if (tools.isEmpty()) {
             throw new IllegalArgumentException("None of the names could be described. " + String.join(" ", problems));
         }
-
+        
         return new CallableToolInfoListDTO(List.copyOf(tools), List.copyOf(problems));
     }
-
+    
     private static List<List<CallableToolSummaryDTO>> splitIntoChunks(List<CallableToolSummaryDTO> summaries, int maxBytes) {
         List<List<CallableToolSummaryDTO>> chunks = new ArrayList<>();
         List<CallableToolSummaryDTO> current = new ArrayList<>();
         int currentBytes = 0;
-
+        
         for (CallableToolSummaryDTO summary : summaries) {
             // One more byte for the comma that separates it from the entry before it
             int bytes = JsonSupport.OBJ_MAPPER.writeValueAsString(summary).getBytes(StandardCharsets.UTF_8).length + 1;
-
+            
             // A tool function larger than the budget still gets a chunk of its own rather than being left out.
             if (!current.isEmpty() && currentBytes + bytes > maxBytes) {
                 chunks.add(List.copyOf(current));
                 current = new ArrayList<>();
                 currentBytes = 0;
             }
-
+            
             current.add(summary);
             currentBytes += bytes;
         }
-
+        
         // Always at least one chunk, so that index 0 is valid even when nothing is callable.
         chunks.add(List.copyOf(current));
-
+        
         return List.copyOf(chunks);
     }
-
+    
     // The names to describe, in the order they were asked for and without the repeats that would spend the answer twice on one tool function
     private static Set<String> requestedNames(List<String> toolNames) {
         Set<String> names = new LinkedHashSet<>();
@@ -174,7 +174,7 @@ public class CallableToolInfoTool implements ToolProvider {
                 }
             }
         }
-
+        
         if (names.isEmpty()) {
             throw new IllegalArgumentException("'toolNames' is empty. Name at least one tool function, as the chunks of 'get_chunk_of_tools_callable_from_mcp_tool_script' spell it.");
         }
@@ -182,20 +182,20 @@ public class CallableToolInfoTool implements ToolProvider {
             throw new IllegalArgumentException("'toolNames' holds " + names.size() + " names, and at most "
                     + McpServerConfig.CALLABLE_TOOL_INFO_MAX_NAMES + " are accepted in one call, because the schemas of that many tool functions already fill an answer. Split them across several calls.");
         }
-
+        
         return names;
     }
-
+    
     // Why the given tool function cannot be described, or null when it can
     private static String problemWith(AstahToolRegistry registry, String name) {
         if (registry.find(name) == null) {
             return "There is no tool function named '" + name + "'. Read the chunks of 'get_chunk_of_tools_callable_from_mcp_tool_script' for the names, spelled as this server spells them.";
         }
-
+        
         NotMcpToolScriptCallableReason reason = registry.notMcpToolScriptCallableReason(name);
         return reason == null ? null : reason.message(name);
     }
-
+    
     // The schemas go in as JSON objects, not as JSON text: text would escape every quote in them, which only adds to the answer
     // An empty object stands for a schema the tool function does not declare
     private static CallableToolInfoDTO toInfo(McpSchema.Tool schema) {
@@ -205,19 +205,19 @@ public class CallableToolInfoTool implements ToolProvider {
                 emptyIfNull(schema.inputSchema()),
                 emptyIfNull(schema.outputSchema()));
     }
-
+    
     // A tool function that takes no arguments declares no properties at all, and gets an empty list
     private static List<String> argumentNames(McpSchema.Tool schema) {
         Map<String, Object> input = schema.inputSchema();
         Object properties = input == null ? null : input.get("properties");
-
+        
         return properties instanceof Map<?, ?> map ? map.keySet().stream().map(String::valueOf).toList() : List.of();
     }
-
+    
     private static Map<String, Object> emptyIfNull(Map<String, Object> schema) {
         return schema == null ? Map.of() : schema;
     }
-
+    
     private static String nullToEmpty(String value) {
         return value == null ? "" : value;
     }

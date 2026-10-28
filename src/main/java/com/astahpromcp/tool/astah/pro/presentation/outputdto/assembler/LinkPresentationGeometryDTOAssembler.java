@@ -9,7 +9,7 @@ import lombok.NonNull;
 
 public class LinkPresentationGeometryDTOAssembler {
     public static LinkPresentationGeometryDTO toDTO(@NonNull ILinkPresentation astahLinkPresentation) throws Exception {
-
+        
         // For a return message, () is appended to the end, so return the model name.
         String label;
         if (astahLinkPresentation.getModel() instanceof IMessage astahMessage && astahMessage.isReturnMessage()) {
@@ -17,7 +17,7 @@ public class LinkPresentationGeometryDTOAssembler {
         } else {
             label = astahLinkPresentation.getLabel() != null ? astahLinkPresentation.getLabel() : "";
         }
-
+        
         return new LinkPresentationGeometryDTO(
             astahLinkPresentation.getID(),
             label,

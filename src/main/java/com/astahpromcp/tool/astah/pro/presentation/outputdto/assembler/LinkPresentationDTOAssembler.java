@@ -22,7 +22,7 @@ import java.util.List;
 
 public class LinkPresentationDTOAssembler {
     public static LinkPresentationDTO toDTO(@NonNull ILinkPresentation astahLinkPresentation) throws Exception {
-
+        
         return new LinkPresentationDTO(
             PresentationDTOAssembler.toDTO(astahLinkPresentation),
             endOf(sourceEndOf(astahLinkPresentation)),
@@ -30,22 +30,22 @@ public class LinkPresentationDTOAssembler {
             drawnPointsOf(astahLinkPresentation),
             LineStyleKind.getCorrespondingType(astahLinkPresentation.getProperty(Key.LINE_SHAPE)));
     }
-
+    
     // Astah reports the supplier side of these links as the source end, the reverse of the model and of the arrow, so the ends are swapped back.
     private static boolean hasReversedEnds(ILinkPresentation astahLinkPresentation) {
         IElement astahModel = astahLinkPresentation.getModel();
         return astahModel instanceof IDependency || astahModel instanceof IUsage || astahModel instanceof IRealization
             || astahModel instanceof IInclude || astahModel instanceof IExtend;
     }
-
+    
     public static IPresentation sourceEndOf(ILinkPresentation astahLinkPresentation) {
         return hasReversedEnds(astahLinkPresentation) ? astahLinkPresentation.getTargetEnd() : astahLinkPresentation.getSourceEnd();
     }
-
+    
     public static IPresentation targetEndOf(ILinkPresentation astahLinkPresentation) {
         return hasReversedEnds(astahLinkPresentation) ? astahLinkPresentation.getSourceEnd() : astahLinkPresentation.getTargetEnd();
     }
-
+    
     public static LabelIdTypeDTO endOf(IPresentation astahEnd) throws Exception {
         if (astahEnd != null) {
             return LabelIdTypeDTOAssembler.toDTO(astahEnd);
@@ -53,16 +53,16 @@ public class LinkPresentationDTOAssembler {
             return LabelIdTypeDTO.empty();
         }
     }
-
+    
     public static List<PointDoubleDTO> drawnPointsOf(ILinkPresentation astahLinkPresentation) throws Exception {
         List<PointDoubleDTO> drawnPoints = new ArrayList<>();
-
+        
         // getPoints() may return null
         Point2D[] astahPoints = astahLinkPresentation.getPoints();
         if (astahPoints == null) {
             return drawnPoints;
         }
-
+        
         for (Point2D point : astahPoints) {
             drawnPoints.add(new PointDoubleDTO(point.getX(), point.getY()));
         }

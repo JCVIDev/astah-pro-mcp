@@ -31,14 +31,14 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/BasicDiagramEditor.html
 @Slf4j
 public class BasicDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final DiagramEditorSupport diagramEditorSupport;
     private final ImageCaptureSupport imageCaptureSupport;
     static final double NOTE_MAX_WIDTH = 800.0;
-
+    
     public BasicDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, DiagramEditorSupport diagramEditorSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -46,7 +46,7 @@ public class BasicDiagramEditorTool extends AstahToolProvider {
         this.diagramEditorSupport = diagramEditorSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -56,7 +56,7 @@ public class BasicDiagramEditorTool extends AstahToolProvider {
                 this::createNote,
                 NewNoteDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_note_anchor",
                 "Create a new note anchor between the specified note (specified by presentation ID) and the specified target presentation (specified by ID) on the specified diagram (specified by ID), and return the newly created link presentation of the note anchor along with the updated diagram image in low resolution.",
@@ -65,26 +65,26 @@ public class BasicDiagramEditorTool extends AstahToolProvider {
                 LinkPresentationDTO.class)
         );
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createNote(NewNoteDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         BasicDiagramEditor basicDiagramEditor;
         try {
             basicDiagramEditor = (BasicDiagramEditor) diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get basic diagram editor.", e);
         }
-
+        
         basicDiagramEditor.setDiagram(astahDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             INodePresentation notePresentation = basicDiagramEditor.createNote(
                 param.noteContent(),
                 new Point2D.Double(
                         param.locationX(),
                         param.locationY()));
-
+            
             // If the note width exceeds the limit, adjust it to the limit.
             if (notePresentation.getWidth() > NOTE_MAX_WIDTH) {
                 try {
@@ -101,70 +101,70 @@ public class BasicDiagramEditorTool extends AstahToolProvider {
             }
             return notePresentation;
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createNoteAnchor(NewNoteAnchorDTO param) throws Exception {
         IDiagram astahDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
         INodePresentation astahNote = astahProToolSupport.getNodePresentation(param.targetNoteId());
         IPresentation astahPresentation = astahProToolSupport.getPresentation(param.targetPresentationId());
-
+        
         requireNote(astahNote);
         requireOnDiagram(astahNote, "note", astahDiagram);
         requireOnDiagram(astahPresentation, "target presentation", astahDiagram);
         requireNoNoteAnchorBetween(astahNote, astahPresentation);
-
+        
         BasicDiagramEditor basicDiagramEditor;
         try {
             basicDiagramEditor = (BasicDiagramEditor) diagramEditorSupport.getCorrespondingDiagramEditor(astahDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get basic diagram editor.", e);
         }
-
+        
         basicDiagramEditor.setDiagram(astahDiagram);
-
-        ILinkPresentation astahLinkPresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLinkPresentation = txnAstah.call(() -> {
             return basicDiagramEditor.createNoteAnchor(
                 astahNote,
                 astahPresentation);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLinkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     // Astah casts the model of the note to a comment, so any other node fails with an unexplained error
     private static void requireNote(INodePresentation presentation) {
         if (presentation.getModel() instanceof IComment) {
             return;
         }
-
+        
         throw new IllegalArgumentException(String.format(
                 "Presentation (ID: %s, type: %s) is not a note. Specify the presentation ID of a note as the target note.",
                 presentation.getID(), presentation.getType()));
     }
-
+    
     // Astah accepts presentations on other diagrams, and leaves a note anchor that no diagram draws
     private static void requireOnDiagram(IPresentation presentation, String role, IDiagram diagram) {
         IDiagram actualDiagram = presentation.getDiagram();
         if (actualDiagram != null && diagram.getId().equals(actualDiagram.getId())) {
             return;
         }
-
+        
         throw new IllegalArgumentException(String.format(
                 "The %s (ID: %s) is not on the target diagram '%s' (ID: %s)%s. A note anchor connects a note and a presentation on the same diagram, so specify presentations on the target diagram.",
                 role, presentation.getID(), diagram.getName(), diagram.getId(),
                 actualDiagram == null ? "" : " but on '" + actualDiagram.getName() + "' (ID: " + actualDiagram.getId() + ")"));
     }
-
+    
     // Astah accepts the same note anchor again, and the copies overlap exactly into one visible line
     private static void requireNoNoteAnchorBetween(INodePresentation note, IPresentation target) {
         for (ILinkPresentation link : note.getLinks()) {
@@ -175,7 +175,7 @@ public class BasicDiagramEditorTool extends AstahToolProvider {
             }
         }
     }
-
+    
     // A note anchor has no direction, so either end may be the note
     private static boolean connects(ILinkPresentation link, IPresentation end1, IPresentation end2) {
         String sourceId = link.getSource().getID();

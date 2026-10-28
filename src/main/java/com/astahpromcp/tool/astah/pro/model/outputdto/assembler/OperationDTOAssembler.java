@@ -19,24 +19,24 @@ public class OperationDTOAssembler {
         for (IParameter parameter : astahOperation.getParameters()) {
             parameterDTOs.add(ParameterDTOAssembler.toDTO(parameter));
         }
-
+        
         NameIdTypeDTO returnType;
         if (astahOperation.getReturnType() != null) {
             returnType = NameIdTypeDTOAssembler.toDTO(astahOperation.getReturnType());
         } else {
             returnType = NameIdTypeDTO.empty();
         }
-
+        
         List<String> preconditions = new ArrayList<>();
         for (String preCondition : astahOperation.getPreConditions()) {
             preconditions.add(preCondition);
         }
-
+        
         List<String> postconditions = new ArrayList<>();
         for (String postCondition : astahOperation.getPostConditions()) {
             postconditions.add(postCondition);
         }
-
+        
         return new OperationDTO(
             NamedElementDTOAssembler.toDTO(astahOperation),
             astahOperation.isAbstract(),

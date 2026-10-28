@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EnumerationLiteralToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private EnumerationLiteralTool tool;
     private Method setValue;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,42 +29,42 @@ public class EnumerationLiteralToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/EnumerationLiteralToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new EnumerationLiteralTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // setValue() method
         setValue = TestSupport.getAccessibleMethod(
             EnumerationLiteralTool.class,
             "setValue",
             EnumerationLiteralWithValueDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void setValue_ok() throws Exception {
         // Get enumeration literal
         IEnumerationLiteral enumerationLiteral = (IEnumerationLiteral) TestSupport.instance().getNamedElementByClassAndName(
             IEnumerationLiteral.class,
             "Enumeration Literal0");
-
+        
         // Create input DTO
         EnumerationLiteralWithValueDTO inputDTO = new EnumerationLiteralWithValueDTO(
             enumerationLiteral.getId(),
             "testValue");
-
+        
         // Check value before setting
         assertNotEquals("testValue", enumerationLiteral.getValue());
-
+        
         // ----------------------------------------
         // Call setValue()
         // ----------------------------------------
@@ -73,10 +73,10 @@ public class EnumerationLiteralToolTest {
             tool,
             inputDTO,
             EnumerationLiteralDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check value after setting
         assertEquals("testValue", enumerationLiteral.getValue());
     }

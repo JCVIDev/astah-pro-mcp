@@ -6,43 +6,43 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record MessageDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Argument")
     String argument,
-
+    
     @JsonPropertyDescription("Guard condition")
     String guard,
-
+    
     @JsonPropertyDescription("Return value")
     String returnValue,
-
+    
     @JsonPropertyDescription("Return value variable")
     String returnValueVariable,
-
+    
     @JsonPropertyDescription("Is Asynchronous")
     boolean isAsynchronous,
-
+    
     @JsonPropertyDescription("Is ReturnMessage")
     boolean isReturnMessage,
-
+    
     @JsonPropertyDescription("Is Synchronous")
     boolean isSynchronous,
-
+    
     @JsonPropertyDescription("Index. Empty if none (e.g., a return message).")
     String index,
-
+    
     @JsonPropertyDescription("Activator. For a return message, this is the message it returns from.")
     NameIdTypeDTO activator,
-
+    
     @JsonPropertyDescription("Successor")
     NameIdTypeDTO successor,
-
+    
     @JsonPropertyDescription("Source")
     NameIdTypeDTO source,
-
+    
     @JsonPropertyDescription("Target")
     NameIdTypeDTO target,
-
+    
     @JsonPropertyDescription("Operation")
     NameIdTypeDTO operation
 ) {

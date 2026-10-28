@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UseCaseModelEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private UseCaseModelEditorTool tool;
     private Method createActor;
@@ -29,7 +29,7 @@ public class UseCaseModelEditorToolTest {
     private Method createInclude;
     private Method createExtend;
     private Method createExtensionPoint;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -38,65 +38,65 @@ public class UseCaseModelEditorToolTest {
         UseCaseModelEditor useCaseModelEditor = projectAccessor.getModelEditorFactory().getUseCaseModelEditor();
         projectAccessor.open("src/test/resources/modelfile/editor/UseCaseModelEditorToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new UseCaseModelEditorTool(
             projectAccessor,
             transactionSupport,
             useCaseModelEditor,
             astahProToolSupport);
-
+        
         // createActor() method
         createActor = TestSupport.getAccessibleMethod(
             UseCaseModelEditorTool.class,
             "createActor",
             NewActorDTO.class);
-
+        
         // createUseCase() method
         createUseCase = TestSupport.getAccessibleMethod(
             UseCaseModelEditorTool.class,
             "createUseCase",
             NewUseCaseDTO.class);
-
+        
         // createInclude() method
         createInclude = TestSupport.getAccessibleMethod(
             UseCaseModelEditorTool.class,
             "createInclude",
             NewIncludeDTO.class);
-
+        
         // createExtend() method
         createExtend = TestSupport.getAccessibleMethod(
             UseCaseModelEditorTool.class,
             "createExtend",
             NewExtendDTO.class);
-
+        
         // createExtensionPoint() method
         createExtensionPoint = TestSupport.getAccessibleMethod(
             UseCaseModelEditorTool.class,
             "createExtensionPoint",
             NewExtensionPointDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createActor_ok() throws Exception {
         // Get package
         IPackage astahPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewActorDTO inputDTO = new NewActorDTO(
             astahPackage.getId(),
             "Test Actor"
         );
-
+        
         // ----------------------------------------
         // Call createActor()
         // ----------------------------------------
@@ -105,24 +105,24 @@ public class UseCaseModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createUseCase_ok() throws Exception {
         // Get package
         IPackage astahPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewUseCaseDTO inputDTO = new NewUseCaseDTO(
             astahPackage.getId(),
             "Test Use Case"
         );
-
+        
         // ----------------------------------------
         // Call createUseCase()
         // ----------------------------------------
@@ -131,11 +131,11 @@ public class UseCaseModelEditorToolTest {
             tool,
             inputDTO,
             UseCaseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createInclude_ok() throws Exception {
         // Get use cases
@@ -145,13 +145,13 @@ public class UseCaseModelEditorToolTest {
         IUseCase astahIncludedUseCase = (IUseCase) TestSupport.instance().getNamedElementByClassAndName(
             IUseCase.class,
             "UseCase1");
-
+        
         // Create input DTO
         NewIncludeDTO inputDTO = new NewIncludeDTO(
             astahUseCase.getId(),
             astahIncludedUseCase.getId(),
             "Test Include");
-
+        
         // ----------------------------------------
         // Call createInclude()
         // ----------------------------------------
@@ -160,19 +160,19 @@ public class UseCaseModelEditorToolTest {
             tool,
             inputDTO,
             IncludeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created include
         IInclude createdInclude = (IInclude) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created include
         assertEquals(astahUseCase.getId(), createdInclude.getIncludingCase().getId());
         assertEquals(astahIncludedUseCase.getId(), createdInclude.getAddition().getId());
     }
-
+    
     @Test
     void createExtend_ok() throws Exception {
         // Get use cases
@@ -182,13 +182,13 @@ public class UseCaseModelEditorToolTest {
         IUseCase astahExtendedUseCase = (IUseCase) TestSupport.instance().getNamedElementByClassAndName(
             IUseCase.class,
             "UseCase1");
-
+        
         // Create input DTO
         NewExtendDTO inputDTO = new NewExtendDTO(
             astahUseCase.getId(),
             astahExtendedUseCase.getId(),
             "Test Extend");
-
+        
         // ----------------------------------------
         // Call createExtend()
         // ----------------------------------------
@@ -197,31 +197,31 @@ public class UseCaseModelEditorToolTest {
             tool,
             inputDTO,
             ExtendDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created extend
         IExtend createdExtend = (IExtend) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created extend
         assertEquals(astahUseCase.getId(), createdExtend.getExtension().getId());
         assertEquals(astahExtendedUseCase.getId(), createdExtend.getExtendedCase().getId());
     }
-
+    
     @Test
     void createExtensionPoint_ok() throws Exception {
         // Get use case
         IUseCase astahUseCase = (IUseCase) TestSupport.instance().getNamedElementByClassAndName(
             IUseCase.class,
             "UseCase0");
-
+        
         // Create input DTO
         NewExtensionPointDTO inputDTO = new NewExtensionPointDTO(
             astahUseCase.getId(),
             "Test Extension Point");
-
+        
         // ----------------------------------------
         // Call createExtensionPoint()
         // ----------------------------------------
@@ -230,7 +230,7 @@ public class UseCaseModelEditorToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

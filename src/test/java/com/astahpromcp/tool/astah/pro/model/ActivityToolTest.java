@@ -22,11 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ActivityToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ActivityTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -34,37 +34,37 @@ public class ActivityToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ActivityTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ActivityTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ActivityTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get activity
         IActivity activity = (IActivity) TestSupport.instance().getNamedElementByClassAndName(
             IActivity.class,
             "Activity0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(activity.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -73,11 +73,11 @@ public class ActivityToolTest {
             tool,
             inputDTO,
             ActivityDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getInfo_ng_activityBehindDataFlowDiagram() throws Exception {
         IActivity activity = mock(IActivity.class);
@@ -85,15 +85,15 @@ public class ActivityToolTest {
         when(activity.getId()).thenReturn("activity-behind-dfd");
         when(activity.getActivityDiagram()).thenThrow(new ClassCastException(
             "class xR cannot be cast to class com.change_vision.jude.api.inf.model.IActivityDiagram"));
-
+        
         AstahProToolSupport astahProToolSupport = mock(AstahProToolSupport.class);
         when(astahProToolSupport.getActivity("activity-behind-dfd")).thenReturn(activity);
-
+        
         ActivityTool toolWithMock = new ActivityTool(
             projectAccessor,
             new TransactionSupport(projectAccessor.getTransactionManager()),
             astahProToolSupport);
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -104,7 +104,7 @@ public class ActivityToolTest {
                 new IdDTO("activity-behind-dfd"),
                 ActivityDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains(

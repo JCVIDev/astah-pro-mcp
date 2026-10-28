@@ -18,12 +18,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CommunicationDiagramToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private CommunicationDiagramTool tool;
     private Method getInfo;
     private Method getInteraction;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -31,43 +31,43 @@ public class CommunicationDiagramToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/CommunicationDiagramToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new CommunicationDiagramTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             CommunicationDiagramTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // getInteraction() method
         getInteraction = TestSupport.getAccessibleMethod(
             CommunicationDiagramTool.class,
             "getInteraction",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get communication diagram
         ICommunicationDiagram communicationDiagram = (ICommunicationDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ICommunicationDiagram.class,
             "Communication Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(communicationDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -76,21 +76,21 @@ public class CommunicationDiagramToolTest {
             tool,
             inputDTO,
             CommunicationDiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getInteraction_ok() throws Exception {
         // Get communication diagram
         ICommunicationDiagram communicationDiagram = (ICommunicationDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ICommunicationDiagram.class,
             "Communication Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(communicationDiagram.getId());
-
+        
         // ----------------------------------------
         // Call getInteraction()
         // ----------------------------------------
@@ -99,7 +99,7 @@ public class CommunicationDiagramToolTest {
             tool,
             inputDTO,
             InteractionDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

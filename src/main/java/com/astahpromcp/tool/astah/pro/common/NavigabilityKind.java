@@ -10,9 +10,9 @@ public enum NavigabilityKind {
     NON_NAVIGABLE("Non_Navigable"),
     @JsonProperty("unspecified")
     UNSPECIFIED("Unspecified");
-
+    
     public final String astahValue;
-
+    
     private NavigabilityKind(String astahValue) {
         this.astahValue = astahValue;
     }

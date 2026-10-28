@@ -12,19 +12,19 @@ import java.util.List;
 public record NodePresentationDTO(
     @JsonPropertyDescription("Presentation info")
     PresentationDTO presentation,
-
+    
     @JsonPropertyDescription("Label, identifier and type of connected links")
     List<LabelIdTypeDTO> links,
-
+    
     @JsonPropertyDescription("Drawn rectangle")
     RectangleDTO drawnRectangle,
-
+    
     @JsonPropertyDescription("Hyperlinks to URL")
     List<UrlHyperlinkDTO> urlHyperlinks,
-
+    
     @JsonPropertyDescription("Hyperlinks to file path")
     List<FilePathHyperlinkDTO> filePathHyperlinks,
-
+    
     @JsonPropertyDescription("Hyperlinks to named element")
     List<NamedElementHyperlinkDTO> namedElementHyperlinks
 ) {

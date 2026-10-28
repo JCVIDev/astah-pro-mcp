@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record PseudostateDTO(
     @JsonPropertyDescription("Vertex info")
     VertexDTO vertex,
-
+    
     @JsonPropertyDescription("Pseudostate kind")
     PseudostateKind pseudostateKind
 ) {

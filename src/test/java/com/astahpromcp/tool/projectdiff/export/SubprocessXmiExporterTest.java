@@ -14,20 +14,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SubprocessXmiExporterTest {
-
+    
     @TempDir
     Path dir;
-
+    
     @Test
     void writeMainClass_ok_copiesTheClassFileWhereTheClassPathFindsIt() throws Exception {
         SubprocessXmiExporter.writeMainClass(dir, XmiExportMain.class);
-
+        
         Path written = dir.resolve(XmiExportMain.class.getName().replace('.', '/') + ".class");
         byte[] bytes = Files.readAllBytes(written);
         assertEquals((byte) 0xCA, bytes[0]);
         assertEquals((byte) 0xFE, bytes[1]);
     }
-
+    
     @Test
     void installDirectory_ok_dropsTheSlashBeforeAWindowsDrive() {
         Path path = SubprocessXmiExporter.installDirectory("/C:/Program Files/astah-professional/");
@@ -37,13 +37,13 @@ public class SubprocessXmiExporterTest {
             assertEquals(Path.of("/C:/Program Files/astah-professional/"), path);
         }
     }
-
+    
     @Test
     void command_ok_namesEveryPathOfTheJobRelativeToItsWorkingDirectory() {
         SubprocessXmiExporter.Plan plan = new SubprocessXmiExporter.Plan(Path.of("java"), Path.of("astah-pro.jar"), Path.of("astah-api.jar"), null, XmiExportMain.class);
-
+        
         List<String> command = SubprocessXmiExporter.command(plan, "512m", 60);
-
+        
         assertTrue(command.contains("-Duser.home=home"));
         assertTrue(command.contains("-Djava.io.tmpdir=tmp"));
         assertTrue(command.contains("-Xmx512m"));
@@ -52,11 +52,43 @@ public class SubprocessXmiExporterTest {
         assertEquals(List.of(XmiExportMain.class.getName(), "project.asta", "out.xmi", "info.json", "60"),
                 command.subList(command.size() - 5, command.size()));
     }
-
+    
+    @Test
+    void lastExceptionOf_ok_prefersTheRootCause() {
+        String log = """
+                java.lang.IllegalStateException: Failed to open the project
+                \tat com.example.Open.run(Open.java:10)
+                Caused by: java.io.EOFException
+                \tat java.base/java.io.DataInputStream.readFully(DataInputStream.java:210)
+                \t... 12 more
+                """;
+        
+        assertEquals("java.io.EOFException", SubprocessXmiExporter.lastExceptionOf(log));
+    }
+    
+    @Test
+    void lastExceptionOf_ok_readsAnExceptionThatEndedAThread() {
+        String log = "Exception in thread \"main\" java.lang.OutOfMemoryError: Java heap space\n\tat Main.main(Main.java:3)\n";
+        
+        assertEquals("java.lang.OutOfMemoryError: Java heap space", SubprocessXmiExporter.lastExceptionOf(log));
+    }
+    
+    @Test
+    void lastExceptionOf_ok_findsNothingInALogWithoutAnException() {
+        // A log line that mentions an exception in passing, or a stack frame, is not a stack trace's first line
+        String log = """
+                2026-10-23 16:22:47,902 [main] JP.co.esm.caddies.jomt.jsystem.j <INFO> - no java.io.IOException was raised
+                \tat java.base/java.io.ObjectInputStream.readStreamHeader(ObjectInputStream.java:908)
+                The parent process went away; stopping.
+                """;
+        
+        assertEquals("", SubprocessXmiExporter.lastExceptionOf(log));
+    }
+    
     @Test
     void unencodable_ok_findsWhatTheSystemCodePageCannotHold() {
         Charset sjis = Charset.forName("windows-31j");
-
+        
         assertEquals(List.of(), SubprocessXmiExporter.unencodable(List.of("C:/日本語/a.jar"), sjis));
         assertEquals(List.of("C:/한국어/a.jar"), SubprocessXmiExporter.unencodable(List.of("C:/한국어/a.jar", "ascii"), sjis));
         assertEquals(List.of(), SubprocessXmiExporter.unencodable(List.of("C:/한국어/a.jar"), StandardCharsets.UTF_8));

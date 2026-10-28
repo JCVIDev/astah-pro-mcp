@@ -19,20 +19,20 @@ import static org.junit.jupiter.api.Assertions.*;
 // The check has to run in its own process: if it failed in the test JVM the run would not report a failure, it
 // would simply disappear.
 public class McpToolScriptExecutorIsolationTest {
-
+    
     @TempDir
     Path outputDirectory;
-
+    
     @Test
     void execute_ok_cannotTerminateTheJvm() throws Exception {
         assertSurvives("exit(" + ExitCanaryRunner.CANARY_EXIT_CODE + ");");
     }
-
+    
     @Test
     void execute_ok_cannotTerminateTheJvmThroughQuit() throws Exception {
         assertSurvives("quit(" + ExitCanaryRunner.CANARY_EXIT_CODE + ");");
     }
-
+    
     // The route a name-by-name denial list misses: a second engine built through the injected 'engine' global has no ClassFilter, so anything reachable from it is reachable from the script.
     @Test
     void execute_ok_cannotTerminateTheJvmThroughASecondEngine() throws Exception {
@@ -40,7 +40,7 @@ public class McpToolScriptExecutorIsolationTest {
                 + ".eval(\"Java.type('java.lang.Runtime').getRuntime().halt("
                 + ExitCanaryRunner.CANARY_EXIT_CODE + ")\");");
     }
-
+    
     private void assertSurvives(String script) throws Exception {
         Path outputFile = outputDirectory.resolve("astah-mcp-exit-canary.log");
         List<String> command = new ArrayList<>();
@@ -49,17 +49,17 @@ public class McpToolScriptExecutorIsolationTest {
         command.add(System.getProperty("java.class.path"));
         command.add(ExitCanaryRunner.class.getName());
         command.add(script);
-
+        
         Process process = new ProcessBuilder(command)
                 .redirectErrorStream(true)
                 .redirectOutput(outputFile.toFile())
                 .start();
-
+        
         assertTrue(process.waitFor(120, TimeUnit.SECONDS), "The canary process did not finish in time");
-
+        
         int exitCode = process.exitValue();
         String output = Files.readString(outputFile, StandardCharsets.UTF_8);
-
+        
         assertNotEquals(ExitCanaryRunner.CANARY_EXIT_CODE, exitCode,
                 "The script shut the JVM down, so a script on this port could close Astah. Output: " + output);
         assertEquals(0, exitCode, "The canary process ended unexpectedly. Output: " + output);

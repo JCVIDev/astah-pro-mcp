@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IVertex.html
 @Slf4j
 public class VertexTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public VertexTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,10 +41,10 @@ public class VertexTool extends AstahToolProvider {
                 )
         );
     }
-
+    
     private VertexDTO getInfo(IdDTO param) throws Exception {
         IVertex astahVertex = astahProToolSupport.getVertex(param.id());
-
+        
         return VertexDTOAssembler.toDTO(astahVertex);
     }
 }

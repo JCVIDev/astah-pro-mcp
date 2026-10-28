@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record ParameterDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Type")
     NameIdTypeDTO type,
-
+    
     @JsonPropertyDescription("Type expression: The string representation of a type, consisting of the type name and its modifiers.")
     String typeExpression
 ) {

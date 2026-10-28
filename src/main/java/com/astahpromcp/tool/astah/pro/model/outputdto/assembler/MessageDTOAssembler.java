@@ -8,45 +8,45 @@ import lombok.NonNull;
 
 public class MessageDTOAssembler {
     public static MessageDTO toDTO(@NonNull IMessage astahMessage) throws Exception {
-
+        
         NameIdTypeDTO activator;
         if (astahMessage.getActivator() != null) {
             activator = NameIdTypeDTOAssembler.toDTO(astahMessage.getActivator());
         } else {
             activator = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO successor;
         if (astahMessage.getSuccessor() != null) {
             successor = NameIdTypeDTOAssembler.toDTO(astahMessage.getSuccessor());
         } else {
             successor = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO source;
         if (astahMessage.getSource() != null) {
             source = NameIdTypeDTOAssembler.toDTO(astahMessage.getSource());
         } else {
             source = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO target;
         if (astahMessage.getTarget() != null) {
             target = NameIdTypeDTOAssembler.toDTO(astahMessage.getTarget());
         } else {
             target = NameIdTypeDTO.empty();
         }
-
+        
         NameIdTypeDTO operation;
         if (astahMessage.getOperation() != null) {
             operation = NameIdTypeDTOAssembler.toDTO(astahMessage.getOperation());
         } else {
             operation = NameIdTypeDTO.empty();
         }
-
+        
         // If the message has no index (such as a return message), use an empty string.
         String index = astahMessage.getIndex() != null ? astahMessage.getIndex() : "";
-
+        
         return new MessageDTO(
             NamedElementDTOAssembler.toDTO(astahMessage),
             astahMessage.getArgument(),

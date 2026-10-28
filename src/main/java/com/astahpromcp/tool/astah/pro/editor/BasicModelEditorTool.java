@@ -23,14 +23,14 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/BasicModelEditor.html
 @Slf4j
 public class BasicModelEditorTool extends AstahToolProvider {
-
+    
     private final BasicModelEditor basicModelEditor;
     private final ERModelEditor erModelEditor;
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final SystemPropertySupport systemPropertySupport;
-
+    
     public BasicModelEditorTool(BasicModelEditor basicModelEditor, ERModelEditor erModelEditor, ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, SystemPropertySupport systemPropertySupport) {
         this.basicModelEditor = basicModelEditor;
         this.erModelEditor = erModelEditor;
@@ -39,7 +39,7 @@ public class BasicModelEditorTool extends AstahToolProvider {
         this.astahProToolSupport = astahProToolSupport;
         this.systemPropertySupport = systemPropertySupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -49,238 +49,238 @@ public class BasicModelEditorTool extends AstahToolProvider {
                 this::changeParent,
                 NamedElementWithParentDTO.class,
                 NamedElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_artifact",
                 "Create a new artifact under the specified parent package (specified by ID), and return the newly created model element of the artifact.",
                 this::createArtifact,
                 NewArtifactInPackageDTO.class,
                 ArtifactDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_pkg_in_parent_pkg",
                 "Create a new package under the specified parent package (specified by ID), and return the newly created model element of the package. Note that this tool cannot create a root package (i.e., a project).",
                 this::createPackageInParentPackage,
                 NewPackageInPackageDTO.class,
                 PackageDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_class_in_parent_pkg",
                 "Create a new class under the specified parent package (specified by ID), and return the newly created model element of the class.",
                 this::createClassInParentPackage,
                 NewClassInPackageDTO.class,
                 ClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_class_in_parent_class",
                 "Create a new class under the specified parent class (specified by ID), and return the newly created model element of the class.",
                 this::createClassInParentClass,
                 NewClassInClassDTO.class,
                 ClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_enum_in_parent_pkg",
                 "Create a new enumeration under the specified parent package (specified by ID), and return the newly created model element of the enumeration.",
                 this::createEnumerationInParentPackage,
                 NewEnumerationInPackageDTO.class,
                 EnumerationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_interface_in_parent_pkg",
-                "Create a new interface under the specified parent package (specified by ID), and return the newly created model element of the interface.",
+                "Create a new interface under the specified parent package (specified by ID), and return the newly created model element of the interface. Astah represents an interface as a class with the 'interface' stereotype, so the result has the type 'Class' and lists 'interface' among its stereotypes.",
                 this::createInterfaceInParentPackage,
                 NewInterfaceInPackageDTO.class,
                 ClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_interface_in_parent_class",
-                "Create a new interface under the specified parent class (specified by ID), and return the newly created model element of the interface.",
+                "Create a new interface under the specified parent class (specified by ID), and return the newly created model element of the interface. Astah represents an interface as a class with the 'interface' stereotype, so the result has the type 'Class' and lists 'interface' among its stereotypes.",
                 this::createInterfaceInParentClass,
                 NewInterfaceInClassDTO.class,
                 ClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_component",
                 "Create a new component under the specified parent package (specified by ID), and return the newly created model element of the component.",
                 this::createComponent,
                 NewComponentInPackageDTO.class,
                 ComponentDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_port",
                 "Create a new port under the specified class (specified by ID), and return the newly created model element of the port.",
                 this::createPort,
                 NewPortInClassDTO.class,
                 PortDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_attr",
                 "Create a new attribute under the specified class (specified by ID), and return the newly created model element of the attribute. Since the attribute type is set as 'int', if the attribute type is not 'int', use other tool function to set the attribute type.",
                 this::createAttribute,
                 NewAttributeInClassDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_enum_literal",
                 "Create a new enumeration literal under the specified enumeration (specified by ID), and return the newly created model element of the enumeration literal.",
                 this::createEnumerationLiteral,
                 NewEnumerationLiteralInEnumerationDTO.class,
                 EnumerationLiteralDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_ope",
                 "Create a new operation under the specified class (specified by ID), and return the newly created model element of the operation. Since the operation return type is set to 'void', if the operation return type is not 'void', use other tool function to set the operation return type.",
                 this::createOperation,
                 NewOperationInClassDTO.class,
                 OperationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_param",
                 "Create a new parameter to the specified operation (specified by ID), and return the newly created model element of the parameter. Since the parameter type is set as 'int', if the parameter type is not 'int', use other tool function to set the parameter type.",
                 this::createParameter,
                 NewParameterToOperationDTO.class,
                 ParameterDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_asso",
                 "Create a new association between the specified class (specified by ID) and the another specified class (specified by ID), and return the newly created model element of the association. The association name and the association end A and B role names are set to empty strings.",
                 this::createAssociation,
                 NewAssociationDTO.class,
                 AssociationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_asso_class",
                 "Create a new association and association class between the specified class (specified by ID) and the another specified class (specified by ID), and return the newly created model element of the association. The association end A and B role names are set to empty strings.",
                 this::createAssociationClass,
                 NewAssociationClassDTO.class,
                 AssociationClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_dep",
                 "Create a new dependency between the specified source named element (specified by ID) and the specified target named element (specified by ID), and return the newly created model element of the dependency.",
                 this::createDependency,
                 NewDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_gen",
                 "Create a new generalization between the specified sub class (specified by ID) and the specified super class (specified by ID), and return the newly created model element of the generalization.",
                 this::createGeneralization,
                 NewGeneralizationDTO.class,
                 GeneralizationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_real",
                 "Create a new realization between the specified client (specified by ID) and the specified supplier (specified by ID), and return the newly created model element of the realization.",
                 this::createRealization,
                 NewRealizationDTO.class,
                 RealizationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_usage",
                 "Create a new usage between the specified client (specified by ID) and the specified supplier (specified by ID), and return the newly created model element of the usage.",
                 this::createUsage,
                 NewUsageDTO.class,
                 UsageDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_qualifier",
                 "Create a new qualifier (type and name) to the specified association end (specified by ID), and return the newly created model element of the qualifier.",
                 this::createQualifier,
                 NewQualifierToAssociationEndDTO.class,
                 AttributeDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_tagged_val",
                 "Create a new tagged value (name and value) to the specified element (specified by ID), and return the element after it is edited.",
                 this::createTaggedValue,
                 NewTaggedValueToElementDTO.class,
                 ElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_template_param",
                 "Create a template parameter of the specified type (specified by ID) to the specified class (specified by ID), and return the model element of the class after it is edited.",
                 this::createTemplateParameter,
                 NewTemplateParameterToClassDTO.class,
                 ClassDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "delete_elem",
                 "Delete the specified element (specified by ID), and return the deleted element. Note that deleting an element also deletes all corresponding presentations.",
                 this::deleteElement,
                 IdDTO.class,
                 ElementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_req_in_parent_pkg",
                 "Create a new requirement under the specified parent package (specified by ID), and return the newly created model element of the requirement.",
                 this::createRequirementInParentPackage,
                 NewRequirementInPackageDTO.class,
                 RequirementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_req_in_parent_req",
                 "Create a new requirement under the specified parent requirement (specified by ID), and return the newly created model element of the requirement.",
                 this::createRequirementInParentRequirement,
                 NewRequirementInRequirementDTO.class,
                 RequirementDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_test_case_in_parent_pkg",
                 "Create a new test case under the specified parent package (specified by ID), and return the newly created model element of the test case.",
                 this::createTestCaseInParentPackage,
                 NewTestCaseInPackageDTO.class,
                 TestCaseDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_test_case_in_parent_test_case",
                 "Create a new test case under the specified parent test case (specified by ID), and return the newly created model element of the test case.",
                 this::createTestCaseInParentTestCase,
                 NewTestCaseInTestCaseDTO.class,
                 TestCaseDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_copy_dep",
                 "Create a copy dependency from the specified source requirement (specified by ID) to the specified target requirement (specified by ID), and return the newly created model element of the dependency.",
                 this::createCopyDependency,
                 NewCopyDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_derive_req_dep",
                 "Create a DeriveReqt dependency from the specified source requirement (specified by ID) to the specified target requirement (specified by ID), and return the newly created model element of the dependency.",
                 this::createDeriveReqtDependency,
                 NewDeriveReqtDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_refine_dep",
                 "Create a refine dependency from the specified source named element (specified by ID) to the specified target requirement (specified by ID), and return the newly created model element of the dependency.",
                 this::createRefineDependency,
                 NewRefineDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_satisfy_dep",
                 "Create a satisfy dependency from the specified source named element (specified by ID) to the specified target requirement (specified by ID), and return the newly created model element of the dependency.",
                 this::createSatisfyDependency,
                 NewSatisfyDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_trace_dep",
                 "Create a trace dependency from the specified source named element (specified by ID) to the specified target named element (specified by ID), and return the newly created model element of the dependency.",
                 this::createTraceDependency,
                 NewTraceDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_verify_dep",
                 "Create a verify dependency from the specified source test case (specified by ID) to the specified target requirement (specified by ID), and return the newly created model element of the dependency.",
                 this::createVerifyDependency,
                 NewVerifyDependencyDTO.class,
                 DependencyDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "create_constraint",
                 "Create a constraint to the specified named element (specified by ID), and return the newly created model element of the constraint.",
@@ -289,178 +289,178 @@ public class BasicModelEditorTool extends AstahToolProvider {
                 ConstraintDTO.class)
         );
     }
-
+    
     private NamedElementDTO changeParent(NamedElementWithParentDTO param) throws Exception {
         INamedElement astahTargetNamedElement = astahProToolSupport.getNamedElement(param.targetNamedElementId());
         INamedElement newParentAstahNamedElement = astahProToolSupport.getNamedElement(param.newParentNamedElementId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             basicModelEditor.changeParent(newParentAstahNamedElement, astahTargetNamedElement);
         });
-
+        
         return NamedElementDTOAssembler.toDTO(astahTargetNamedElement);
     }
-
+    
     private ArtifactDTO createArtifact(NewArtifactInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IArtifact createdAstahArtifact = txnAstah.call( () -> {
+        
+        IArtifact createdAstahArtifact = txnAstah.call(() -> {
             return basicModelEditor.createArtifact(parentAstahPackage, param.newArtifactName());
         });
-
+        
         return ArtifactDTOAssembler.toDTO(createdAstahArtifact);
     }
-
+    
     private PackageDTO createPackageInParentPackage(NewPackageInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IPackage createdAstahPackage = txnAstah.call( () -> {
+        
+        IPackage createdAstahPackage = txnAstah.call(() -> {
             return basicModelEditor.createPackage(parentAstahPackage, param.newPackageName());
         });
-
+        
         return PackageDTOAssembler.toDTO(createdAstahPackage);
     }
-
+    
     private ClassDTO createClassInParentPackage(NewClassInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IClass createdAstahClass = txnAstah.call( () -> {
+        
+        IClass createdAstahClass = txnAstah.call(() -> {
             return basicModelEditor.createClass(parentAstahPackage, param.newClassName());
         });
-
+        
         return ClassDTOAssembler.toDTO(createdAstahClass);
     }
-
+    
     private ClassDTO createClassInParentClass(NewClassInClassDTO param) throws Exception {
         IClass parentAstahClass = astahProToolSupport.getClass(param.parentClassId());
-
-        IClass createdAstahClass = txnAstah.call( () -> {
+        
+        IClass createdAstahClass = txnAstah.call(() -> {
             return basicModelEditor.createClass(parentAstahClass, param.newClassName());
         });
-
+        
         return ClassDTOAssembler.toDTO(createdAstahClass);
     }
-
+    
     private EnumerationDTO createEnumerationInParentPackage(NewEnumerationInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IEnumeration createdAstahEnumeration = txnAstah.call( () -> {
+        
+        IEnumeration createdAstahEnumeration = txnAstah.call(() -> {
             return basicModelEditor.createEnumeration(parentAstahPackage, param.newEnumerationName());
         });
-
+        
         return EnumerationDTOAssembler.toDTO(createdAstahEnumeration);
     }
-
+    
     private ClassDTO createInterfaceInParentPackage(NewInterfaceInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IClass createdAstahInterface = txnAstah.call( () -> {
+        
+        IClass createdAstahInterface = txnAstah.call(() -> {
             return basicModelEditor.createInterface(parentAstahPackage, param.newInterfaceName());
         });
-
+        
         return ClassDTOAssembler.toDTO(createdAstahInterface);
     }
-
+    
     private ClassDTO createInterfaceInParentClass(NewInterfaceInClassDTO param) throws Exception {
         IClass parentAstahClass = astahProToolSupport.getClass(param.parentClassId());
-
-        IClass createdAstahInterface = txnAstah.call( () -> {
+        
+        IClass createdAstahInterface = txnAstah.call(() -> {
             return basicModelEditor.createInterface(parentAstahClass, param.newInterfaceName());
         });
-
+        
         return ClassDTOAssembler.toDTO(createdAstahInterface);
     }
-
+    
     private ComponentDTO createComponent(NewComponentInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IComponent createdAstahComponent = txnAstah.call( () -> {
+        
+        IComponent createdAstahComponent = txnAstah.call(() -> {
             return basicModelEditor.createComponent(parentAstahPackage, param.newComponentName());
         });
-
+        
         return ComponentDTOAssembler.toDTO(createdAstahComponent);
     }
-
+    
     private PortDTO createPort(NewPortInClassDTO param) throws Exception {
         IClass parentAstahClass = astahProToolSupport.getClass(param.parentClassId());
-
-        IPort createdAstahPort = txnAstah.call( () -> {
+        
+        IPort createdAstahPort = txnAstah.call(() -> {
             return basicModelEditor.createPort(parentAstahClass, param.newPortName());
         });
-
+        
         return PortDTOAssembler.toDTO(createdAstahPort);
     }
-
+    
     private AttributeDTO createAttribute(NewAttributeInClassDTO param) throws Exception {
         IClass parentAstahClass = astahProToolSupport.getClass(param.parentClassId());
-
-        IAttribute createdAstahAttribute = txnAstah.call( () -> {
+        
+        IAttribute createdAstahAttribute = txnAstah.call(() -> {
             return basicModelEditor.createAttribute(parentAstahClass, param.newAttributeName(), "int");
         });
-
+        
         return AttributeDTOAssembler.toDTO(createdAstahAttribute);
     }
-
+    
     private EnumerationLiteralDTO createEnumerationLiteral(NewEnumerationLiteralInEnumerationDTO param) throws Exception {
         IEnumeration astahEnumeration = astahProToolSupport.getEnumeration(param.parentEnumerationId());
-
-        IEnumerationLiteral createdAstahEnumerationLiteral = txnAstah.call( () -> {
+        
+        IEnumerationLiteral createdAstahEnumerationLiteral = txnAstah.call(() -> {
             return basicModelEditor.createEnumerationLiteral(astahEnumeration, param.newEnumerationLiteralName());
         });
-
+        
         return EnumerationLiteralDTOAssembler.toDTO(createdAstahEnumerationLiteral);
     }
-
+    
     private OperationDTO createOperation(NewOperationInClassDTO param) throws Exception {
         IClass parentAstahClass = astahProToolSupport.getClass(param.parentClassId());
-
-        IOperation createdAstahOperation = txnAstah.call( () -> {
+        
+        IOperation createdAstahOperation = txnAstah.call(() -> {
             return basicModelEditor.createOperation(parentAstahClass, param.newOperationName(), "void");
         });
-
+        
         return OperationDTOAssembler.toDTO(createdAstahOperation);
     }
-
+    
     private ParameterDTO createParameter(NewParameterToOperationDTO param) throws Exception {
         IOperation astahTargetOperation = astahProToolSupport.getOperation(param.targetOperationId());
-
-        IParameter createdAstahParameter = txnAstah.call( () -> {
+        
+        IParameter createdAstahParameter = txnAstah.call(() -> {
             return basicModelEditor.createParameter(
                 astahTargetOperation,
                 param.newParameterName(),
                 "int");
         });
-
+        
         return ParameterDTOAssembler.toDTO(createdAstahParameter);
     }
-
+    
     private AssociationDTO createAssociation(NewAssociationDTO param) throws Exception {
         IClass astahSourceClass = astahProToolSupport.getClass(param.sourceClassId());
         IClass astahTargetClass = astahProToolSupport.getClass(param.targetClassId());
-
-        IAssociation createdAstahAssociation = txnAstah.call( () -> {
+        
+        IAssociation createdAstahAssociation = txnAstah.call(() -> {
             IAssociation association = basicModelEditor.createAssociation(
                 astahSourceClass,
                 astahTargetClass,
                 "",
                 "",
                 "");
-
+            
             association.getMemberEnds()[0].setNavigability(param.sourceNavigability().astahValue);
             association.getMemberEnds()[1].setNavigability(param.targetNavigability().astahValue);
             association.getMemberEnds()[0].setAggregationKind(param.sourceAggregationKind().astahValue);
             association.getMemberEnds()[1].setAggregationKind(param.targetAggregationKind().astahValue);
             return association;
         });
-
+        
         return AssociationDTOAssembler.toDTO(createdAstahAssociation);
     }
-
+    
     private AssociationClassDTO createAssociationClass(NewAssociationClassDTO param) throws Exception {
         IClass astahSourceClass = astahProToolSupport.getClass(param.sourceClassId());
         IClass astahTargetClass = astahProToolSupport.getClass(param.targetClassId());
-
-        IAssociationClass createdAstahAssociationClass = txnAstah.call( () -> {
+        
+        IAssociationClass createdAstahAssociationClass = txnAstah.call(() -> {
             return basicModelEditor.createAssociationClass(
                 astahSourceClass,
                 astahTargetClass,
@@ -468,117 +468,117 @@ public class BasicModelEditorTool extends AstahToolProvider {
                 "",
                 "");
         });
-
+        
         return AssociationClassDTOAssembler.toDTO(createdAstahAssociationClass);
     }
-
+    
     private DependencyDTO createDependency(NewDependencyDTO param) throws Exception {
         INamedElement sourceAstahNamedElement = astahProToolSupport.getNamedElement(param.sourceNamedElementId());
         INamedElement targetAstahNamedElement = astahProToolSupport.getNamedElement(param.targetNamedElementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             return basicModelEditor.createDependency(
                 targetAstahNamedElement,
                 sourceAstahNamedElement,
                 "");
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private GeneralizationDTO createGeneralization(NewGeneralizationDTO param) throws Exception {
         IClass astahSubClass = astahProToolSupport.getClass(param.subClassId());
         IClass astahSuperClass = astahProToolSupport.getClass(param.superClassId());
-
-        IGeneralization createdAstahGeneralization = txnAstah.call( () -> {
+        
+        IGeneralization createdAstahGeneralization = txnAstah.call(() -> {
             return basicModelEditor.createGeneralization(
                 astahSubClass,
                 astahSuperClass,
                 "");
         });
-
+        
         return GeneralizationDTOAssembler.toDTO(createdAstahGeneralization);
     }
-
+    
     private RealizationDTO createRealization(NewRealizationDTO param) throws Exception {
         IClass astahClientClass = astahProToolSupport.getClass(param.clientClassId());
         IClass astahSupplierClass = astahProToolSupport.getClass(param.supplierClassId());
-
-        IRealization createdAstahRealization = txnAstah.call( () -> {
+        
+        IRealization createdAstahRealization = txnAstah.call(() -> {
             return basicModelEditor.createRealization(
                 astahClientClass,
                 astahSupplierClass,
                 "");
         });
-
+        
         return RealizationDTOAssembler.toDTO(createdAstahRealization);
     }
-
+    
     private UsageDTO createUsage(NewUsageDTO param) throws Exception {
         IClass astahClientClass = astahProToolSupport.getClass(param.clientClassId());
         IClass astahSupplierClass = astahProToolSupport.getClass(param.supplierClassId());
-
-        IUsage createdAstahUsage = txnAstah.call( () -> {
+        
+        IUsage createdAstahUsage = txnAstah.call(() -> {
             return basicModelEditor.createUsage(
                 astahClientClass,
                 astahSupplierClass,
                 "");
         });
-
+        
         return UsageDTOAssembler.toDTO(createdAstahUsage);
     }
-
+    
     private AttributeDTO createQualifier(NewQualifierToAssociationEndDTO param) throws Exception {
         IAttribute astahAssociationEnd = astahProToolSupport.getAttribute(param.targetAssociationEndId());
         IClass astahType = astahProToolSupport.getClassOrPrimitiveType(param.qualifierTypeId());
-
+        
         // Create an attribute on the owner class to serve as the qualifier
-        IAttribute createdAstahQualifier = txnAstah.call( () -> {
+        IAttribute createdAstahQualifier = txnAstah.call(() -> {
             return basicModelEditor.createQualifier(
                 astahAssociationEnd,
                 param.newQualifierName(),
                 astahType);
         });
-
+        
         return AttributeDTOAssembler.toDTO(createdAstahQualifier);
     }
-
+    
     private ElementDTO createTaggedValue(NewTaggedValueToElementDTO param) throws Exception {
         IElement astahElement = astahProToolSupport.getElement(param.targetElementId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             basicModelEditor.createTaggedValue(
                 astahElement,
                 param.newKeyOfTaggedValue(),
                 param.newValueOfTaggedValue());
         });
-
+        
         return ElementDTOAssembler.toDTO(astahElement);
     }
-
+    
     private ClassDTO createTemplateParameter(NewTemplateParameterToClassDTO param) throws Exception {
         IClass astahTargetClass = astahProToolSupport.getClass(param.targetClassId());
         IClass astahType = astahProToolSupport.getClassOrPrimitiveType(param.templateParameterTypeId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             basicModelEditor.createTemplateParameter(
                 astahTargetClass,
                 param.newTemplateParameterName(),
                 astahType,
                 "");
         });
-
+        
         return ClassDTOAssembler.toDTO(astahTargetClass);
     }
-
+    
     private ElementDTO deleteElement(IdDTO param) throws Exception {
         IElement astahElement = astahProToolSupport.getElement(param.id());
-
+        
         ElementDTO deletedElementDTO = ElementDTOAssembler.toDTO(astahElement);
-
-        systemPropertySupport.deleteWithoutConfirmationDialog( () -> {
-            txnAstah.run( () -> {
+        
+        systemPropertySupport.deleteWithoutConfirmationDialog(() -> {
+            txnAstah.run(() -> {
                 if (astahElement instanceof IERModel
                         || astahElement instanceof IEREntity
                         || astahElement instanceof IERAttribute
@@ -591,67 +591,66 @@ public class BasicModelEditorTool extends AstahToolProvider {
                 }
             });
         });
-
+        
         astahProToolSupport.verifyDeleted(param.id());
-
+        
         return deletedElementDTO;
     }
-
+    
     private RequirementDTO createRequirementInParentPackage(NewRequirementInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IRequirement createdAstahRequirement = txnAstah.call( () -> {
+        
+        IRequirement createdAstahRequirement = txnAstah.call(() -> {
             return basicModelEditor.createRequirement(
                 parentAstahPackage,
                 param.newRequirementName());
         });
-
+        
         return RequirementDTOAssembler.toDTO(createdAstahRequirement);
     }
-
+    
     private RequirementDTO createRequirementInParentRequirement(NewRequirementInRequirementDTO param) throws Exception {
         IRequirement parentAstahRequirement = astahProToolSupport.getRequirement(param.parentRequirementId());
-
-        IRequirement createdAstahRequirement = txnAstah.call( () -> {
+        
+        IRequirement createdAstahRequirement = txnAstah.call(() -> {
             return basicModelEditor.createRequirement(
                 parentAstahRequirement,
                 param.newRequirementName());
         });
-
+        
         return RequirementDTOAssembler.toDTO(createdAstahRequirement);
     }
-
+    
     private TestCaseDTO createTestCaseInParentPackage(NewTestCaseInPackageDTO param) throws Exception {
         IPackage parentAstahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        ITestCase createdAstahTestCase = txnAstah.call( () -> {
+        
+        ITestCase createdAstahTestCase = txnAstah.call(() -> {
             return basicModelEditor.createTestCase(
                 parentAstahPackage,
                 param.newTestCaseName());
         });
-
-
+        
         return TestCaseDTOAssembler.toDTO(createdAstahTestCase);
     }
-
+    
     private TestCaseDTO createTestCaseInParentTestCase(NewTestCaseInTestCaseDTO param) throws Exception {
         ITestCase parentAstahTestCase = astahProToolSupport.getTestCase(param.parentTestCaseId());
-
-        ITestCase createdAstahTestCase = txnAstah.call( () -> {
+        
+        ITestCase createdAstahTestCase = txnAstah.call(() -> {
             return basicModelEditor.createTestCase(
                 parentAstahTestCase,
                 param.newTestCaseName());
         });
-
+        
         return TestCaseDTOAssembler.toDTO(createdAstahTestCase);
     }
-
+    
     private DependencyDTO createCopyDependency(NewCopyDependencyDTO param) throws Exception {
         IRequirement sourceAstahRequirement = astahProToolSupport.getRequirement(param.sourceRequirementId());
         IRequirement targetAstahRequirement = astahProToolSupport.getRequirement(param.targetRequirementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahRequirement,
                 sourceAstahRequirement,
@@ -659,16 +658,16 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("copy");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private DependencyDTO createDeriveReqtDependency(NewDeriveReqtDependencyDTO param) throws Exception {
         IRequirement sourceAstahRequirement = astahProToolSupport.getRequirement(param.sourceRequirementId());
         IRequirement targetAstahRequirement = astahProToolSupport.getRequirement(param.targetRequirementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahRequirement,
                 sourceAstahRequirement,
@@ -676,16 +675,16 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("deriveReqt");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private DependencyDTO createRefineDependency(NewRefineDependencyDTO param) throws Exception {
         INamedElement sourceAstahNamedElement = astahProToolSupport.getNamedElement(param.sourceNamedElementId());
         IRequirement targetAstahRequirement = astahProToolSupport.getRequirement(param.targetRequirementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahRequirement,
                 sourceAstahNamedElement,
@@ -693,16 +692,16 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("refine");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private DependencyDTO createSatisfyDependency(NewSatisfyDependencyDTO param) throws Exception {
         INamedElement sourceAstahNamedElement = astahProToolSupport.getNamedElement(param.sourceNamedElementId());
         IRequirement targetAstahRequirement = astahProToolSupport.getRequirement(param.targetRequirementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahRequirement,
                 sourceAstahNamedElement,
@@ -710,16 +709,16 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("satisfy");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private DependencyDTO createTraceDependency(NewTraceDependencyDTO param) throws Exception {
         INamedElement sourceAstahNamedElement = astahProToolSupport.getNamedElement(param.sourceNamedElementId());
         INamedElement targetAstahNamedElement = astahProToolSupport.getNamedElement(param.targetNamedElementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahNamedElement,
                 sourceAstahNamedElement,
@@ -727,16 +726,16 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("trace");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private DependencyDTO createVerifyDependency(NewVerifyDependencyDTO param) throws Exception {
         ITestCase sourceAstahTestCase = astahProToolSupport.getTestCase(param.sourceTestCaseId());
         IRequirement targetAstahRequirement = astahProToolSupport.getRequirement(param.targetRequirementId());
-
+        
         // Note: BasicModelEditor.createDependency takes the supplier first and the client second, unlike createUsage and createRealization, so the target is passed before the source.
-        IDependency createdAstahDependency = txnAstah.call( () -> {
+        IDependency createdAstahDependency = txnAstah.call(() -> {
             IDependency dependency = basicModelEditor.createDependency(
                 targetAstahRequirement,
                 sourceAstahTestCase,
@@ -744,10 +743,10 @@ public class BasicModelEditorTool extends AstahToolProvider {
             dependency.addStereotype("verify");
             return dependency;
         });
-
+        
         return DependencyDTOAssembler.toDTO(createdAstahDependency);
     }
-
+    
     private ConstraintDTO createConstraint(NewConstraintDTO param) throws Exception {
         INamedElement astahTargetNamedElement = astahProToolSupport.getNamedElement(param.targetNamedElementId());
         String newConstraintName = ConditionTextSupport.normalize("constraint", param.newConstraintName());
@@ -757,13 +756,13 @@ public class BasicModelEditorTool extends AstahToolProvider {
             newConstraintName,
             astahTargetNamedElement.getConstraints(),
             IConstraint::getSpecification);
-
-        IConstraint createdAstahConstraint = txnAstah.call( () -> {
+        
+        IConstraint createdAstahConstraint = txnAstah.call(() -> {
             return basicModelEditor.createConstraint(
                 astahTargetNamedElement,
                 newConstraintName);
         });
-
+        
         return ConstraintDTOAssembler.toDTO(createdAstahConstraint);
     }
 }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record LinkEndWithNavigabilityDTO(
     @JsonPropertyDescription("Target link end identifier")
     String targetLinkEndId,
-
+    
     @JsonPropertyDescription("Navigability kind")
     NavigabilityKind navigabilityKind
 ) {

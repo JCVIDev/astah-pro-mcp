@@ -35,14 +35,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ERDiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERDiagramEditorTool tool;
     private Method createERDiagram;
     private Method createNodePresentation;
     private Method createLinkPresentation;
     private Method createSubtypeRelationshipGroup;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -54,7 +54,7 @@ public class ERDiagramEditorToolTest {
         ImageCaptureSupport imageCaptureSupport = mock(ImageCaptureSupport.class);
         when(imageCaptureSupport.createThumbnailContent(anyString()))
             .thenReturn(McpSchema.ImageContent.builder("", "image/png").build());
-
+        
         // Tool
         tool = new ERDiagramEditorTool(
             projectAccessor,
@@ -62,51 +62,51 @@ public class ERDiagramEditorToolTest {
             erDiagramEditor,
             astahProToolSupport,
             imageCaptureSupport);
-
+        
         // createERDiagram() method
         createERDiagram = TestSupport.getAccessibleMethod(
             ERDiagramEditorTool.class,
             "createERDiagram",
             NewERDiagramDTO.class);
-
+        
         // createNodePresentation() method
         createNodePresentation = TestSupport.getAccessibleMethod(
             ERDiagramEditorTool.class,
             "createNodePresentation",
             NewNodePresentationOnERDiagramDTO.class);
-
+        
         // createLinkPresentation() method
         createLinkPresentation = TestSupport.getAccessibleMethod(
             ERDiagramEditorTool.class,
             "createLinkPresentation",
             NewLinkPresentationOnERDiagramDTO.class);
-
+        
         // createSubtypeRelationshipGroup() method
         createSubtypeRelationshipGroup = TestSupport.getAccessibleMethod(
             ERDiagramEditorTool.class,
             "createSubtypeRelationshipGroup",
             NewSubtypeRelationshipGroupOnERDiagramDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createERDiagram_ok() throws Exception {
         // Get ER package
         IERPackage erPackage = (IERPackage) TestSupport.instance().getNamedElementByClassAndName(
             IERPackage.class,
             "package0");
-
+        
         // Create input DTO
         NewERDiagramDTO inputDTO = new NewERDiagramDTO(
             erPackage.getId(),
             "TestERDiagram");
-
+        
         // ----------------------------------------
         // Call createERDiagram()
         // ----------------------------------------
@@ -115,31 +115,31 @@ public class ERDiagramEditorToolTest {
             tool,
             inputDTO,
             ERDiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals("TestERDiagram", outputDTO.diagram().namedElement().name());
     }
-
+    
     @Test
     void createNodePresentation_ok() throws Exception {
         // Get ER diagram
         IERDiagram erDiagram = (IERDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IERDiagram.class,
             "ER Diagram0");
-
+        
         // Get ER entity
         IEREntity erEntity = (IEREntity) TestSupport.instance().getNamedElementByClassAndName(
             IEREntity.class,
             "Entity0");
-
+        
         // Create input DTO
         NewNodePresentationOnERDiagramDTO inputDTO = new NewNodePresentationOnERDiagramDTO(
             erDiagram.getId(),
             erEntity.getId(),
             10,
             20);
-
+        
         // ----------------------------------------
         // Call createNodePresentation()
         // ----------------------------------------
@@ -148,40 +148,40 @@ public class ERDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createLinkPresentation_ok() throws Exception {
         // Get ER diagram
         IERDiagram erDiagram = (IERDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IERDiagram.class,
             "ER Diagram0");
-
+        
         // Get relationship
         IERRelationship relationship = (IERRelationship) TestSupport.instance().getNamedElementByClassAndName(
             IERRelationship.class,
             "Relationship0");
-
+        
         // Get source node presentation
         IPresentation sourceNodePresentation = TestSupport.instance().getPresentationByTypeAndLabel(
             "EREntity",
             "Entity0");
-
+        
         // Get target node presentation
         IPresentation targetNodePresentation = TestSupport.instance().getPresentationByTypeAndLabel(
             "EREntity",
             "Entity1");
-
+        
         // Create input DTO
         NewLinkPresentationOnERDiagramDTO inputDTO = new NewLinkPresentationOnERDiagramDTO(
             erDiagram.getId(),
             relationship.getId(),
             sourceNodePresentation.getID(),
             targetNodePresentation.getID());
-
+        
         // ----------------------------------------
         // Call createLinkPresentation()
         // ----------------------------------------
@@ -190,37 +190,37 @@ public class ERDiagramEditorToolTest {
             tool,
             inputDTO,
             LinkPresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createSubtypeRelationshipGroup_ok() throws Exception {
         // Get ER diagram
         IERDiagram erDiagram = (IERDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IERDiagram.class,
             "ER Diagram0");
-
+        
         // Get subtype relationship link presentation
         ILinkPresentation subtypeRelationshipPresentation0 = (ILinkPresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Subtype",
             "Subtype0");
-
+        
         ILinkPresentation subtypeRelationshipPresentation1 = (ILinkPresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Subtype",
             "Subtype1");
-
+        
         List<String> subtypeRelationshipIds = new ArrayList<>();
         subtypeRelationshipIds.add(subtypeRelationshipPresentation0.getID());
         subtypeRelationshipIds.add(subtypeRelationshipPresentation1.getID());
-
+        
         // Create input DTO
         NewSubtypeRelationshipGroupOnERDiagramDTO inputDTO = new NewSubtypeRelationshipGroupOnERDiagramDTO(
             erDiagram.getId(),
             subtypeRelationshipIds,
             "vertical");
-
+        
         // ----------------------------------------
         // Call createSubtypeRelationshipGroup()
         // ----------------------------------------
@@ -229,7 +229,7 @@ public class ERDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

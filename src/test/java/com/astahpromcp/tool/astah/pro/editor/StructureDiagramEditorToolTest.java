@@ -25,12 +25,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class StructureDiagramEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private StructureDiagramEditorTool tool;
     private Method createNodePresentation;
     private Method createLinkPresentation;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -42,7 +42,7 @@ public class StructureDiagramEditorToolTest {
         ImageCaptureSupport imageCaptureSupport = mock(ImageCaptureSupport.class);
         when(imageCaptureSupport.createThumbnailContent(anyString()))
             .thenReturn(McpSchema.ImageContent.builder("", "image/png").build());
-
+        
         // Tool
         tool = new StructureDiagramEditorTool(
             projectAccessor,
@@ -50,46 +50,46 @@ public class StructureDiagramEditorToolTest {
             astahProToolSupport,
             diagramEditorSupport,
             imageCaptureSupport);
-
+        
         // createNodePresentation() method
         createNodePresentation = TestSupport.getAccessibleMethod(
             StructureDiagramEditorTool.class,
             "createNodePresentation",
             NewNodePresentationDTO.class);
-
+        
         // createLinkPresentation() method
         createLinkPresentation = TestSupport.getAccessibleMethod(
             StructureDiagramEditorTool.class,
             "createLinkPresentation",
             NewLinkPresentationDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void createNodePresentation_ok() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewNodePresentationDTO inputDTO = new NewNodePresentationDTO(
             classDiagram.getId(),
             clazz.getId(),
             10,
             20);
-
+        
         // ----------------------------------------
         // Call createNodePresentation()
         // ----------------------------------------
@@ -98,41 +98,41 @@ public class StructureDiagramEditorToolTest {
             tool,
             inputDTO,
             NodePresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createLinkPresentation_ok_1() throws Exception {
         // Get class diagram
         IClassDiagram classDiagram = (IClassDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IClassDiagram.class,
             "Class Diagram0");
-
+        
         // Get association
         IClass classBarModel = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
         IAssociation association = classBarModel.getAttributes()[0].getAssociation();
-
+        
         // Get class (source node presentation)
         INodePresentation classBar = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Class",
             "Bar");
-
+        
         // Get class (target node presentation)
         INodePresentation classBaz = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Class",
             "Baz");
-
+        
         // Create input DTO
         NewLinkPresentationDTO inputDTO = new NewLinkPresentationDTO(
             classDiagram.getId(),
             association.getId(),
             classBar.getID(),
             classBaz.getID());
-
+        
         // ----------------------------------------
         // Call createLinkPresentation()
         // ----------------------------------------
@@ -141,23 +141,23 @@ public class StructureDiagramEditorToolTest {
             tool,
             inputDTO,
             LinkPresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createLinkPresentation_ok_2() throws Exception {
         // Get composite structure diagram
         ICompositeStructureDiagram compositeStructureDiagram = (ICompositeStructureDiagram) TestSupport.instance().getNamedElementByClassAndName(
             ICompositeStructureDiagram.class,
             "Composite Structure Diagram0");
-
+        
         // Get connector
         IConnector connector = (IConnector) TestSupport.instance().getNamedElementByClassAndName(
             IConnector.class,
             "");
-
+        
         // Get parts
         INodePresentation part0 = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Part",
@@ -165,14 +165,14 @@ public class StructureDiagramEditorToolTest {
         INodePresentation part1 = (INodePresentation) TestSupport.instance().getPresentationByTypeAndLabel(
             "Part",
             "Part1");
-
+        
         // Create input DTO
         NewLinkPresentationDTO inputDTO = new NewLinkPresentationDTO(
             compositeStructureDiagram.getId(),
             connector.getId(),
             part0.getID(),
             part1.getID());
-
+        
         // ----------------------------------------
         // Call createLinkPresentation()
         // ----------------------------------------
@@ -181,7 +181,7 @@ public class StructureDiagramEditorToolTest {
             tool,
             inputDTO,
             LinkPresentationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(connector.getId(), outputDTO.presentation().correspondingModelElement().id());

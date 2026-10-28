@@ -10,4 +10,3 @@ public record RequirementWithIdDTO(
     String requirementId
 ) {
 }
-

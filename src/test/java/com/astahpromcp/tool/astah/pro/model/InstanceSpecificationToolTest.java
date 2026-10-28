@@ -19,12 +19,12 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstanceSpecificationToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private InstanceSpecificationTool tool;
     private Method getInfo;
     private Method setClassifier;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -32,43 +32,43 @@ public class InstanceSpecificationToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/InstanceSpecificationToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new InstanceSpecificationTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             InstanceSpecificationTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // setClassifier() method
         setClassifier = TestSupport.getAccessibleMethod(
             InstanceSpecificationTool.class,
             "setClassifier",
             InstanceSpecificationWithClassifierDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get instance specification
         IInstanceSpecification instanceSpecification = (IInstanceSpecification) TestSupport.instance().getNamedElementByClassAndName(
             IInstanceSpecification.class,
             "foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(instanceSpecification.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -77,28 +77,28 @@ public class InstanceSpecificationToolTest {
             tool,
             inputDTO,
             InstanceSpecificationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void setClassifier_ok() throws Exception {
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Get instance specification
         IInstanceSpecification instanceSpecification = (IInstanceSpecification) TestSupport.instance().getNamedElementByClassAndName(
             IInstanceSpecification.class,
             "foo");
-
+        
         // Create input DTO
         InstanceSpecificationWithClassifierDTO inputDTO = new InstanceSpecificationWithClassifierDTO(
             clazz.getId(),
             instanceSpecification.getId());
-
+        
         // ----------------------------------------
         // Call setClassifier()
         // ----------------------------------------
@@ -107,7 +107,7 @@ public class InstanceSpecificationToolTest {
             tool,
             inputDTO,
             InstanceSpecificationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }

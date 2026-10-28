@@ -8,7 +8,7 @@ import java.util.List;
 public record LinkPresentationWithPointsDTO(
     @JsonPropertyDescription("Target link presentation identifier")
     String targetLinkPresentationId,
-
+    
     @JsonPropertyDescription("Draw points with the connection points in the rectangles.")
     List<PointIntDTO> drawPoints
 ) {

@@ -20,12 +20,12 @@ import java.util.List;
 
 public class NodePresentationDTOAssembler {
     public static NodePresentationDTO toDTO(@NonNull INodePresentation astahNodePresentation) throws Exception {
-
+        
         List<LabelIdTypeDTO> links = new ArrayList<>();
         for (ILinkPresentation linkPresentation : astahNodePresentation.getLinks()) {
             links.add(LabelIdTypeDTOAssembler.toDTO(linkPresentation));
         }
-
+        
         List<UrlHyperlinkDTO> urlHyperlinks = new ArrayList<>();
         List<FilePathHyperlinkDTO> filePathHyperlinks = new ArrayList<>();
         List<NamedElementHyperlinkDTO> namedElementHyperlinks = new ArrayList<>();
@@ -35,7 +35,7 @@ public class NodePresentationDTOAssembler {
                     new UrlHyperlinkDTO(
                         hyperlink.getName(),
                         hyperlink.getComment()));
-            
+                
             } else if (hyperlink.isFile()) {
                 String filePath;
                 try {
@@ -47,15 +47,15 @@ public class NodePresentationDTOAssembler {
                     new FilePathHyperlinkDTO(
                         filePath,
                         hyperlink.getComment()));
-            
+                
             } else if (hyperlink.isModel()) {
                 namedElementHyperlinks.add(
                     new NamedElementHyperlinkDTO(
                         hyperlink.getName(),
                         hyperlink.getComment()));
             }
-        }   
-
+        }
+        
         return new NodePresentationDTO(
             PresentationDTOAssembler.toDTO(astahNodePresentation),
             links,

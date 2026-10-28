@@ -8,11 +8,11 @@ import java.util.List;
 // Factory for creating log tools
 @Slf4j
 public class LogToolFactory {
-
+    
     public LogToolFactory() {
         // No dependencies
     }
-
+    
     public List<ToolProvider> createToolProviders() {
         try {
             return List.of(

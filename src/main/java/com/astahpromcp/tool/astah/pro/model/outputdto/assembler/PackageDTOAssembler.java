@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PackageDTOAssembler {
     public static PackageDTO toDTO(@NonNull IPackage astahPackage) throws Exception {
-                
+        
         List<NameIdTypeDTO> ownedElementNameIdTypes = new ArrayList<>();
         for (INamedElement ownedElement : astahPackage.getOwnedElements()) {
             ownedElementNameIdTypes.add(NameIdTypeDTOAssembler.toDTO(ownedElement));

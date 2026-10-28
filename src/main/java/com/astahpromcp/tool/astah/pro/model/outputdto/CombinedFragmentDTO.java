@@ -8,10 +8,10 @@ import java.util.List;
 public record CombinedFragmentDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Combined fragment kind")
     String combinedFragmentKind,
-
+    
     @JsonPropertyDescription("Interaction operands")
     List<NameIdTypeDTO> interactionOperands
 ) {

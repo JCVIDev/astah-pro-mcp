@@ -7,7 +7,7 @@ import java.util.List;
 public record EnumerationDTO(
     @JsonPropertyDescription("Class info")
     ClassDTO classDTO,
-
+    
     @JsonPropertyDescription("Enumeration literals")
     List<EnumerationLiteralDTO> enumerationLiterals
 ) {

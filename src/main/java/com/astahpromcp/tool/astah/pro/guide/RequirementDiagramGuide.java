@@ -1,10 +1,10 @@
 package com.astahpromcp.tool.astah.pro.guide;
 
 final class RequirementDiagramGuide {
-
+    
     private RequirementDiagramGuide() {
     }
-
+    
     static String contents() {
         String contents = """
 Terminology Definitions (quoted from OMG SysML Specification v.1.7):

@@ -19,17 +19,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ISlot.html
 @Slf4j
 public class SlotTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public SlotTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -39,8 +39,7 @@ public class SlotTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 SlotDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_val_of_slot",
                 "Set the value of the specified slot (specified by ID), and return the model element of the slot after it is set.",
@@ -49,20 +48,20 @@ public class SlotTool extends AstahToolProvider {
                 SlotDTO.class)
         );
     }
-
+    
     private SlotDTO getInfo(IdDTO param) throws Exception {
         ISlot astahSlot = astahProToolSupport.getSlot(param.id());
-
+        
         return SlotDTOAssembler.toDTO(astahSlot);
     }
-
+    
     private SlotDTO setValue(SlotWithValueDTO param) throws Exception {
         ISlot astahSlot = astahProToolSupport.getSlot(param.targetSlotId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahSlot.setValue(param.value());
         });
-
+        
         return SlotDTOAssembler.toDTO(astahSlot);
     }
 }

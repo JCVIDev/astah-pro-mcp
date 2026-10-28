@@ -8,16 +8,16 @@ import java.util.List;
 public record InstanceSpecificationDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Classifier")
     NameIdTypeDTO classifier,
-
+    
     @JsonPropertyDescription("Parent instance specification")
     NameIdTypeDTO parentInstanceSpecification,
-
+    
     @JsonPropertyDescription("Link ends")
     List<NameIdTypeDTO> linkEnds,
-
+    
     @JsonPropertyDescription("Slots")
     List<NameIdTypeDTO> slots
 ) {

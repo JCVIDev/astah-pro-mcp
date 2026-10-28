@@ -5,9 +5,9 @@
 // find_named_elements_by_name matches partially, and an exact name is not necessarily unique either,
 // so the hits are filtered and then counted rather than taking value[0].
 var diagrams = tools.find_named_elements_by_name({ name: 'Class Diagram0' }).value
-  .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
+    .filter(function (e) { return e.name === 'Class Diagram0' && e.type === 'ClassDiagram'; });
 if (diagrams.length !== 1) {
-  throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
+    throw new Error('Expected 1 ClassDiagram named "Class Diagram0", found ' + diagrams.length + '.');
 }
 var diagramId = diagrams[0].id;
 
@@ -25,13 +25,13 @@ var presentations = tools.get_prsts_on_dgm({ id: diagramId }).value;
 
 var lines = [];
 for (var i = 0; i < presentations.length; i++) {
-  var presentation = presentations[i];
-  var model = presentation.correspondingModelElement;
-
-  // The frame and an image draw nothing from the model. correspondingModelElement is still there
-  // for them, filled with empty strings, so it is the id that tells them apart.
-  lines.push(presentation.type + ' ' + presentation.id + ' -> '
-    + (model.id === '' ? '(no model element)' : model.type + ' ' + model.id));
+    var presentation = presentations[i];
+    var model = presentation.correspondingModelElement;
+    
+    // The frame and an image draw nothing from the model. correspondingModelElement is still there
+    // for them, filled with empty strings, so it is the id that tells them apart.
+    lines.push(presentation.type + ' ' + presentation.id + ' -> '
+        + (model.id === '' ? '(no model element)' : model.type + ' ' + model.id));
 }
 
 print(presentations.length + ' presentation(s) on the diagram:');
@@ -48,13 +48,13 @@ print(lines.join('\n'));
 // end of a link.
 var nodeId = '';
 for (var n = 0; n < presentations.length && nodeId === ''; n++) {
-  if (presentations[n].type === 'Class') {
-    nodeId = presentations[n].id;
-  }
+    if (presentations[n].type === 'Class') {
+        nodeId = presentations[n].id;
+    }
 }
 
 if (nodeId === '') {
-  throw new Error('No class is drawn on the diagram, so there is no node presentation to cross over from.');
+    throw new Error('No class is drawn on the diagram, so there is no node presentation to cross over from.');
 }
 
 var classId = tools.get_node_info({ id: nodeId }).presentation.correspondingModelElement.id;
@@ -79,6 +79,6 @@ var presentationIds = element.element.correspondingPresentationIds;
 print('');
 print(element.name + ' is drawn ' + presentationIds.length + ' time(s):');
 for (var p = 0; p < presentationIds.length; p++) {
-  var drawnIn = tools.get_node_info({ id: presentationIds[p] }).presentation.renderedInDiagram;
-  print('  ' + presentationIds[p] + ' on ' + drawnIn.type + ' ' + drawnIn.name);
+    var drawnIn = tools.get_node_info({ id: presentationIds[p] }).presentation.renderedInDiagram;
+    print('  ' + presentationIds[p] + ' on ' + drawnIn.type + ' ' + drawnIn.name);
 }

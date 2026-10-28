@@ -19,21 +19,21 @@ import java.util.List;
 // Tool that fetches Plantuml guide content and returns it in chunks
 @Slf4j
 public class PlantumlGuideTool implements ToolProvider {
-
+    
     private final KnowledgeToolSupport.ContentCache contentCache;
     private final Path outputDirectory;
     private final HttpClient httpClient;
-
+    
     public PlantumlGuideTool(Path outputDirectory) {
         this(outputDirectory, KnowledgeToolSupport.newHttpClient());
     }
-
+    
     public PlantumlGuideTool(Path outputDirectory, HttpClient httpClient) {
         this.outputDirectory = outputDirectory;
         this.httpClient = httpClient;
         this.contentCache = new KnowledgeToolSupport.ContentCache();
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -44,7 +44,7 @@ public class PlantumlGuideTool implements ToolProvider {
                     this::getPlantumlGuideInfo,
                     NoInputDTO.class,
                     DocumentDTO.class),
-
+                
                 ToolSupport.toolDefinitionReturningDto(
                     "get_chunk_of_puml_guide",
                     "Return the chunk data of PlantUML guide. The chunk index must be in the range 0 to totalChunks - 1 (totalChunks is returned by the corresponding get_info_of_... tool function, which must be called first); otherwise an error is returned.",
@@ -57,30 +57,30 @@ public class PlantumlGuideTool implements ToolProvider {
             return List.of();
         }
     }
-
+    
     private DocumentDTO getPlantumlGuideInfo(NoInputDTO param) throws IOException {
         DocumentDTO cached = contentCache.describe();
         if (cached != null) {
             log.info("PlantUML guide already loaded, returning from cache.");
             return cached;
         }
-
+        
         log.info("Loading PlantUML guide from web pages.");
         List<String> urls = KnowledgeToolSupport.readUrlsFromResource(getClass(), "plantuml-guide-url.txt");
         if (urls.isEmpty()) {
             throw new IOException("PlantUML guide URL resource not found or is empty.");
         }
-
+        
         String allTextContentString = KnowledgeToolSupport.fetchAllOrFail(httpClient, urls, "PlantUML guide");
-
+        
         String outputFileName = "plantuml_guide.md";
         Path outputPath = outputDirectory.resolve(outputFileName);
         Files.writeString(outputPath, allTextContentString, StandardCharsets.UTF_8);
         log.info("PlantUML guide saved to file: {}", outputPath.toAbsolutePath());
-
+        
         return KnowledgeToolSupport.chunkAndCache(allTextContentString, contentCache);
     }
-
+    
     private DocumentChunkDTO getPlantumlGuideChunk(ChunkDTO param) {
         return new DocumentChunkDTO(contentCache.chunkAt(param.chunkIndex()));
     }

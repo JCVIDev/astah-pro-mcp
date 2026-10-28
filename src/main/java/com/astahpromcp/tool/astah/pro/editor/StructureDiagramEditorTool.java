@@ -34,13 +34,13 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/StructureDiagramEditor.html
 @Slf4j
 public class StructureDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
     private final DiagramEditorSupport diagramEditorSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public StructureDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport, DiagramEditorSupport diagramEditorSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -48,7 +48,7 @@ public class StructureDiagramEditorTool extends AstahToolProvider {
         this.diagramEditorSupport = diagramEditorSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -58,14 +58,14 @@ public class StructureDiagramEditorTool extends AstahToolProvider {
                 this::createNodePresentation,
                 NewNodePresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_link_prst_on_dgm",
                 "Create a new link presentation between the specified source node presentation (specified by ID) and the specified target node presentation (specified by ID) on the specified diagram (specified by ID), and return the newly created link presentation along with the updated diagram image in low resolution.",
                 this::createLinkPresentation,
                 NewLinkPresentationDTO.class,
                 LinkPresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_nesting_link_prst_on_dgm",
                 "Create a new link presentation that indicates nesting (\"circle-plus\" notation) between the specified parent node presentation (specified by ID) and the specified child node presentation (specified by ID) on the specified diagram (specified by ID), and return the newly created link presentation along with the updated diagram image in low resolution. For example, use this tool to draw nested relationships between requirements in a requirements diagram.",
@@ -74,27 +74,27 @@ public class StructureDiagramEditorTool extends AstahToolProvider {
                 LinkPresentationDTO.class)
         );
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createNodePresentation(NewNodePresentationDTO param) throws Exception {
         IElement astahElement = astahProToolSupport.getElement(param.targetElementId());
         IDiagram astahStructureDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
-
+        
         StructureDiagramEditor structureDiagramEditor;
         try {
             structureDiagramEditor = (StructureDiagramEditor) diagramEditorSupport.getCorrespondingDiagramEditor(astahStructureDiagram, astahElement);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get structure diagram editor.", e);
         }
-
+        
         structureDiagramEditor.setDiagram(astahStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             INodePresentation nodePresentation = structureDiagramEditor.createNodePresentation(
                 astahElement,
                 new Point2D.Double(
                         param.locationX(),
                         param.locationY()));
-
+            
             // Use normal notation (e.g., interfaces as rectangles), except for actors on Use Case or Sequence diagrams.
             if (astahElement.hasStereotype("actor")
                 && (astahStructureDiagram instanceof IUseCaseDiagram || astahStructureDiagram instanceof ISequenceDiagram)) {
@@ -108,62 +108,62 @@ public class StructureDiagramEditorTool extends AstahToolProvider {
             }
             return nodePresentation;
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createLinkPresentation(NewLinkPresentationDTO param) throws Exception {
         IDiagram astahStructureDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
         IElement astahElement = astahProToolSupport.getElement(param.targetElementId());
         INodePresentation astahSourceNode = astahProToolSupport.getNodePresentation(param.sourceNodePresentationId());
         INodePresentation astahTargetNode = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
-
+        
         StructureDiagramEditor structureDiagramEditor;
         try {
             structureDiagramEditor = (StructureDiagramEditor) diagramEditorSupport.getCorrespondingDiagramEditor(astahStructureDiagram, astahElement);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get structure diagram editor.", e);
         }
-
+        
         structureDiagramEditor.setDiagram(astahStructureDiagram);
-
-        ILinkPresentation astahLinkPresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLinkPresentation = txnAstah.call(() -> {
             return structureDiagramEditor.createLinkPresentation(astahElement, astahSourceNode, astahTargetNode);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLinkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<LinkPresentationDTO, List<McpSchema.Content>> createNestingLinkPresentation(NewNestingLinkPresentationDTO param) throws Exception {
         IDiagram astahStructureDiagram = astahProToolSupport.getDiagram(param.targetDiagramId());
         INodePresentation astahParentNode = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         INodePresentation astahChildNode = astahProToolSupport.getNodePresentation(param.childNodePresentationId());
-
+        
         StructureDiagramEditor structureDiagramEditor;
         try {
             structureDiagramEditor = (StructureDiagramEditor) diagramEditorSupport.getCorrespondingDiagramEditor(astahStructureDiagram);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get structure diagram editor.", e);
         }
-
+        
         structureDiagramEditor.setDiagram(astahStructureDiagram);
-
-        ILinkPresentation astahLinkPresentation = txnAstah.call( () -> {
+        
+        ILinkPresentation astahLinkPresentation = txnAstah.call(() -> {
             return structureDiagramEditor.createContainmentLinkPresentation(astahParentNode, astahChildNode);
         });
-
+        
         LinkPresentationDTO dto = LinkPresentationDTOAssembler.toDTO(astahLinkPresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

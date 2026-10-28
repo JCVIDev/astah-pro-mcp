@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 public class DependencyDTOAssembler {
     public static DependencyDTO toDTO(@NonNull IDependency astahDependency) throws Exception {
-
+        
         return new DependencyDTO(
             NamedElementDTOAssembler.toDTO(astahDependency),
             NameIdTypeDTOAssembler.toDTO(astahDependency.getClient()),

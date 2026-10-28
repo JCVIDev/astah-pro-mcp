@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ITestCase.html
 @Slf4j
 public class TestCaseTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public TestCaseTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class TestCaseTool extends AstahToolProvider {
                 TestCaseDTO.class)
         );
     }
-
+    
     private TestCaseDTO getInfo(IdDTO param) throws Exception {
         ITestCase astahTestCase = astahProToolSupport.getTestCase(param.id());
-
+        
         return TestCaseDTOAssembler.toDTO(astahTestCase);
     }
 }

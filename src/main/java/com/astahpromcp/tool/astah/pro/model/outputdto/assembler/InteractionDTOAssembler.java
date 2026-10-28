@@ -14,22 +14,22 @@ import java.util.List;
 
 public class InteractionDTOAssembler {
     public static InteractionDTO toDTO(@NonNull IInteraction astahInteraction) throws Exception {
-
+        
         List<NameIdTypeDTO> lifelines = new ArrayList<>();
         for (ILifeline astahLifeline : astahInteraction.getLifelines()) {
             lifelines.add(NameIdTypeDTOAssembler.toDTO(astahLifeline));
         }
-
+        
         List<NameIdTypeDTO> messages = new ArrayList<>();
         for (IMessage astahMessage : astahInteraction.getMessages()) {
             messages.add(NameIdTypeDTOAssembler.toDTO(astahMessage));
         }
-
+        
         List<NameIdTypeDTO> gates = new ArrayList<>();
         for (IGate astahGate : astahInteraction.getGates()) {
             gates.add(NameIdTypeDTOAssembler.toDTO(astahGate));
         }
-
+        
         return new InteractionDTO(
             NamedElementDTOAssembler.toDTO(astahInteraction),
             lifelines,

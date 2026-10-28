@@ -8,25 +8,25 @@ import java.util.List;
 public record PresentationDTO(
     @JsonPropertyDescription("Presentation identifier")
     String id,
-
+    
     @JsonPropertyDescription("Label text")
     String label,
-
+    
     @JsonPropertyDescription("Diagram where this presentation is rendered")
     NameIdTypeDTO renderedInDiagram,
-
+    
     @JsonPropertyDescription("Corresponding model element (named element)")
     NameIdTypeDTO correspondingModelElement,
-
+    
     @JsonPropertyDescription("Presentation type name")
     String type,
-
+    
     @JsonPropertyDescription("Presentation fill color")
     String fillColor,
-
+    
     @JsonPropertyDescription("Presentation line color")
     String lineColor,
-
+    
     @JsonPropertyDescription("Presentation font color")
     String fontColor
 ) {
@@ -134,17 +134,17 @@ public record PresentationDTO(
         HEADER_CELL_IN_CRUD("HeaderCell"),
         TOTAL_HEADER_CELL_IN_CRUD("TotalHeaderCell"),
         UNKNOWN("Unknown");
-
+        
         public final String typeName;
-
+        
         private Type(String typeName) {
             this.typeName = typeName;
         }
-
+        
         public boolean matches(String typeName) {
             return this.typeName.equals(typeName);
         }
-
+        
         public static Type getCorrespondingType(String typeName) {
             for (Type type : Type.values()) {
                 if (type.matches(typeName)) {

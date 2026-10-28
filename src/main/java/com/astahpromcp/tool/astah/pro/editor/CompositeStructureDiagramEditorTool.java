@@ -48,13 +48,13 @@ import java.util.Set;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/CompositeStructureDiagramEditor.html
 @Slf4j
 public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final CompositeStructureDiagramEditor compositeStructureDiagramEditor;
     private final AstahProToolSupport astahProToolSupport;
     private final ImageCaptureSupport imageCaptureSupport;
-
+    
     public CompositeStructureDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, CompositeStructureDiagramEditor compositeStructureDiagramEditor, AstahProToolSupport astahProToolSupport, ImageCaptureSupport imageCaptureSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
@@ -62,7 +62,7 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
         this.astahProToolSupport = astahProToolSupport;
         this.imageCaptureSupport = imageCaptureSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -72,42 +72,42 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                 this::createCompositeStructureDiagram,
                 NewDiagramInPackageDTO.class,
                 DiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_port_prst",
                 "Create a new port presentation of the specified part (specified by presentation ID) or structured class (specified by presentation ID) at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created node presentation of the port along with the updated diagram image in low resolution.",
                 this::createPortPresentation,
                 NewPortPresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_provided_interface_prst",
                 "Create a new provided interface presentation of the specified interface (specified by ID) for the specified port (specified by presentation ID) or part (specified by presentation ID) at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created node presentation of the provided interface along with the updated diagram image in low resolution. Note that if the specified interface is already a provided interface of the specified port or part, only the interface symbol is placed and no line connecting it to the port or part is drawn.",
                 this::createProvidedInterfacePresentation,
                 NewProvidedInterfacePresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_required_interface_prst",
                 "Create a new required interface presentation of the specified interface (specified by ID) for the specified port (specified by presentation ID) or part (specified by presentation ID) at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created node presentation of the required interface along with the updated diagram image in low resolution. Note that if the specified interface is already a required interface of the specified port or part, only the interface symbol is placed and no line connecting it to the port or part is drawn.",
                 this::createRequiredInterfacePresentation,
                 NewRequiredInterfacePresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_structured_class_prst",
                 "Create a new structured class presentation of the specified class (specified by ID) at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created node presentation of the structured class along with the updated diagram image in low resolution. Since a structured class presentation cannot be shrunk once it has part presentations inside, use other tool function to set its width and height before creating part presentations.",
                 this::createStructuredClassPresentation,
                 NewStructuredClassPresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "create_part_prst",
                 "Create a new part presentation of the specified attribute (specified by ID) inside the specified parent structured class presentation (specified by ID) at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created node presentation of the part along with the updated diagram image in low resolution. Since the specified point is an absolute coordinate on the diagram, specify a point inside the parent structured class presentation; otherwise the parent is automatically enlarged to enclose the part. Only one part presentation of the same attribute can be drawn inside the same parent structured class presentation.",
                 this::createPartPresentation,
                 NewPartPresentationDTO.class,
                 NodePresentationDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDtoAndContents(
                 "show_interface_prsts_of_port",
                 "Show the provided and required interfaces that the specified port (specified by presentation ID) already has, as interface presentations connected to the port at the specified point (specified by x and y coordinates) on the specified composite structure diagram (specified by ID), and return the newly created presentations along with the updated diagram image in low resolution. Since all the interface symbols are placed at the same point, use other tool function to move each of them afterwards. Note that nothing is created when the port has no interfaces or when its interfaces are already shown on the diagram.",
@@ -116,25 +116,25 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                 PresentationListDTO.class)
         );
     }
-
+    
     private DiagramDTO createCompositeStructureDiagram(NewDiagramInPackageDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.targetPackageId());
-
-        ICompositeStructureDiagram createdAstahCompositeStructureDiagram = txnAstah.call( () -> {
+        
+        ICompositeStructureDiagram createdAstahCompositeStructureDiagram = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createCompositeStructureDiagram(astahPackage, param.newDiagramName());
         });
-
+        
         return DiagramDTOAssembler.toDTO(createdAstahCompositeStructureDiagram);
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createPortPresentation(NewPortPresentationDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
         IPort astahPort = astahProToolSupport.getPort(param.targetPortId());
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createPortPresentation(
                 astahTargetNodePresentation,
                 astahPort,
@@ -142,33 +142,33 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createProvidedInterfacePresentation(NewProvidedInterfacePresentationDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
-
+        
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
         if (!Type.PORT.matches(astahTargetNodePresentation.getType()) && !Type.PART.matches(astahTargetNodePresentation.getType())) {
             throw new IllegalArgumentException(String.format(
                 "Target node for provided interface presentation must be one of the following node presentation types: Port, or Part (actual type: %s).",
                 astahTargetNodePresentation.getType()));
         }
-
+        
         if (!astahCompositeStructureDiagram.equals(astahTargetNodePresentation.getDiagram())) {
             throw new IllegalArgumentException("The target node presentation is not on the target composite structure diagram: " + param.targetNodePresentationId());
         }
-
+        
         IClass astahInterface = astahProToolSupport.getInterface(param.targetInterfaceId());
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createProvidedInterfacePresentation(
                 astahTargetNodePresentation,
                 astahInterface,
@@ -176,33 +176,33 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createRequiredInterfacePresentation(NewRequiredInterfacePresentationDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
-
+        
         INodePresentation astahTargetNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
         if (!Type.PORT.matches(astahTargetNodePresentation.getType()) && !Type.PART.matches(astahTargetNodePresentation.getType())) {
             throw new IllegalArgumentException(String.format(
                 "Target node for required interface presentation must be one of the following node presentation types: Port, or Part (actual type: %s).",
                 astahTargetNodePresentation.getType()));
         }
-
+        
         if (!astahCompositeStructureDiagram.equals(astahTargetNodePresentation.getDiagram())) {
             throw new IllegalArgumentException("The target node presentation is not on the target composite structure diagram: " + param.targetNodePresentationId());
         }
-
+        
         IClass astahInterface = astahProToolSupport.getInterface(param.targetInterfaceId());
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createRequiredInterfacePresentation(
                 astahTargetNodePresentation,
                 astahInterface,
@@ -210,55 +210,55 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createStructuredClassPresentation(NewStructuredClassPresentationDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
         IClass astahClass = astahProToolSupport.getClass(param.targetClassId());
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createStructuredClassPresentation(
                 astahClass,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<NodePresentationDTO, List<McpSchema.Content>> createPartPresentation(NewPartPresentationDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
-
+        
         // IPort extends IAttribute, so a port is accepted here and drawn as a part box instead of a port.
         IAttribute astahAttribute = astahProToolSupport.getAttribute(param.targetAttributeId());
         if (astahAttribute instanceof IPort) {
             throw new IllegalArgumentException("Target attribute for part presentation must not be a port.");
         }
-
+        
         INodePresentation astahParentNodePresentation = astahProToolSupport.getNodePresentation(param.parentNodePresentationId());
         if (!Type.STRUCTURED_CLASS.matches(astahParentNodePresentation.getType())) {
             throw new IllegalArgumentException("Parent node for part presentation must be one of the following node presentation types: StructuredClass.");
         }
-
+        
         // Nothing is added to the diagram and no error is raised when the parent structured class does not own the attribute.
         IElement astahParentModel = astahParentNodePresentation.getModel();
         if (astahParentModel == null || !astahParentModel.equals(astahAttribute.getOwner())) {
             throw new IllegalArgumentException("Target attribute for part presentation must be owned by the class that the parent node presentation represents.");
         }
-
+        
         // Astah silently discards a second part presentation of the same attribute inside the same parent when the transaction is committed, and still returns it as if it had been created.
         for (IPresentation astahExistingPresentation : astahAttribute.getPresentations()) {
             if (astahExistingPresentation instanceof INodePresentation astahExistingNodePresentation
@@ -267,10 +267,10 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                 throw new IllegalArgumentException("A part presentation (ID: " + astahExistingNodePresentation.getID() + ") of the target attribute already exists inside the parent structured class presentation. Only one part presentation of the same attribute can be drawn inside the same parent, so use the existing one.");
             }
         }
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
-        INodePresentation astahNodePresentation = txnAstah.call( () -> {
+        
+        INodePresentation astahNodePresentation = txnAstah.call(() -> {
             return compositeStructureDiagramEditor.createStructuredClassPresentation(
                 astahAttribute,
                 astahParentNodePresentation,
@@ -278,42 +278,42 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         // Safety net for any other case in which Astah discards the part presentation on commit: it then belongs to no diagram and its ID cannot be resolved.
         if (astahNodePresentation.getDiagram() == null) {
             throw new IllegalStateException("Astah discarded the part presentation when the edit was committed, so nothing was added to the diagram. Check the part presentations of the target attribute that already exist on the diagram.");
         }
-
+        
         NodePresentationDTO dto = NodePresentationDTOAssembler.toDTO(astahNodePresentation);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
-
+    
     private Pair<PresentationListDTO, List<McpSchema.Content>> showInterfacePresentationsOfPort(ShowInterfacePresentationsOfPortDTO param) throws Exception {
         ICompositeStructureDiagram astahCompositeStructureDiagram = astahProToolSupport.getCompositeStructureDiagram(param.targetCompositeStructureDiagramId());
-
+        
         INodePresentation astahNodePresentation = astahProToolSupport.getNodePresentation(param.targetNodePresentationId());
         if (!Type.PORT.matches(astahNodePresentation.getType())) {
             throw new IllegalArgumentException("Target node for showing interface presentations must be one of the following node presentation types: Port.");
         }
-
+        
         compositeStructureDiagramEditor.setDiagram(astahCompositeStructureDiagram);
-
+        
         Set<String> beforePresentationIds = new HashSet<>();
         for (IPresentation astahPresentation : AstahProToolSupport.getPresentationsOnDiagram(astahCompositeStructureDiagram)) {
             beforePresentationIds.add(astahPresentation.getID());
         }
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             compositeStructureDiagramEditor.showInterfacePresentations(
                 astahNodePresentation,
                 new Point2D.Double(
                     param.locationX(),
                     param.locationY()));
         });
-
+        
         // The newly created presentations
         List<PresentationDTO> presentationDTOs = new ArrayList<>();
         for (IPresentation astahPresentation : AstahProToolSupport.getPresentationsOnDiagram(astahCompositeStructureDiagram)) {
@@ -321,11 +321,11 @@ public class CompositeStructureDiagramEditorTool extends AstahToolProvider {
                 presentationDTOs.add(PresentationDTOAssembler.toDTO(astahPresentation));
             }
         }
-
+        
         PresentationListDTO dto = new PresentationListDTO(presentationDTOs);
-
+        
         McpSchema.Content thumbnailContent = imageCaptureSupport.createThumbnailContent(param.targetCompositeStructureDiagramId());
-
+        
         return Pair.of(dto, List.of(thumbnailContent));
     }
 }

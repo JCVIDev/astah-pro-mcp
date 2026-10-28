@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IEREntity.html
 @Slf4j
 public class EREntityTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public EREntityTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,22 +41,21 @@ public class EREntityTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 EREntityDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_logical_name_of_er_entity",
                 "Set the logical name (specified by string) of the specified ER entity (specified by ID), and return the model element of the ER entity after it is set.",
                 this::setLogicalName,
                 EREntityWithLogicalNameDTO.class,
                 EREntityDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_physical_name_of_er_entity",
                 "Set the physical name (specified by string) of the specified ER entity (specified by ID), and return the model element of the ER entity after it is set.",
                 this::setPhysicalName,
                 EREntityWithPhysicalNameDTO.class,
                 EREntityDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_type_of_er_entity",
                 "Set the type (specified by string) of the specified ER entity (specified by ID), and return the model element of the ER entity after it is set.",
@@ -65,40 +64,40 @@ public class EREntityTool extends AstahToolProvider {
                 EREntityDTO.class)
         );
     }
-
+    
     private EREntityDTO getInfo(IdDTO param) throws Exception {
         IEREntity astahEREntity = astahProToolSupport.getEREntity(param.id());
-
+        
         return EREntityDTOAssembler.toDTO(astahEREntity);
     }
-
+    
     private EREntityDTO setLogicalName(EREntityWithLogicalNameDTO param) throws Exception {
         IEREntity astahEREntity = astahProToolSupport.getEREntity(param.targetEREntityId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahEREntity.setLogicalName(param.logicalName());
         });
-
+        
         return EREntityDTOAssembler.toDTO(astahEREntity);
     }
-
+    
     private EREntityDTO setPhysicalName(EREntityWithPhysicalNameDTO param) throws Exception {
         IEREntity astahEREntity = astahProToolSupport.getEREntity(param.targetEREntityId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahEREntity.setPhysicalName(param.physicalName());
         });
-
+        
         return EREntityDTOAssembler.toDTO(astahEREntity);
     }
-
+    
     private EREntityDTO setType(EREntityWithTypeDTO param) throws Exception {
         IEREntity astahEREntity = astahProToolSupport.getEREntity(param.targetEREntityId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahEREntity.setType(param.type());
         });
-
+        
         return EREntityDTOAssembler.toDTO(astahEREntity);
     }
 }

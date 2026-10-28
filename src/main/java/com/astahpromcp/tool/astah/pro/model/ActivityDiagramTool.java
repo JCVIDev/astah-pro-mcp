@@ -20,17 +20,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IActivityDiagram.html
 @Slf4j
 public class ActivityDiagramTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ActivityDiagramTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,7 +40,7 @@ public class ActivityDiagramTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ActivityDiagramDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "get_activity_of_activity_dgm",
                 "Return the model element of the activity for the specified activity diagram (specified by ID).",
@@ -49,16 +49,16 @@ public class ActivityDiagramTool extends AstahToolProvider {
                 ActivityDTO.class)
         );
     }
-
+    
     private ActivityDiagramDTO getInfo(IdDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.id());
-
+        
         return ActivityDiagramDTOAssembler.toDTO(astahActivityDiagram);
     }
-
+    
     private ActivityDTO getActivity(IdDTO param) throws Exception {
         IActivityDiagram astahActivityDiagram = astahProToolSupport.getActivityDiagram(param.id());
-
+        
         return ActivityDTOAssembler.toDTO(astahActivityDiagram.getActivity());
     }
 }

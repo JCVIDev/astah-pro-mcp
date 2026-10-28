@@ -4,17 +4,17 @@ import com.astahpromcp.tool.ToolDefinition;
 import com.astahpromcp.tool.ToolProvider;
 import com.astahpromcp.tool.ToolSupport;
 import com.astahpromcp.tool.astah.pro.common.inputdto.DiagramTypeDTO;
-import com.astahpromcp.tool.astah.pro.common.outputdto.GuideDTO;
+import com.astahpromcp.tool.common.outputdto.GuideDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
 public class DiagramGuideTool implements ToolProvider {
-
+    
     public DiagramGuideTool() {
     }
-
+    
     @Override
     public List<ToolDefinition> createToolDefinitions() {
         try {
@@ -26,13 +26,13 @@ public class DiagramGuideTool implements ToolProvider {
                     DiagramTypeDTO.class,
                     GuideDTO.class)
             );
-
+            
         } catch (Exception e) {
             log.error("Failed to create diagram guide tools", e);
             return List.of();
         }
     }
-
+    
     private GuideDTO getGuide(DiagramTypeDTO param) throws Exception {
         String contents = switch (param.diagramType()) {
             case CLASS -> ClassDiagramGuide.contents();
@@ -46,7 +46,7 @@ public class DiagramGuideTool implements ToolProvider {
             case ER -> ERDiagramGuide.contents();
             case MIND_MAP -> MindMapGuide.contents();
         };
-
+        
         return new GuideDTO(contents);
     }
 }

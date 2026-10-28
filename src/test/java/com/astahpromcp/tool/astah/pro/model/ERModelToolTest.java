@@ -17,11 +17,11 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERModelToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERModelTool tool;
     private Method getInfo;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -29,37 +29,37 @@ public class ERModelToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERModelToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERModelTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERModelTool.class,
             "getInfo",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER model
         IERModel erModel = (IERModel) TestSupport.instance().getNamedElementByClassAndName(
             IERModel.class,
             "ER Model");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erModel.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -68,7 +68,7 @@ public class ERModelToolTest {
             tool,
             inputDTO,
             ERModelDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erModel.getId(), outputDTO.pkg().namedElement().element().id());

@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IInteraction.html
 @Slf4j
 public class InteractionTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public InteractionTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class InteractionTool extends AstahToolProvider {
                 InteractionDTO.class)
         );
     }
-
+    
     private InteractionDTO getInfo(IdDTO param) throws Exception {
         IInteraction astahInteraction = astahProToolSupport.getInteraction(param.id());
-
+        
         return InteractionDTOAssembler.toDTO(astahInteraction);
     }
 }

@@ -18,17 +18,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IERSchema.html
 @Slf4j
 public class ERSchemaTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ERSchemaTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -40,10 +40,10 @@ public class ERSchemaTool extends AstahToolProvider {
                 ERSchemaDTO.class)
         );
     }
-
+    
     private ERSchemaDTO getInfo(IdDTO param) throws Exception {
         IERSchema astahERSchema = astahProToolSupport.getERSchema(param.id());
-
+        
         return ERSchemaDTOAssembler.toDTO(astahERSchema);
     }
 }

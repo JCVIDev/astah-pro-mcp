@@ -12,7 +12,7 @@ import java.util.List;
 
 public class StateMachineDTOAssembler {
     public static StateMachineDTO toDTO(@NonNull IStateMachine astahStateMachine) throws Exception {
-
+        
         // StateMachine diagram
         NameIdTypeDTO stateMachineDiagram;
         if (astahStateMachine.getStateMachineDiagram() != null) {

@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 public class GateDTOAssembler {
     public static GateDTO toDTO(@NonNull IGate astahGate) throws Exception {
-
+        
         NameIdTypeDTO interactionUse;
         if (astahGate.getInteractionUse() != null) {
             interactionUse = NameIdTypeDTOAssembler.toDTO(astahGate.getInteractionUse());
@@ -22,7 +22,7 @@ public class GateDTOAssembler {
         } else {
             message = NameIdTypeDTO.empty();
         }
-
+        
         return new GateDTO(
             NamedElementDTOAssembler.toDTO(astahGate),
             interactionUse,

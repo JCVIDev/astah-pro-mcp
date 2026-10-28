@@ -21,17 +21,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IInteractionUse.html
 @Slf4j
 public class InteractionUseTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public InteractionUseTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -41,15 +41,14 @@ public class InteractionUseTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 InteractionUseDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_arg_of_interaction_use",
                 "Set the argument of the specified interaction use (specified by ID), and return the model element of the interaction use after it is set.",
                 this::setArgument,
                 InteractionUseWithArgumentDTO.class,
                 InteractionUseDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_seq_dgm_to_interaction_use",
                 "Set the sequence diagram (specified by ID) to the specified interaction use (specified by ID), and return the model element of the interaction use after it is set.",
@@ -58,31 +57,31 @@ public class InteractionUseTool extends AstahToolProvider {
                 InteractionUseDTO.class)
         );
     }
-
+    
     private InteractionUseDTO getInfo(IdDTO param) throws Exception {
         IInteractionUse astahInteractionUse = astahProToolSupport.getInteractionUse(param.id());
-
+        
         return InteractionUseDTOAssembler.toDTO(astahInteractionUse);
     }
-
+    
     private InteractionUseDTO setArgument(InteractionUseWithArgumentDTO param) throws Exception {
         IInteractionUse astahInteractionUse = astahProToolSupport.getInteractionUse(param.targetInteractionUseId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahInteractionUse.setArgment(param.argument());
         });
-
+        
         return InteractionUseDTOAssembler.toDTO(astahInteractionUse);
     }
-
+    
     private InteractionUseDTO setSequenceDiagram(InteractionUseWithSequenceDiagramDTO param) throws Exception {
         IInteractionUse astahInteractionUse = astahProToolSupport.getInteractionUse(param.targetInteractionUseId());
         ISequenceDiagram astahSequenceDiagram = astahProToolSupport.getSequenceDiagram(param.targetSequenceDiagramId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahInteractionUse.setSequenceDiagram(astahSequenceDiagram);
         });
-
+        
         return InteractionUseDTOAssembler.toDTO(astahInteractionUse);
     }
 }

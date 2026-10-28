@@ -16,17 +16,17 @@ import java.util.List;
 
 @Slf4j
 public class ControlNodeTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ControlNodeTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -38,10 +38,10 @@ public class ControlNodeTool extends AstahToolProvider {
                 ControlNodeDTO.class)
         );
     }
-
+    
     private ControlNodeDTO getInfo(IdDTO param) throws Exception {
         IControlNode astahControlNode = astahProToolSupport.getControlNode(param.id());
-
+        
         return ControlNodeDTOAssembler.toDTO(astahControlNode);
     }
 }

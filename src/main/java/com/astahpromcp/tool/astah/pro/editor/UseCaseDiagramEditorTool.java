@@ -20,20 +20,19 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/editor/UseCaseDiagramEditor.html
 @Slf4j
 public class UseCaseDiagramEditorTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final UseCaseDiagramEditor useCaseDiagramEditor;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public UseCaseDiagramEditorTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, UseCaseDiagramEditor useCaseDiagramEditor, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.useCaseDiagramEditor = useCaseDiagramEditor;
         this.astahProToolSupport = astahProToolSupport;
     }
-
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -45,16 +44,16 @@ public class UseCaseDiagramEditorTool extends AstahToolProvider {
                 DiagramDTO.class)
         );
     }
-
+    
     private DiagramDTO createUseCaseDiagram(NewUseCaseDiagramDTO param) throws Exception {
         IPackage astahPackage = astahProToolSupport.getPackage(param.parentPackageId());
-
-        IUseCaseDiagram astahUseCaseDiagram = txnAstah.call( () -> {
+        
+        IUseCaseDiagram astahUseCaseDiagram = txnAstah.call(() -> {
             return useCaseDiagramEditor.createUseCaseDiagram(
                 astahPackage,
                 param.newUseCaseDiagramName());
         });
-
+        
         return DiagramDTOAssembler.toDTO(astahUseCaseDiagram);
     }
 }

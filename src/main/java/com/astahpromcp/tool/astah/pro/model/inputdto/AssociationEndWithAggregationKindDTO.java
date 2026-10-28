@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record AssociationEndWithAggregationKindDTO(
     @JsonPropertyDescription("Target association end identifier")
     String targetAssociationEndId,
-
+    
     @JsonPropertyDescription("Aggregation kind")
     AggregationKind aggregationKind
 ) {

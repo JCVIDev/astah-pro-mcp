@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ERIndexToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private ERIndexTool tool;
     private Method getInfo;
@@ -29,7 +29,7 @@ public class ERIndexToolTest {
     private Method removeERAttribute;
     private Method setKey;
     private Method setUnique;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -37,61 +37,61 @@ public class ERIndexToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/ERIndexToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new ERIndexTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport);
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             ERIndexTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // addERAttribute() method
         addERAttribute = TestSupport.getAccessibleMethod(
             ERIndexTool.class,
             "addERAttribute",
             ERIndexWithERAttributeDTO.class);
-
+        
         // removeERAttribute() method
         removeERAttribute = TestSupport.getAccessibleMethod(
             ERIndexTool.class,
             "removeERAttribute",
             ERIndexWithERAttributeDTO.class);
-
+        
         // setKey() method
         setKey = TestSupport.getAccessibleMethod(
             ERIndexTool.class,
             "setKey",
             ERIndexWithKeyDTO.class);
-
+        
         // setUnique() method
         setUnique = TestSupport.getAccessibleMethod(
             ERIndexTool.class,
             "setUnique",
             ERIndexWithUniqueDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get ER index
         IERIndex erIndex = (IERIndex) TestSupport.instance().getNamedElementByClassAndName(
             IERIndex.class,
             "Index0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erIndex.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -100,30 +100,30 @@ public class ERIndexToolTest {
             tool,
             inputDTO,
             ERIndexDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(erIndex.getId(), outputDTO.namedElement().element().id());
         assertEquals(erIndex.getName(), outputDTO.namedElement().name());
     }
-
+    
     @Test
     void addERAttribute_ok() throws Exception {
         // Get ER index
         IERIndex erIndex = (IERIndex) TestSupport.instance().getNamedElementByClassAndName(
             IERIndex.class,
             "Index0");
-
+        
         // Get ER attribute
         IERAttribute targetAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute1");
-
+        
         // Create input DTO
         ERIndexWithERAttributeDTO inputDTO = new ERIndexWithERAttributeDTO(
             erIndex.getId(),
             targetAttribute.getId());
-
+        
         // ----------------------------------------
         // Call addERAttribute()
         // ----------------------------------------
@@ -132,29 +132,29 @@ public class ERIndexToolTest {
             tool,
             inputDTO,
             ERIndexDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(2, erIndex.getERAttributes().length);
     }
-
+    
     @Test
     void removeERAttribute_ok() throws Exception {
         // Get ER index
         IERIndex erIndex = (IERIndex) TestSupport.instance().getNamedElementByClassAndName(
             IERIndex.class,
             "Index0");
-
+        
         // Get ER attribute
         IERAttribute targetAttribute = (IERAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IERAttribute.class,
             "Attribute0");
-
+        
         // Create input DTO
         ERIndexWithERAttributeDTO inputDTO = new ERIndexWithERAttributeDTO(
             erIndex.getId(),
             targetAttribute.getId());
-
+        
         // ----------------------------------------
         // Call removeERAttribute()
         // ----------------------------------------
@@ -163,12 +163,12 @@ public class ERIndexToolTest {
             tool,
             inputDTO,
             ERIndexDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(0, erIndex.getERAttributes().length);
     }
-
+    
     @Test
     void setKey_ok() throws Exception {
         // Get ER index
@@ -176,12 +176,12 @@ public class ERIndexToolTest {
             IERIndex.class,
             "Index0");
         boolean nextValue = !erIndex.isKey();
-
+        
         // Create input DTO
         ERIndexWithKeyDTO inputDTO = new ERIndexWithKeyDTO(
             erIndex.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setKey()
         // ----------------------------------------
@@ -190,12 +190,12 @@ public class ERIndexToolTest {
             tool,
             inputDTO,
             ERIndexDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erIndex.isKey());
     }
-
+    
     @Test
     void setUnique_ok() throws Exception {
         // Get ER index
@@ -203,12 +203,12 @@ public class ERIndexToolTest {
             IERIndex.class,
             "Index0");
         boolean nextValue = !erIndex.isUnique();
-
+        
         // Create input DTO
         ERIndexWithUniqueDTO inputDTO = new ERIndexWithUniqueDTO(
             erIndex.getId(),
             nextValue);
-
+        
         // ----------------------------------------
         // Call setUnique()
         // ----------------------------------------
@@ -217,7 +217,7 @@ public class ERIndexToolTest {
             tool,
             inputDTO,
             ERIndexDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(nextValue, erIndex.isUnique());

@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicModelEditorToolTest {
-
+    
     private ProjectAccessor projectAccessor;
     private BasicModelEditorTool tool;
     private Method changeParent;
@@ -59,7 +59,7 @@ public class BasicModelEditorToolTest {
     private Method createTraceDependency;
     private Method createVerifyDependency;
     private Method createConstraint;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -69,7 +69,7 @@ public class BasicModelEditorToolTest {
         BasicModelEditor basicModelEditor = projectAccessor.getModelEditorFactory().getBasicModelEditor();
         ERModelEditor erModelEditor = projectAccessor.getModelEditorFactory().getERModelEditor();
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new BasicModelEditorTool(
             basicModelEditor,
@@ -78,207 +78,207 @@ public class BasicModelEditorToolTest {
             transactionSupport,
             astahProToolSupport,
             new SystemPropertySupport());
-
+        
         // changeParent() method
         changeParent = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "changeParent",
             NamedElementWithParentDTO.class);
-
+        
         // createPackageInParentPackage() method
         createPackageInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createPackageInParentPackage",
             NewPackageInPackageDTO.class);
-
+        
         // createClassInParentPackage() method
         createClassInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createClassInParentPackage",
             NewClassInPackageDTO.class);
-
+        
         // createClassInParentClass() method
         createClassInParentClass = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createClassInParentClass",
             NewClassInClassDTO.class);
-
+        
         // createEnumerationInParentPackage() method
         createEnumerationInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createEnumerationInParentPackage",
             NewEnumerationInPackageDTO.class);
-
+        
         // createInterfaceInParentPackage() method
         createInterfaceInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createInterfaceInParentPackage",
             NewInterfaceInPackageDTO.class);
-
+        
         // createInterfaceInParentClass() method
         createInterfaceInParentClass = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createInterfaceInParentClass",
             NewInterfaceInClassDTO.class);
-
+        
         // createAttribute() method
         createAttribute = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createAttribute",
             NewAttributeInClassDTO.class);
-
+        
         // createEnumerationLiteral() method
         createEnumerationLiteral = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createEnumerationLiteral",
             NewEnumerationLiteralInEnumerationDTO.class);
-
+        
         // createOperation() method
         createOperation = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createOperation",
             NewOperationInClassDTO.class);
-
+        
         // createParameter() method
         createParameter = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createParameter",
             NewParameterToOperationDTO.class);
-
+        
         // createAssociation() method
         createAssociation = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createAssociation",
             NewAssociationDTO.class);
-
+        
         // createAssociationClass() method
         createAssociationClass = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createAssociationClass",
             NewAssociationClassDTO.class);
-
+        
         // createDependency() method
         createDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createDependency",
             NewDependencyDTO.class);
-
+        
         // createGeneralization() method
         createGeneralization = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createGeneralization",
             NewGeneralizationDTO.class);
-
+        
         // createRealization() method
         createRealization = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createRealization",
             NewRealizationDTO.class);
-
+        
         // createUsage() method
         createUsage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createUsage",
             NewUsageDTO.class);
-
+        
         // createQualifier() method
         createQualifier = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createQualifier",
             NewQualifierToAssociationEndDTO.class);
-
+        
         // createTaggedValue() method
         createTaggedValue = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createTaggedValue",
             NewTaggedValueToElementDTO.class);
-
+        
         // createTemplateParameter() method
         createTemplateParameter = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createTemplateParameter",
             NewTemplateParameterToClassDTO.class);
-
+        
         // deleteElement() method
         deleteElement = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "deleteElement",
             IdDTO.class);
-
+        
         // createRequirementInParentPackage() method
         createRequirementInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createRequirementInParentPackage",
             NewRequirementInPackageDTO.class);
-
+        
         // createRequirementInParentRequirement() method
         createRequirementInParentRequirement = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createRequirementInParentRequirement",
             NewRequirementInRequirementDTO.class);
-
+        
         // createTestCaseInParentPackage() method
         createTestCaseInParentPackage = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createTestCaseInParentPackage",
             NewTestCaseInPackageDTO.class);
-
+        
         // createTestCaseInParentTestCase() method
         createTestCaseInParentTestCase = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createTestCaseInParentTestCase",
             NewTestCaseInTestCaseDTO.class);
-
+        
         // createCopyDependency() method
         createCopyDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createCopyDependency",
             NewCopyDependencyDTO.class);
-
+        
         // createDeriveReqtDependency() method
         createDeriveReqtDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createDeriveReqtDependency",
             NewDeriveReqtDependencyDTO.class);
-
+        
         // createRefineDependency() method
         createRefineDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createRefineDependency",
             NewRefineDependencyDTO.class);
-
+        
         // createSatisfyDependency() method
         createSatisfyDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createSatisfyDependency",
             NewSatisfyDependencyDTO.class);
-
+        
         // createTraceDependency() method
         createTraceDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createTraceDependency",
             NewTraceDependencyDTO.class);
-
+        
         // createVerifyDependency() method
         createVerifyDependency = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createVerifyDependency",
             NewVerifyDependencyDTO.class);
-
+        
         // createConstraint() method
         createConstraint = TestSupport.getAccessibleMethod(
             BasicModelEditorTool.class,
             "createConstraint",
             NewConstraintDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void changeParent_ok() throws Exception {
         // Get named elements
@@ -288,12 +288,12 @@ public class BasicModelEditorToolTest {
         INamedElement newParentElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NamedElementWithParentDTO inputDTO = new NamedElementWithParentDTO(
             targetElement.getId(),
             newParentElement.getId());
-
+        
         // ----------------------------------------
         // Call changeParent()
         // ----------------------------------------
@@ -302,23 +302,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             NamedElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createPackageInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewPackageInPackageDTO inputDTO = new NewPackageInPackageDTO(
             parentPackage.getId(),
             "TestPackage");
-
+        
         // ----------------------------------------
         // Call createPackageInParentPackage()
         // ----------------------------------------
@@ -327,23 +327,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             PackageDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createClassInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewClassInPackageDTO inputDTO = new NewClassInPackageDTO(
             parentPackage.getId(),
             "TestClass");
-
+        
         // ----------------------------------------
         // Call createClassInParentPackage()
         // ----------------------------------------
@@ -352,23 +352,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createClassInParentClass_ok() throws Exception {
         // Get class
         IClass parentClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewClassInClassDTO inputDTO = new NewClassInClassDTO(
             parentClass.getId(),
             "TestInnerClass");
-
+        
         // ----------------------------------------
         // Call createClassInParentClass()
         // ----------------------------------------
@@ -377,23 +377,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createEnumerationInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewEnumerationInPackageDTO inputDTO = new NewEnumerationInPackageDTO(
             parentPackage.getId(),
             "TestEnum");
-
+        
         // ----------------------------------------
         // Call createEnumerationInParentPackage()
         // ----------------------------------------
@@ -402,23 +402,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             EnumerationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createInterfaceInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewInterfaceInPackageDTO inputDTO = new NewInterfaceInPackageDTO(
             parentPackage.getId(),
             "TestInterface");
-
+        
         // ----------------------------------------
         // Call createInterfaceInParentPackage()
         // ----------------------------------------
@@ -427,23 +427,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createInterfaceInParentClass_ok() throws Exception {
         // Get class
         IClass parentClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewInterfaceInClassDTO inputDTO = new NewInterfaceInClassDTO(
             parentClass.getId(),
             "TestInnerInterface");
-
+        
         // ----------------------------------------
         // Call createInterfaceInParentClass()
         // ----------------------------------------
@@ -452,23 +452,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createAttribute_ok() throws Exception {
         // Get class
         IClass parentClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewAttributeInClassDTO inputDTO = new NewAttributeInClassDTO(
             parentClass.getId(),
             "testAttribute");
-
+        
         // ----------------------------------------
         // Call createAttribute()
         // ----------------------------------------
@@ -477,23 +477,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createEnumerationLiteral_ok() throws Exception {
         // Get enumeration
         IEnumeration parentEnumeration = (IEnumeration) TestSupport.instance().getNamedElementByClassAndName(
             IEnumeration.class,
             "Enumeration0");
-
+        
         // Create input DTO
         NewEnumerationLiteralInEnumerationDTO inputDTO = new NewEnumerationLiteralInEnumerationDTO(
             parentEnumeration.getId(),
             "TEST_LITERAL");
-
+        
         // ----------------------------------------
         // Call createEnumerationLiteral()
         // ----------------------------------------
@@ -502,23 +502,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             EnumerationLiteralDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createOperation_ok() throws Exception {
         // Get class
         IClass parentClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewOperationInClassDTO inputDTO = new NewOperationInClassDTO(
             parentClass.getId(),
             "testOperation");
-
+        
         // ----------------------------------------
         // Call createOperation()
         // ----------------------------------------
@@ -527,23 +527,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             OperationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createParameter_ok() throws Exception {
         // Get operation
         IOperation targetOperation = (IOperation) TestSupport.instance().getNamedElementByClassAndName(
             IOperation.class,
             "operation0");
-
+        
         // Create input DTO
         NewParameterToOperationDTO inputDTO = new NewParameterToOperationDTO(
             targetOperation.getId(),
             "testParameter");
-
+        
         // ----------------------------------------
         // Call createParameter()
         // ----------------------------------------
@@ -552,11 +552,11 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ParameterDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createAssociation_ok() throws Exception {
         // Get classes
@@ -566,7 +566,7 @@ public class BasicModelEditorToolTest {
         IClass targetClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         NewAssociationDTO inputDTO = new NewAssociationDTO(
             sourceClass.getId(),
@@ -575,7 +575,7 @@ public class BasicModelEditorToolTest {
             NavigabilityKind.NAVIGABLE,
             AggregationKind.COMPOSITE,
             AggregationKind.NONE);
-
+        
         // ----------------------------------------
         // Call createAssociation()
         // ----------------------------------------
@@ -584,18 +584,18 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             AssociationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created association
         IAssociation createdAssociation = (IAssociation) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Get created association ends
         IAttribute createdAssociationEndA = createdAssociation.getMemberEnds()[0];
         IAttribute createdAssociationEndB = createdAssociation.getMemberEnds()[1];
-
+        
         // Check with the created association
         assertEquals(NavigabilityKind.UNSPECIFIED.astahValue, createdAssociationEndA.getNavigability());
         assertFalse(createdAssociationEndA.isAggregate());
@@ -606,14 +606,14 @@ public class BasicModelEditorToolTest {
         assertEquals(targetClass.getId(), outputDTO.associationEndAOwner().id());
         assertEquals(sourceClass.getId(), outputDTO.associationEndBOwner().id());
     }
-
+    
     @Test
     void createAssociation_ok_selfAssociation() throws Exception {
         // Get class
         IClass fooClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create input DTO
         NewAssociationDTO inputDTO = new NewAssociationDTO(
             fooClass.getId(),
@@ -622,7 +622,7 @@ public class BasicModelEditorToolTest {
             NavigabilityKind.UNSPECIFIED,
             AggregationKind.NONE,
             AggregationKind.NONE);
-
+        
         // ----------------------------------------
         // Call createAssociation()
         // ----------------------------------------
@@ -631,12 +631,12 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             AssociationDTO.class);
-
+        
         // Check with the created association
         assertEquals(fooClass.getId(), outputDTO.associationEndAOwner().id());
         assertEquals(fooClass.getId(), outputDTO.associationEndBOwner().id());
     }
-
+    
     @Test
     void createAssociationClass_ok() throws Exception {
         // Get classes
@@ -646,13 +646,13 @@ public class BasicModelEditorToolTest {
         IClass targetClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         NewAssociationClassDTO inputDTO = new NewAssociationClassDTO(
             sourceClass.getId(),
             targetClass.getId(),
             "TestAssociationClass");
-
+        
         // ----------------------------------------
         // Call createAssociationClass()
         // ----------------------------------------
@@ -661,13 +661,13 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             AssociationClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertEquals(targetClass.getId(), outputDTO.association().associationEndAOwner().id());
         assertEquals(sourceClass.getId(), outputDTO.association().associationEndBOwner().id());
     }
-
+    
     @Test
     void createDependency_ok() throws Exception {
         // Get named elements
@@ -677,12 +677,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewDependencyDTO inputDTO = new NewDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createDependency()
         // ----------------------------------------
@@ -691,19 +691,19 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
     }
-
+    
     @Test
     void createGeneralization_ok() throws Exception {
         // Get classes
@@ -713,12 +713,12 @@ public class BasicModelEditorToolTest {
         IClass superClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         NewGeneralizationDTO inputDTO = new NewGeneralizationDTO(
             subClass.getId(),
             superClass.getId());
-
+        
         // ----------------------------------------
         // Call createGeneralization()
         // ----------------------------------------
@@ -727,19 +727,19 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             GeneralizationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created generalization
         IGeneralization createdGeneralization = (IGeneralization) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created generalization
         assertEquals(subClass.getId(), createdGeneralization.getSubType().getId());
         assertEquals(superClass.getId(), createdGeneralization.getSuperType().getId());
     }
-
+    
     @Test
     void createRealization_ok() throws Exception {
         // Get classes
@@ -749,12 +749,12 @@ public class BasicModelEditorToolTest {
         IClass supplierClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         NewRealizationDTO inputDTO = new NewRealizationDTO(
             clientClass.getId(),
             supplierClass.getId());
-
+        
         // ----------------------------------------
         // Call createRealization()
         // ----------------------------------------
@@ -763,19 +763,19 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             RealizationDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created realization
         IRealization createdRealization = (IRealization) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created realization
         assertEquals(clientClass.getId(), createdRealization.getClient().getId());
         assertEquals(supplierClass.getId(), createdRealization.getSupplier().getId());
     }
-
+    
     @Test
     void createUsage_ok() throws Exception {
         // Get classes
@@ -785,12 +785,12 @@ public class BasicModelEditorToolTest {
         IClass supplierClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Bar");
-
+        
         // Create input DTO
         NewUsageDTO inputDTO = new NewUsageDTO(
             clientClass.getId(),
             supplierClass.getId());
-
+        
         // ----------------------------------------
         // Call createUsage()
         // ----------------------------------------
@@ -799,37 +799,37 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             UsageDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created usage
         IUsage createdUsage = (IUsage) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created usage
         assertEquals(clientClass.getId(), createdUsage.getClient().getId());
         assertEquals(supplierClass.getId(), createdUsage.getSupplier().getId());
     }
-
+    
     @Test
     void createQualifier_ok() throws Exception {
         // Get association end
         IAttribute associationEnd = (IAttribute) TestSupport.instance().getNamedElementByClassAndName(
             IAttribute.class,
             "bar");
-
+        
         // Get qualifier type
         IClass qualifierType = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Integer");
-
+        
         // Create input DTO
         NewQualifierToAssociationEndDTO inputDTO = new NewQualifierToAssociationEndDTO(
             associationEnd.getId(),
             qualifierType.getId(),
             "testQualifier");
-
+        
         // ----------------------------------------
         // Call createQualifier()
         // ----------------------------------------
@@ -838,27 +838,27 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             AttributeDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createTaggedValue_ok() throws Exception {
         // Get element
         INamedElement namedElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         NewTaggedValueToElementDTO inputDTO = new NewTaggedValueToElementDTO(
             namedElement.getId(),
             "testKey",
             "testValue");
-
+        
         // Check tagged value before setting
         assertNotEquals("testValue", namedElement.getTaggedValue("testKey"));
-
+        
         // ----------------------------------------
         // Call createTaggedValue()
         // ----------------------------------------
@@ -867,32 +867,32 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check tagged value after setting
         assertEquals("testValue", namedElement.getTaggedValue("testKey"));
     }
-
+    
     @Test
     void createTemplateParameter_ok() throws Exception {
         // Get class
         IClass targetClass = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Get template parameter type
         IClass templateParameterType = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "T");
-
+        
         // Create input DTO
         NewTemplateParameterToClassDTO inputDTO = new NewTemplateParameterToClassDTO(
             targetClass.getId(),
             templateParameterType.getId(),
             "templateParameter");
-
+        
         // ----------------------------------------
         // Call createTemplateParameter()
         // ----------------------------------------
@@ -901,21 +901,21 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ClassDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void deleteElement_ok() throws Exception {
         // Get element
         INamedElement namedElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(namedElement.getId());
-
+        
         // ----------------------------------------
         // Call deleteElement()
         // ----------------------------------------
@@ -924,16 +924,16 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             ElementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void deleteElement_ok_erElements() throws Exception {
         ERModelEditor erModelEditor = projectAccessor.getModelEditorFactory().getERModelEditor();
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
-
+        
         // One ER element of each kind except an ER domain, which deleteElement() fails to delete. BasicModelEditor deletes some of them and ERModelEditor the others.
         IERModel erModel = transactionSupport.call(() -> erModelEditor.createERModel(projectAccessor.getProject(), "ERModel"));
         IERSchema erSchema = erModel.getSchemata()[0];
@@ -947,7 +947,7 @@ public class BasicModelEditorToolTest {
             erModelEditor.createNonIdentifyingRelationship(parentEntity, childEntity, "Relationship", "relationship"));
         IERSubtypeRelationship erSubtypeRelationship = transactionSupport.call(() ->
             erModelEditor.createSubtypeRelationship(parentEntity, childEntity, "SubtypeRelationship", "subtype_relationship"));
-
+        
         // ----------------------------------------
         // Call deleteElement()
         // ----------------------------------------
@@ -960,25 +960,25 @@ public class BasicModelEditorToolTest {
                 tool,
                 new IdDTO(id),
                 ElementDTO.class);
-
+            
             // Check output DTO
             assertEquals(id, outputDTO.id(), element.getClass().getSimpleName());
         }
     }
-
+    
     @Test
     void deleteElement_ng_erDomain() throws Exception {
         ERModelEditor erModelEditor = projectAccessor.getModelEditorFactory().getERModelEditor();
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
-
+        
         // ER domain
         IERModel erModel = transactionSupport.call(() -> erModelEditor.createERModel(projectAccessor.getProject(), "ERModel"));
         IERDatatype erDatatype = transactionSupport.call(() -> erModelEditor.createERDatatype(erModel, "Datatype"));
         IERDomain erDomain = transactionSupport.call(() -> erModelEditor.createERDomain(erModel, null, "Domain", "domain", erDatatype));
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(erDomain.getId());
-
+        
         // ----------------------------------------
         // Call deleteElement()
         // ----------------------------------------
@@ -989,27 +989,27 @@ public class BasicModelEditorToolTest {
                 inputDTO,
                 ElementDTO.class);
         });
-
+        
         // Check exception: BasicModelEditor.delete() rejects an ER domain
         assertInstanceOf(InvalidEditingException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("Parameter should be set correctly."), exception.getCause().getMessage());
-
+        
         // Check that the ER domain was not deleted
         assertNotNull(projectAccessor.getEntity(erDomain.getId()));
     }
-
+    
     @Test
     void createRequirementInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewRequirementInPackageDTO inputDTO = new NewRequirementInPackageDTO(
             parentPackage.getId(),
             "TestRequirement");
-
+        
         // ----------------------------------------
         // Call createRequirementInParentPackage()
         // ----------------------------------------
@@ -1018,23 +1018,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             RequirementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createRequirementInParentRequirement_ok() throws Exception {
         // Get requirement
         IRequirement parentRequirement = (IRequirement) TestSupport.instance().getNamedElementByClassAndName(
             IRequirement.class,
             "Requirement0");
-
+        
         // Create input DTO
         NewRequirementInRequirementDTO inputDTO = new NewRequirementInRequirementDTO(
             parentRequirement.getId(),
             "TestSubRequirement");
-
+        
         // ----------------------------------------
         // Call createRequirementInParentRequirement()
         // ----------------------------------------
@@ -1043,23 +1043,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             RequirementDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createTestCaseInParentPackage_ok() throws Exception {
         // Get package
         IPackage parentPackage = (IPackage) TestSupport.instance().getNamedElementByClassAndName(
             IPackage.class,
             "subPackage");
-
+        
         // Create input DTO
         NewTestCaseInPackageDTO inputDTO = new NewTestCaseInPackageDTO(
             parentPackage.getId(),
             "TestTestCase");
-
+        
         // ----------------------------------------
         // Call createTestCaseInParentPackage()
         // ----------------------------------------
@@ -1068,23 +1068,23 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             TestCaseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createTestCaseInParentTestCase_ok() throws Exception {
         // Get test case
         ITestCase parentTestCase = (ITestCase) TestSupport.instance().getNamedElementByClassAndName(
             ITestCase.class,
             "TestCase0");
-
+        
         // Create input DTO
         NewTestCaseInTestCaseDTO inputDTO = new NewTestCaseInTestCaseDTO(
             parentTestCase.getId(),
             "TestSubTestCase");
-
+        
         // ----------------------------------------
         // Call createTestCaseInParentTestCase()
         // ----------------------------------------
@@ -1093,11 +1093,11 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             TestCaseDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void createCopyDependency_ok() throws Exception {
         // Get named elements
@@ -1107,12 +1107,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewCopyDependencyDTO inputDTO = new NewCopyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createCopyDependency()
         // ----------------------------------------
@@ -1121,20 +1121,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("copy", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createCopyDependency_ng_1() throws Exception {
         // Get named elements
@@ -1144,12 +1144,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewCopyDependencyDTO inputDTO = new NewCopyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createCopyDependency()
         // ----------------------------------------
@@ -1161,7 +1161,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createCopyDependency_ng_2() throws Exception {
         // Get named elements
@@ -1171,12 +1171,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewCopyDependencyDTO inputDTO = new NewCopyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createCopyDependency()
         // ----------------------------------------
@@ -1188,7 +1188,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createDeriveReqtDependency_ok() throws Exception {
         // Get named elements
@@ -1198,12 +1198,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewDeriveReqtDependencyDTO inputDTO = new NewDeriveReqtDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createDeriveReqtDependency()
         // ----------------------------------------
@@ -1212,20 +1212,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("deriveReqt", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createDeriveReqtDependency_ng_1() throws Exception {
         // Get named elements
@@ -1235,12 +1235,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewDeriveReqtDependencyDTO inputDTO = new NewDeriveReqtDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createDeriveReqtDependency()
         // ----------------------------------------
@@ -1252,7 +1252,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createDeriveReqtDependency_ng_2() throws Exception {
         // Get named elements
@@ -1262,12 +1262,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewDeriveReqtDependencyDTO inputDTO = new NewDeriveReqtDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createDeriveReqtDependency()
         // ----------------------------------------
@@ -1279,7 +1279,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createRefineDependency_ok() throws Exception {
         // Get named elements
@@ -1289,12 +1289,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewRefineDependencyDTO inputDTO = new NewRefineDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createRefineDependency()
         // ----------------------------------------
@@ -1303,20 +1303,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("refine", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createRefineDependency_ng() throws Exception {
         // Get named elements
@@ -1326,12 +1326,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewRefineDependencyDTO inputDTO = new NewRefineDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createRefineDependency()
         // ----------------------------------------
@@ -1343,7 +1343,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createSatisfyDependency_ok() throws Exception {
         // Get named elements
@@ -1353,12 +1353,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewSatisfyDependencyDTO inputDTO = new NewSatisfyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createSatisfyDependency()
         // ----------------------------------------
@@ -1367,20 +1367,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("satisfy", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createSatisfyDependency_ng() throws Exception {
         // Get named elements
@@ -1390,12 +1390,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewSatisfyDependencyDTO inputDTO = new NewSatisfyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createSatisfyDependency()
         // ----------------------------------------
@@ -1407,7 +1407,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createTraceDependency_ok() throws Exception {
         // Get named elements
@@ -1417,12 +1417,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Bar");
-
+        
         // Create input DTO
         NewTraceDependencyDTO inputDTO = new NewTraceDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createTraceDependency()
         // ----------------------------------------
@@ -1431,20 +1431,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("trace", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createVerifyDependency_ok() throws Exception {
         // Get named elements
@@ -1454,12 +1454,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement0");
-
+        
         // Create input DTO
         NewVerifyDependencyDTO inputDTO = new NewVerifyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createVerifyDependency()
         // ----------------------------------------
@@ -1468,20 +1468,20 @@ public class BasicModelEditorToolTest {
             tool,
             inputDTO,
             DependencyDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Get created dependency
         IDependency createdDependency = (IDependency) TestSupport.instance().getNamedElementById(
             outputDTO.namedElement().element().id());
-
+        
         // Check with the created dependency
         assertEquals(sourceElement.getId(), createdDependency.getClient().getId());
         assertEquals(targetElement.getId(), createdDependency.getSupplier().getId());
         assertEquals("verify", createdDependency.getStereotypes()[0]);
     }
-
+    
     @Test
     void createVerifyDependency_ng_1() throws Exception {
         // Get named elements
@@ -1491,12 +1491,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "Requirement1");
-
+        
         // Create input DTO
         NewVerifyDependencyDTO inputDTO = new NewVerifyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createVerifyDependency()
         // ----------------------------------------
@@ -1508,7 +1508,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createVerifyDependency_ng_2() throws Exception {
         // Get named elements
@@ -1518,12 +1518,12 @@ public class BasicModelEditorToolTest {
         INamedElement targetElement = TestSupport.instance().getNamedElementByClassAndName(
             INamedElement.class,
             "TestCase1");
-
+        
         // Create input DTO
         NewVerifyDependencyDTO inputDTO = new NewVerifyDependencyDTO(
             sourceElement.getId(),
             targetElement.getId());
-
+        
         // ----------------------------------------
         // Call createVerifyDependency()
         // ----------------------------------------
@@ -1535,7 +1535,7 @@ public class BasicModelEditorToolTest {
                 DependencyDTO.class);
         });
     }
-
+    
     @Test
     void createConstraint_ok() throws Exception {
         // Get class
@@ -1543,7 +1543,7 @@ public class BasicModelEditorToolTest {
             IClass.class,
             "Foo");
         int beforeCount = clazz.getConstraints().length;
-
+        
         // ----------------------------------------
         // Call createConstraint()
         // ----------------------------------------
@@ -1552,23 +1552,23 @@ public class BasicModelEditorToolTest {
             tool,
             new NewConstraintDTO(clazz.getId(), " x > 0 "),
             ConstraintDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
-
+        
         // Check that the constraint is created without the surrounding whitespace
         IConstraint[] constraints = clazz.getConstraints();
         assertEquals(beforeCount + 1, constraints.length);
         assertEquals("x > 0", constraints[constraints.length - 1].getSpecification());
     }
-
+    
     @Test
     void createConstraint_ng_alreadyHas() throws Exception {
         // Get class
         IClass clazz = (IClass) TestSupport.instance().getNamedElementByClassAndName(
             IClass.class,
             "Foo");
-
+        
         // Create a constraint first
         TestSupport.instance().invokeToolMethodReturningDto(
             createConstraint,
@@ -1576,7 +1576,7 @@ public class BasicModelEditorToolTest {
             new NewConstraintDTO(clazz.getId(), "x > 0"),
             ConstraintDTO.class);
         int beforeCount = clazz.getConstraints().length;
-
+        
         // ----------------------------------------
         // Call createConstraint()
         // ----------------------------------------
@@ -1587,11 +1587,11 @@ public class BasicModelEditorToolTest {
                 new NewConstraintDTO(clazz.getId(), "x > 0\n"),
                 ConstraintDTO.class);
         });
-
+        
         // Check exception
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("already has the constraint 'x > 0'"));
-
+        
         // Check that the constraint is not duplicated
         assertEquals(beforeCount, clazz.getConstraints().length);
     }

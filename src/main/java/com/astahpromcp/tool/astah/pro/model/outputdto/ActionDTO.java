@@ -8,31 +8,31 @@ import java.util.List;
 public record ActionDTO(
     @JsonPropertyDescription("Activity node info")
     ActivityNodeDTO activityNode,
-
+    
     @JsonPropertyDescription("Calling activity")
     NameIdTypeDTO callingActivity,
-
+    
     @JsonPropertyDescription("Input pins")
     List<NameIdTypeDTO> inputPins,
-
+    
     @JsonPropertyDescription("Output pins")
     List<NameIdTypeDTO> outputPins,
-
+    
     @JsonPropertyDescription("Is Accept event action")
     boolean isAcceptEventAction,
-
+    
     @JsonPropertyDescription("Is Accept time event action")
     boolean isAcceptTimeEventAction,
-
+    
     @JsonPropertyDescription("Is Call behavior action")
     boolean isCallBehaviorAction,
-
+    
     @JsonPropertyDescription("Is Connector")
     boolean isConnector,
-
+    
     @JsonPropertyDescription("Is Process")
     boolean isProcess,
-
+    
     @JsonPropertyDescription("Is Send signal action")
     boolean isSendSignalAction
 ) {

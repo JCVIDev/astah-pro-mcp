@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record PortDTO(
     @JsonPropertyDescription("Attribute info")
     AttributeDTO attribute,
-
+    
     @JsonPropertyDescription("Is Behavior")
     boolean isBehavior,
-
+    
     @JsonPropertyDescription("Is Service")
     boolean isService
 ) {

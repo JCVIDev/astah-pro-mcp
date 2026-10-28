@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record NewJoinNodeDTO(
     @JsonPropertyDescription("Target activity diagram identifier")
     String targetActivityDiagramId,
-
+    
     @JsonPropertyDescription("Location X coordinate")
     int locationX,
-
+    
     @JsonPropertyDescription("Location Y coordinate")
     int locationY
 ) {

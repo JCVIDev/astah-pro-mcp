@@ -16,7 +16,7 @@ public class EnumerationDTOAssembler {
         for (IEnumerationLiteral astahEnumerationLiteral : astahEnumeration.getEnumerationLiterals()) {
             enumerationLiteralDTOs.add(EnumerationLiteralDTOAssembler.toDTO(astahEnumerationLiteral));
         }
-
+        
         return new EnumerationDTO(
             ClassDTOAssembler.toDTO(astahEnumeration),
             enumerationLiteralDTOs);

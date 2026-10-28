@@ -8,37 +8,37 @@ import java.util.List;
 public record ClassDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Attributes")
     List<AttributeDTO> attributes,
-
+    
     @JsonPropertyDescription("Operations")
     List<OperationDTO> operations,
-
+    
     @JsonPropertyDescription("Associations")
     List<AssociationDTO> associations,
-
+    
     @JsonPropertyDescription("Generalizations: Generalizations in which this class is the sub type.")
     List<GeneralizationDTO> generalizations,
-
+    
     @JsonPropertyDescription("Specializations: Generalizations in which this class is the super type.")
     List<GeneralizationDTO> specializations,
-
+    
     @JsonPropertyDescription("Ports")
     List<PortDTO> ports,
-
+    
     @JsonPropertyDescription("Nested classes")
     List<NameIdTypeDTO> nestedClasses,
-
+    
     @JsonPropertyDescription("Template parameters")
     List<NameIdTypeDTO> templateParameters,
-
+    
     @JsonPropertyDescription("Is Abstract")
     boolean isAbstract,
-
+    
     @JsonPropertyDescription("Is Active")
     boolean isActive,
-
+    
     @JsonPropertyDescription("Is Leaf")
     boolean isLeaf
 ) {

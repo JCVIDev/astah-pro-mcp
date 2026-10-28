@@ -29,21 +29,21 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/ICombinedFragment.html
 @Slf4j
 public class CombinedFragmentTool extends AstahToolProvider {
-
+    
     private static final int MIN_INTERACTION_OPERAND_HEIGHT = 10;
-
+    
     private final BasicModelEditor basicModelEditor;
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public CombinedFragmentTool(BasicModelEditor basicModelEditor, ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.basicModelEditor = basicModelEditor;
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -53,22 +53,21 @@ public class CombinedFragmentTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 CombinedFragmentDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "add_interaction_operand",
                 "Add an interaction operand to the specified combined fragment (specified by ID), and return the model element of the combined fragment after it is edited.",
                 this::addInteractionOperand,
                 NewInteractionOperandDTO.class,
                 CombinedFragmentDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_combined_fragment_kind",
                 "Set the kind (specified by string) of the specified combined fragment (specified by ID), and return the model element of the combined fragment after it is set.",
                 this::setCombinedFragmentKind,
                 CombinedFragmentWithKindDTO.class,
                 CombinedFragmentDTO.class),
-
+            
             // Note: To set the height of an interaction operand, the index of the operand known by the combined fragment is required. Therefore, this tool is defined as a tool for the combined fragment rather than for the interaction operand.
             ToolSupport.toolDefinitionReturningDto(
                 "set_height_of_interaction_operand",
@@ -78,20 +77,20 @@ public class CombinedFragmentTool extends AstahToolProvider {
                 NodePresentationDTO.class)
         );
     }
-
+    
     private CombinedFragmentDTO getInfo(IdDTO param) throws Exception {
         ICombinedFragment astahCombinedFragment = astahProToolSupport.getCombinedFragment(param.id());
-
+        
         return CombinedFragmentDTOAssembler.toDTO(astahCombinedFragment);
     }
-
+    
     private CombinedFragmentDTO addInteractionOperand(NewInteractionOperandDTO param) throws Exception {
         ICombinedFragment astahCombinedFragment = astahProToolSupport.getCombinedFragment(param.targetCombinedFragmentId());
-
+        
         // A null or blank guard means no guard, and surrounding whitespace is removed.
         String guard = param.guard() == null ? "" : param.guard().strip();
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             IInteractionOperand addedInteractionOperand;
             try {
                 addedInteractionOperand = astahCombinedFragment.addInteractionOperand(param.newInteractionOperandName(), guard);
@@ -100,7 +99,7 @@ public class CombinedFragmentTool extends AstahToolProvider {
                     "Failed to add an interaction operand (%s). Some interaction operators allow only one interaction operand. If multiple interaction operands are needed, change the interaction operator of the combined fragment to one that allows them.",
                     e.getMessage()), e);
             }
-
+            
             // Workaround: ICombinedFragment.addInteractionOperand() leaves a default "Guard" constraint beside the given guard, and deleting either one clears the guard. So delete them all and set the guard once. The operand has just been added, so nothing of the user's is lost.
             IConstraint[] constraints = addedInteractionOperand.getConstraints();
             if (constraints.length > 1) {
@@ -113,28 +112,28 @@ public class CombinedFragmentTool extends AstahToolProvider {
                 }
             }
         });
-
+        
         return CombinedFragmentDTOAssembler.toDTO(astahCombinedFragment);
     }
-
+    
     private CombinedFragmentDTO setCombinedFragmentKind(CombinedFragmentWithKindDTO param) throws Exception {
         ICombinedFragment astahCombinedFragment = astahProToolSupport.getCombinedFragment(param.targetCombinedFragmentId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahCombinedFragment.setInteractionOperator(param.kind().astahValue);
         });
-
+        
         return CombinedFragmentDTOAssembler.toDTO(astahCombinedFragment);
     }
-
+    
     private NodePresentationDTO setHeightOfInteractionOperand(InteractionOperandIndexWithHeightDTO param) throws Exception {
         INodePresentation astahCombinedFragmentPresentation = astahProToolSupport.getNodePresentation(param.targetCombinedFragmentNodePresentationId());
         if (!Type.COMBINED_FRAGMENT.matches(astahCombinedFragmentPresentation.getType())) {
             throw new IllegalArgumentException("Combined fragment node must be one of the following node presentation types: CombinedFragment.");
         }
-
+        
         ICombinedFragment astahCombinedFragment = (ICombinedFragment) astahCombinedFragmentPresentation.getModel();
-
+        
         // Validate the target interaction operand index
         if (param.targetInteractionOperandIndex() < 1 || param.targetInteractionOperandIndex() > astahCombinedFragment.getInteractionOperands().length) {
             throw new IllegalArgumentException("Invalid interaction operand index: " + param.targetInteractionOperandIndex());
@@ -147,10 +146,10 @@ public class CombinedFragmentTool extends AstahToolProvider {
         
         // Get the key for the operand length property
         String key = PresentationPropertyUtil.createOperandLengthKey(param.targetInteractionOperandIndex());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahCombinedFragmentPresentation.setProperty(key, String.valueOf(param.height()));
-
+            
             // Workaround: Astah does not apply a height that would leave a message drawn in the operand below its bottom, yet still moves the presentations below and resizes the combined fragment. So check the height it kept, and fail inside the transaction so that those changes are rolled back as well.
             String appliedHeight = astahCombinedFragmentPresentation.getProperty(key);
             if (!hasLength(appliedHeight, param.height())) {
@@ -159,10 +158,10 @@ public class CombinedFragmentTool extends AstahToolProvider {
                     param.height(), param.targetInteractionOperandIndex(), appliedHeight));
             }
         });
-
+        
         return NodePresentationDTOAssembler.toDTO(astahCombinedFragmentPresentation);
     }
-
+    
     private static boolean hasLength(String length, int expected) {
         try {
             return length != null && Double.parseDouble(length) == expected;

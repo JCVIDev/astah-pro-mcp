@@ -26,17 +26,17 @@ import java.util.List;
 //   https://members.change-vision.com/javadoc/astah-api/latest/api/en/doc/javadoc/com/change_vision/jude/api/inf/model/IERRelationship.html
 @Slf4j
 public class ERRelationshipTool extends AstahToolProvider {
-
+    
     private final ProjectAccessor projectAccessor;
     private final TransactionSupport txnAstah;
     private final AstahProToolSupport astahProToolSupport;
-
+    
     public ERRelationshipTool(ProjectAccessor projectAccessor, TransactionSupport transactionSupport, AstahProToolSupport astahProToolSupport) {
         this.projectAccessor = projectAccessor;
         this.txnAstah = transactionSupport;
         this.astahProToolSupport = astahProToolSupport;
     }
-
+    
     @Override
     protected List<ToolDefinition> createTools() {
         return List.of(
@@ -46,50 +46,49 @@ public class ERRelationshipTool extends AstahToolProvider {
                 this::getInfo,
                 IdDTO.class,
                 ERRelationshipDTO.class),
-
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_cardinality_of_er_relationship",
                 "Set the cardinality (specified by string) of the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setCardinality,
                 ERRelationshipWithCardinalityDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_er_index_of_er_relationship",
                 "Set the ER index (specified by ID) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setERIndex,
                 ERRelationshipWithERIndexDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_logical_name_of_er_relationship",
                 "Set the logical name (specified by string) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setLogicalName,
                 ERRelationshipWithLogicalNameDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_physical_name_of_er_relationship",
                 "Set the physical name (specified by string) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setPhysicalName,
                 ERRelationshipWithPhysicalNameDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_parent_required_of_er_relationship",
                 "Set the parent required (specified by boolean) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setParentRequired,
                 ERRelationshipWithParentRequiredDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_parent_verb_phrase_of_er_relationship",
                 "Set the parent verb phrase (specified by string) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
                 this::setVerbPhraseParent,
                 ERRelationshipWithParentVerbPhraseDTO.class,
                 ERRelationshipDTO.class),
-
+            
             ToolSupport.toolDefinitionReturningDto(
                 "set_child_verb_phrase_of_er_relationship",
                 "Set the child verb phrase (specified by string) to the specified ER relationship (specified by ID), and return the model element of the ER relationship after it is set.",
@@ -98,81 +97,81 @@ public class ERRelationshipTool extends AstahToolProvider {
                 ERRelationshipDTO.class)
         );
     }
-
+    
     private ERRelationshipDTO getInfo(IdDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.id());
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setCardinality(ERRelationshipWithCardinalityDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setCardinality(param.cardinality());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setERIndex(ERRelationshipWithERIndexDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
         IERIndex astahERIndex = astahProToolSupport.getERIndex(param.erIndexId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setERIndex(astahERIndex);
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setLogicalName(ERRelationshipWithLogicalNameDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setLogicalName(param.logicalName());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setPhysicalName(ERRelationshipWithPhysicalNameDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setPhysicalName(param.physicalName());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setParentRequired(ERRelationshipWithParentRequiredDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setParentRequired(param.isParentRequired());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setVerbPhraseParent(ERRelationshipWithParentVerbPhraseDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setVerbPhraseParent(param.parentVerbPhrase());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
-
+    
     private ERRelationshipDTO setVerbPhraseChild(ERRelationshipWithChildVerbPhraseDTO param) throws Exception {
         IERRelationship astahERRelationship = astahProToolSupport.getERRelationship(param.targetERRelationshipId());
-
-        txnAstah.run( () -> {
+        
+        txnAstah.run(() -> {
             astahERRelationship.setVerbPhraseChild(param.childVerbPhrase());
         });
-
+        
         return ERRelationshipDTOAssembler.toDTO(astahERRelationship);
     }
 }

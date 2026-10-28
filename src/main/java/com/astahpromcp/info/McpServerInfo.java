@@ -9,24 +9,24 @@ import java.util.Properties;
 // Information of the MCP server
 @Slf4j
 public final class McpServerInfo {
-
+    
     private McpServerInfo() {
     }
-
+    
     private static final String UNKNOWN = "unknown";
-
+    
     // MCP server artifact ID
     public static final String ARTIFACT_ID;
-
+    
     // MCP server version
     public static final String VERSION;
-
+    
     static {
         Properties props = loadProjectProperties();
         ARTIFACT_ID = props.getProperty("project.artifactId", UNKNOWN);
         VERSION = props.getProperty("project.version", UNKNOWN);
     }
-
+    
     private static Properties loadProjectProperties() {
         Properties props = new Properties();
         try (InputStream is = McpServerInfo.class.getClassLoader().getResourceAsStream("project.properties")) {

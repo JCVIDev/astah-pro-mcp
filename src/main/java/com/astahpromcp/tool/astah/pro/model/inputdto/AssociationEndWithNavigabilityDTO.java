@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record AssociationEndWithNavigabilityDTO(
     @JsonPropertyDescription("Target association end identifier")
     String targetAssociationEndId,
-
+    
     @JsonPropertyDescription("Navigability kind")
     NavigabilityKind navigabilityKind
 ) {

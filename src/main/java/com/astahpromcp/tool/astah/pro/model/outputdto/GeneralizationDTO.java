@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record GeneralizationDTO(
     @JsonPropertyDescription("Named element info")
     NamedElementDTO namedElement,
-
+    
     @JsonPropertyDescription("Super type")
     NameIdTypeDTO superType,
-
+    
     @JsonPropertyDescription("Sub type")
     NameIdTypeDTO subType
 ) {

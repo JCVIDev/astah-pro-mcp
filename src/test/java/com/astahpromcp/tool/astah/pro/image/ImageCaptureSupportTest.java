@@ -37,35 +37,35 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ImageCaptureSupportTest {
-
+    
     private static final String DIAGRAM_ID = "diagram-id";
-
+    
     @Test
     void cropRectangleOf_ok_fullCoversWholeImage() {
         Rectangle crop = ImageCaptureSupport.cropRectangleOf(ImageRegion.FULL, 800, 600);
-
+        
         assertEquals(new Rectangle(0, 0, 800, 600), crop);
     }
-
+    
     @Test
     void cropRectangleOf_ok_quadrantsTileTheImageExactlyEvenForOddSizes() {
         // Odd width/height: the right/bottom halves must take the remainder pixel
         int width = 801;
         int height = 601;
-
+        
         Rectangle topLeft = ImageCaptureSupport.cropRectangleOf(ImageRegion.TOP_LEFT, width, height);
         Rectangle topRight = ImageCaptureSupport.cropRectangleOf(ImageRegion.TOP_RIGHT, width, height);
         Rectangle bottomLeft = ImageCaptureSupport.cropRectangleOf(ImageRegion.BOTTOM_LEFT, width, height);
         Rectangle bottomRight = ImageCaptureSupport.cropRectangleOf(ImageRegion.BOTTOM_RIGHT, width, height);
-
+        
         // The right column starts exactly where the left column ends (no gap, no overlap)
         assertEquals(topLeft.x + topLeft.width, topRight.x);
         assertEquals(bottomLeft.x + bottomLeft.width, bottomRight.x);
-
+        
         // The bottom row starts exactly where the top row ends
         assertEquals(topLeft.y + topLeft.height, bottomLeft.y);
         assertEquals(topRight.y + topRight.height, bottomRight.y);
-
+        
         // The four quadrants together cover the whole image
         assertEquals(width, topLeft.width + topRight.width);
         assertEquals(width, bottomLeft.width + bottomRight.width);
@@ -74,122 +74,122 @@ public class ImageCaptureSupportTest {
         assertEquals(width, topRight.x + topRight.width);
         assertEquals(height, bottomLeft.y + bottomLeft.height);
     }
-
+    
     @Test
     void encodeDownscaledPng_ok_keepsFullResolutionWhenPngFitsTarget() throws Exception {
         // A large but uniform image compresses to a tiny PNG, so it must be kept at full resolution
         // even though its raw RGBA size (2000*2000*4 ≈ 15 MB) far exceeds the 50 KB target.
         BufferedImage image = uniformImage(2000, 2000, Color.WHITE);
-
+        
         ImageCaptureSupport.EncodedPng encoded = ImageCaptureSupport.encodeDownscaledPng(image, null, 50L * 1024);
-
+        
         assertEquals(1.0, encoded.scale(), "A well-compressing image must not be downscaled");
         BufferedImage decoded = decode(encoded.bytes());
         assertEquals(2000, decoded.getWidth());
         assertEquals(2000, decoded.getHeight());
     }
-
+    
     @Test
     void encodeDownscaledPng_ok_downscalesWhenPngExceedsTarget() throws Exception {
         // Random noise is incompressible, so a 1000x1000 PNG comfortably exceeds the 50 KB target
         // and must be downscaled.
         BufferedImage image = noiseImage(1000, 1000);
-
+        
         ImageCaptureSupport.EncodedPng encoded = ImageCaptureSupport.encodeDownscaledPng(image, null, 50L * 1024);
-
+        
         assertTrue(encoded.scale() < 1.0, "An oversized PNG must be downscaled, but scale was " + encoded.scale());
         assertTrue(encoded.scale() >= 0.1, "Scale must not fall below the 0.1 floor");
         BufferedImage decoded = decode(encoded.bytes());
         assertTrue(decoded.getWidth() < 1000 && decoded.getHeight() < 1000,
                 "Downscaled image must be smaller than the source");
     }
-
+    
     @Test
     void encodeDownscaledPng_ok_honorsSourceRegionAtFullResolution() throws Exception {
         // A uniform image stays at full resolution; the output must span exactly the requested region.
         BufferedImage image = uniformImage(800, 600, Color.WHITE);
         Rectangle region = new Rectangle(100, 50, 300, 200);
-
+        
         ImageCaptureSupport.EncodedPng encoded = ImageCaptureSupport.encodeDownscaledPng(image, region, 50L * 1024);
-
+        
         assertEquals(1.0, encoded.scale());
         BufferedImage decoded = decode(encoded.bytes());
         assertEquals(300, decoded.getWidth());
         assertEquals(200, decoded.getHeight());
     }
-
+    
     @Test
     void scaledImagePathOf_ok_prefixesTheFileNameAndKeepsTheNamespaceDirectories(@TempDir Path outputDir) {
         // exportImage returns the diagram's namespace as directories, so the prefix must not touch them:
         // "scaled_" + the whole path would name a directory ("scaled_State") that was never created.
         Path scaledImagePath = ImageCaptureSupport.scaledImagePathOf(
                 outputDir, relativePath("State", "Statemachine", "Statemachine Diagram.png"), 1.0);
-
+        
         assertEquals(outputDir.resolve("State").resolve("Statemachine").resolve("scaled_Statemachine Diagram_scale1.00.png"),
                 scaledImagePath);
     }
-
+    
     @Test
     void scaledImagePathOf_ok_keepsARootLevelDiagramDirectlyInTheOutputDir() {
         // A diagram owned by the root package has no directory component at all.
         Path outputDir = Path.of("out");
-
+        
         Path scaledImagePath = ImageCaptureSupport.scaledImagePathOf(outputDir, "Class Diagram.png", 0.76);
-
+        
         assertEquals(outputDir.resolve("scaled_Class Diagram_scale0.76.png"), scaledImagePath);
     }
-
+    
     @Test
     void scaledImagePathOf_ok_writesADecimalPointEvenInACommaDecimalLocale() {
         // German and friends format 1.0 as "1,00", which would make the file name vary by machine.
         Locale original = Locale.getDefault();
         try {
             Locale.setDefault(Locale.GERMANY);
-
+            
             Path scaledImagePath = ImageCaptureSupport.scaledImagePathOf(Path.of("out"), "Class Diagram.png", 1.0);
-
+            
             assertEquals("scaled_Class Diagram_scale1.00.png", scaledImagePath.getFileName().toString());
         } finally {
             Locale.setDefault(original);
         }
     }
-
+    
     @Test
     void saveScaledImage_ok_createsTheMissingNamespaceDirectories(@TempDir Path outputDir) throws Exception {
         byte[] pngBytes = {1, 2, 3};
-
+        
         ImageCaptureSupport.saveScaledImage(
                 outputDir, relativePath("State", "Statemachine", "Statemachine Diagram.png"), 1.0, pngBytes);
-
+        
         Path expected = outputDir.resolve("State").resolve("Statemachine").resolve("scaled_Statemachine Diagram_scale1.00.png");
         assertTrue(Files.exists(expected), "The scaled image must be written next to the exported one");
         assertArrayEquals(pngBytes, Files.readAllBytes(expected));
     }
-
+    
     @Test
     void saveScaledImage_ok_overwritesWhenTheParentDirectoryAlreadyExists(@TempDir Path outputDir) throws Exception {
         Files.createDirectories(outputDir.resolve("Deployment"));
         String relativeImagePath = relativePath("Deployment", "Deployment Diagram.png");
         ImageCaptureSupport.saveScaledImage(outputDir, relativeImagePath, 1.0, new byte[]{1, 2, 3});
-
+        
         ImageCaptureSupport.saveScaledImage(outputDir, relativeImagePath, 1.0, new byte[]{4, 5});
-
+        
         Path expected = outputDir.resolve("Deployment").resolve("scaled_Deployment Diagram_scale1.00.png");
         assertArrayEquals(new byte[]{4, 5}, Files.readAllBytes(expected), "The second write must replace the first");
     }
-
+    
     @Test
     void saveScaledImage_ng_swallowsTheFailureAndNamesTheExceptionClass(@TempDir Path outputDir) throws Exception {
         // A plain file where the namespace directory must go: createDirectories then fails deterministically
         // on every platform, unlike a read-only directory.
         Files.createFile(outputDir.resolve("State"));
-
+        
         ListAppender<ILoggingEvent> captured = attachAppenderTo(ImageCaptureSupport.class);
         try {
             assertDoesNotThrow(() -> ImageCaptureSupport.saveScaledImage(
                     outputDir, relativePath("State", "Statemachine Diagram.png"), 1.0, new byte[]{1, 2, 3}),
                     "Saving the troubleshooting copy must never break the tool call");
-
+            
             List<ILoggingEvent> warnings = captured.list.stream()
                     .filter(event -> event.getLevel() == Level.WARN)
                     .toList();
@@ -201,36 +201,36 @@ public class ImageCaptureSupportTest {
             detachAppenderFrom(ImageCaptureSupport.class, captured);
         }
     }
-
+    
     @Test
     void createThumbnailContent_ng_answersWithANoticeWhenTheOutputDirectoryCannotBeCreated(@TempDir Path workspace) throws Exception {
         // The edit is committed before its thumbnail is taken, so a throw here would report a done edit as failed,
         // and the client would repeat it. A plain file where the output directory must go fails on every platform.
         Path imageOutputDir = Files.createFile(workspace.resolve("images"));
         ImageCaptureSupport support = supportFor(mock(IDiagram.class), imageOutputDir);
-
+        
         ListAppender<ILoggingEvent> captured = attachAppenderTo(ImageCaptureSupport.class);
         try {
             McpSchema.Content content = support.createThumbnailContent(DIAGRAM_ID);
-
+            
             String notice = assertInstanceOf(McpSchema.TextContent.class, content).text();
             assertTrue(notice.contains("do not repeat it"), "The notice must keep the client from repeating the edit: " + notice);
             assertTrue(notice.contains("Failed to create output directory"), "The notice must say what went wrong: " + notice);
-
+            
             long errors = captured.list.stream().filter(event -> event.getLevel() == Level.ERROR).count();
             assertEquals(1, errors, "The failure must be reported exactly once, as an error");
         } finally {
             detachAppenderFrom(ImageCaptureSupport.class, captured);
         }
     }
-
+    
     @Test
     void createThumbnailContent_ng_answersWithANoticeWhenTheExportRunsOutOfMemory(@TempDir Path outputDir) throws Exception {
         // exportImage is wrapped for Exception only, so an OutOfMemoryError there reaches the thumbnail as it is. Its
         // message, "Java heap space", does not say that memory ran out, so the notice must name the error as well.
         IDiagram diagram = mock(IDiagram.class);
         when(diagram.exportImage(anyString(), anyString(), anyDouble())).thenThrow(new OutOfMemoryError("Java heap space"));
-
+        
         McpSchema.Content content;
         try {
             content = supportFor(diagram, outputDir).createThumbnailContent(DIAGRAM_ID);
@@ -238,83 +238,83 @@ public class ImageCaptureSupportTest {
             // Left to escape, the error would abort the whole test run instead of failing this test.
             throw new AssertionError("The OutOfMemoryError must be answered with a notice, not thrown", e);
         }
-
+        
         String notice = assertInstanceOf(McpSchema.TextContent.class, content).text();
         assertTrue(notice.contains("OutOfMemoryError"), "The notice must name the error: " + notice);
         assertTrue(notice.contains("Java heap space"), "The notice must keep the error's message: " + notice);
     }
-
+    
     // Only the thumbnail an edit returns is spared. An image the caller asked for, as capture_dgm_img does, has nothing
     // committed behind it, so its failure is still the call's failure.
     @Test
     void createLargeImageContent_ng_stillThrowsWhenTheOutputDirectoryCannotBeCreated(@TempDir Path workspace) throws Exception {
         Path imageOutputDir = Files.createFile(workspace.resolve("images"));
         ImageCaptureSupport support = supportFor(mock(IDiagram.class), imageOutputDir);
-
+        
         Exception thrown = assertThrows(Exception.class, () -> support.createLargeImageContent(DIAGRAM_ID, ImageRegion.FULL));
         assertTrue(thrown.getMessage().contains("Failed to create output directory"),
                 "The capture must fail for the output directory, not for anything else: " + thrown);
     }
-
+    
     @Test
     void createThumbnailContent_ok_answersWithASmallPictureOfTheWholeDiagram(@TempDir Path outputDir) throws Exception {
         // Noise does not compress, so the size a picture comes out at is decided by the size target it was encoded for,
         // and the thumbnail's must leave it well below what capture_dgm_img returns for the same diagram. A marker in
         // two opposite corners shows that the thumbnail covers the whole diagram rather than one quarter of it.
         ImageCaptureSupport support = supportFor(diagramExporting(noiseImageWithCornerMarkers(400, 200, 80)), outputDir);
-
+        
         McpSchema.Content content = support.createThumbnailContent(DIAGRAM_ID);
         McpSchema.ImageContent capture = support.createLargeImageContent(DIAGRAM_ID, ImageRegion.FULL);
-
+        
         byte[] thumbnailBytes = Base64.getDecoder().decode(assertInstanceOf(McpSchema.ImageContent.class, content).data());
         byte[] captureBytes = Base64.getDecoder().decode(capture.data());
         assertTrue(thumbnailBytes.length * 3 < captureBytes.length,
                 "The thumbnail must be encoded for its own size target: " + thumbnailBytes.length + " bytes against "
                         + captureBytes.length + " bytes for capture_dgm_img");
-
+        
         BufferedImage thumbnail = decode(thumbnailBytes);
         assertColorNear(Color.RED, thumbnail.getRGB(0, 0), "top-left corner");
         assertColorNear(Color.BLUE, thumbnail.getRGB(thumbnail.getWidth() - 1, thumbnail.getHeight() - 1), "bottom-right corner");
     }
-
+    
     @Test
     void exportDiagramImageFile_ok_answersThePathAndSizeOfTheExportedFile(@TempDir Path outputDir) throws Exception {
         ImageCaptureSupport support = supportFor(diagramExporting(uniformImage(400, 200, Color.WHITE)), outputDir);
-
+        
         ImageCaptureSupport.ExportedImageFile exported = support.exportDiagramImageFile(DIAGRAM_ID);
-
+        
         assertEquals(outputDir.resolve("Class Diagram.png"), exported.path());
         assertEquals(400, exported.width());
         assertEquals(200, exported.height());
     }
-
+    
     @Test
     void exportDiagramImageFile_ok_readsTheSizeWithoutDecodingThePixels(@TempDir Path outputDir) throws Exception {
         // 900 million pixels, about 3.4 GB as one ARGB image, but the file ends after its header: decoding it would fail
         // for want of pixels, so only a reader that stops at the header can answer the size.
         ImageCaptureSupport support = supportFor(diagramExportingBytes(headerOnlyPng(30000, 30000)), outputDir);
-
+        
         ImageCaptureSupport.ExportedImageFile exported = support.exportDiagramImageFile(DIAGRAM_ID);
-
+        
         assertEquals(30000, exported.width());
         assertEquals(30000, exported.height());
     }
-
+    
     @Test
     void exportDiagramImageFile_ng_failsWhenTheExportedFileIsNotAnImage(@TempDir Path outputDir) throws Exception {
         ImageCaptureSupport support = supportFor(diagramExportingBytes("not an image".getBytes(StandardCharsets.US_ASCII)), outputDir);
-
+        
         Exception thrown = assertThrows(Exception.class, () -> support.exportDiagramImageFile(DIAGRAM_ID));
         assertTrue(thrown.getMessage().contains("Failed to read image file"),
                 "The failure must say that the exported file could not be read: " + thrown);
     }
-
+    
     private static ImageCaptureSupport supportFor(IDiagram diagram, Path imageOutputDir) {
         AstahProToolSupport astahProToolSupport = mock(AstahProToolSupport.class);
         when(astahProToolSupport.getDiagram(DIAGRAM_ID)).thenReturn(diagram);
         return new ImageCaptureSupport(astahProToolSupport, new SystemPropertySupport(), imageOutputDir);
     }
-
+    
     // A diagram whose export writes the given picture into the output directory and answers its path, as Astah does.
     private static IDiagram diagramExporting(BufferedImage picture) throws Exception {
         IDiagram diagram = mock(IDiagram.class);
@@ -325,7 +325,7 @@ public class ImageCaptureSupportTest {
         });
         return diagram;
     }
-
+    
     // A diagram whose export writes the given bytes into the output directory and answers its path, as Astah does.
     private static IDiagram diagramExportingBytes(byte[] fileBytes) throws Exception {
         IDiagram diagram = mock(IDiagram.class);
@@ -336,7 +336,7 @@ public class ImageCaptureSupportTest {
         });
         return diagram;
     }
-
+    
     // A PNG that ends after its IHDR chunk: the header gives the size, but no pixels follow.
     private static byte[] headerOnlyPng(int width, int height) {
         byte[] ihdr = ByteBuffer.allocate(17)
@@ -347,7 +347,7 @@ public class ImageCaptureSupportTest {
                 .array();
         CRC32 crc = new CRC32();
         crc.update(ihdr);
-
+        
         return ByteBuffer.allocate(8 + 4 + ihdr.length + 4)
                 .put(new byte[]{(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'})
                 .putInt(ihdr.length - 4)
@@ -355,7 +355,7 @@ public class ImageCaptureSupportTest {
                 .putInt((int) crc.getValue())
                 .array();
     }
-
+    
     // Noise with a solid red block in the top-left corner and a solid blue one in the bottom-right corner.
     private static BufferedImage noiseImageWithCornerMarkers(int width, int height, int markerSize) {
         BufferedImage image = noiseImage(width, height);
@@ -370,7 +370,7 @@ public class ImageCaptureSupportTest {
         }
         return image;
     }
-
+    
     // Downscaling blends neighboring pixels, so a marker is recognized by being close to its color, not equal to it.
     private static void assertColorNear(Color expected, int actualRgb, String where) {
         Color actual = new Color(actualRgb);
@@ -379,12 +379,12 @@ public class ImageCaptureSupportTest {
                 + Math.abs(expected.getBlue() - actual.getBlue());
         assertTrue(distance < 90, "The " + where + " must show its marker " + expected + ", but shows " + actual);
     }
-
+    
     // exportImage hands back a path in the platform's own separators, and Paths.get only splits on those.
     private static String relativePath(String... names) {
         return String.join(File.separator, names);
     }
-
+    
     private static ListAppender<ILoggingEvent> attachAppenderTo(Class<?> type) {
         Logger logger = (Logger) LoggerFactory.getLogger(type);
         ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -392,13 +392,13 @@ public class ImageCaptureSupportTest {
         logger.addAppender(appender);
         return appender;
     }
-
+    
     private static void detachAppenderFrom(Class<?> type, ListAppender<ILoggingEvent> appender) {
         Logger logger = (Logger) LoggerFactory.getLogger(type);
         logger.detachAppender(appender);
         appender.stop();
     }
-
+    
     private static BufferedImage uniformImage(int width, int height, Color color) {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = image.createGraphics();
@@ -410,7 +410,7 @@ public class ImageCaptureSupportTest {
         }
         return image;
     }
-
+    
     private static BufferedImage noiseImage(int width, int height) {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Random random = new Random(42);  // Fixed seed for a deterministic test
@@ -421,7 +421,7 @@ public class ImageCaptureSupportTest {
         }
         return image;
     }
-
+    
     private static BufferedImage decode(byte[] pngBytes) throws Exception {
         BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(pngBytes));
         assertNotNull(decoded, "The encoded bytes must be a readable PNG");

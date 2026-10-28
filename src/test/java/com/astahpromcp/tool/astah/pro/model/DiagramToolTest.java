@@ -42,10 +42,10 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DiagramToolTest {
-
+    
     @TempDir
     Path imageOutputDir;
-
+    
     private ProjectAccessor projectAccessor;
     private DiagramTool tool;
     private Method getInfo;
@@ -53,7 +53,7 @@ public class DiagramToolTest {
     private Method getDiagramBoundRect;
     private Method getPresentationsOnDiagram;
     private Method getPresentationGeometriesOnDiagram;
-
+    
     @BeforeEach
     void setUp() throws Exception {
         AstahAPI astahApi = AstahAPI.getAstahAPI();
@@ -61,62 +61,62 @@ public class DiagramToolTest {
         TransactionSupport transactionSupport = new TransactionSupport(projectAccessor.getTransactionManager());
         projectAccessor.open("src/test/resources/modelfile/model/DiagramToolTest.asta");
         AstahProToolSupport astahProToolSupport = new AstahProToolSupport(projectAccessor);
-
+        
         // Tool
         tool = new DiagramTool(
             projectAccessor,
             transactionSupport,
             astahProToolSupport,
             new ImageCaptureSupport(astahProToolSupport, new SystemPropertySupport(), imageOutputDir));
-
+        
         // getInfo() method
         getInfo = TestSupport.getAccessibleMethod(
             DiagramTool.class,
             "getInfo",
             IdDTO.class);
-
+        
         // getDiagramBoundRect() method
         getDiagramBoundRect = TestSupport.getAccessibleMethod(
             DiagramTool.class,
             "getDiagramBoundRect",
             IdDTO.class);
-
+        
         // getPresentationsOnDiagram() method
         getPresentationsOnDiagram = TestSupport.getAccessibleMethod(
             DiagramTool.class,
             "getPresentationsOnDiagram",
             IdDTO.class);
-
+        
         // getPresentationGeometriesOnDiagram() method
         getPresentationGeometriesOnDiagram = TestSupport.getAccessibleMethod(
             DiagramTool.class,
             "getPresentationGeometriesOnDiagram",
             IdDTO.class);
-
+        
         // exportPngImage() method
         exportPngImage = TestSupport.getAccessibleMethod(
             DiagramTool.class,
             "exportPngImage",
             IdDTO.class);
     }
-
+    
     @AfterEach
     void tearDown() throws Exception {
         if (projectAccessor != null) {
             projectAccessor.close();
         }
     }
-
+    
     @Test
     void getInfo_ok() throws Exception {
         // Get diagram
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call getInfo()
         // ----------------------------------------
@@ -125,21 +125,21 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             DiagramDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
     }
-
+    
     @Test
     void getDiagramBoundRect_ok() throws Exception {
         // Get diagram
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call getDiagramBoundRect()
         // ----------------------------------------
@@ -148,23 +148,23 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             RectangleDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.width() > 0);
         assertTrue(outputDTO.height() > 0);
     }
-
+    
     @Test
     void getPresentationsOnDiagram_ok() throws Exception {
         // Get diagram
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call getPresentationsOnDiagram()
         // ----------------------------------------
@@ -173,12 +173,12 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             PresentationListDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertTrue(outputDTO.value().size() >= 0);
     }
-
+    
     @Test
     void getPresentationGeometriesOnDiagram_ok_classDiagram() throws Exception {
         // Get diagram
@@ -186,10 +186,10 @@ public class DiagramToolTest {
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call getPresentationGeometriesOnDiagram()
         // ----------------------------------------
@@ -198,17 +198,17 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             PresentationGeometriesDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertMatchesAstahPresentations(diagram, outputDTO);
-
+        
         assertEquals(4, outputDTO.nodes().size());
         assertEquals(1, outputDTO.links().size());
-
+        
         NodePresentationGeometryDTO foo = findNodeByTypeAndLabel(outputDTO, "Class", "Foo");
         assertEquals("Foo", foo.correspondingModelElement().name());
-
+        
         NodePresentationGeometryDTO subPackage = findNodeByTypeAndLabel(outputDTO, "Package", "subPackage");
         LinkPresentationGeometryDTO containment = outputDTO.links().get(0);
         assertEquals("Containment", containment.type());
@@ -216,16 +216,16 @@ public class DiagramToolTest {
         assertEquals("Class", containment.targetNodeEnd().type());
         assertTrue(containment.drawnPoints().size() >= 2);
     }
-
+    
     @Test
     void getPresentationGeometriesOnDiagram_ng_presentationIdGiven() throws Exception {
         // Get presentation
         //   A presentation ID names no diagram, even though the presentation is drawn on one.
         IPresentation presentation = TestSupport.instance().getPresentationByTypeAndLabel("Class", "Foo");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(presentation.getID());
-
+        
         // ----------------------------------------
         // Call getPresentationGeometriesOnDiagram()
         // ----------------------------------------
@@ -235,7 +235,7 @@ public class DiagramToolTest {
             inputDTO,
             PresentationGeometriesDTO.class));
     }
-
+    
     @Disabled("This test is disabled because it requires a real Astah API connection and cannot be run in a test environment.")
     @Test
     void exportPngImage_ok() throws Exception {
@@ -243,10 +243,10 @@ public class DiagramToolTest {
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call exportPngImage()
         // ----------------------------------------
@@ -255,7 +255,7 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             ImageFileDTO.class);
-
+        
         // Check output DTO
         assertNotNull(outputDTO);
         assertNotNull(outputDTO.imageFilePath());
@@ -264,17 +264,17 @@ public class DiagramToolTest {
         assertTrue(outputDTO.imageWidth() > 0);
         assertTrue(outputDTO.imageHeight() > 0);
     }
-
+    
     @Test
     void exportPngImage_ng_transactionOpen() throws Exception {
         // Get diagram
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call exportPngImage()
         // ----------------------------------------
@@ -289,7 +289,7 @@ public class DiagramToolTest {
         } finally {
             projectAccessor.getTransactionManager().abortTransaction();
         }
-
+        
         // Refused before Astah was asked: outside the plugin, exportImage would have failed with a message of its own.
         String message = thrown.getCause().getMessage();
         assertTrue(message.contains("transaction is open"), message);
@@ -297,17 +297,17 @@ public class DiagramToolTest {
             assertEquals(0, files.count());
         }
     }
-
+    
     @Test
     void exportPngImage_ng_noTransactionReachesAstah() throws Exception {
         // Get diagram
         IDiagram diagram = (IDiagram) TestSupport.instance().getNamedElementByClassAndName(
             IDiagram.class,
             "Class Diagram0");
-
+        
         // Create input DTO
         IdDTO inputDTO = new IdDTO(diagram.getId());
-
+        
         // ----------------------------------------
         // Call exportPngImage()
         // ----------------------------------------
@@ -316,18 +316,18 @@ public class DiagramToolTest {
             tool,
             inputDTO,
             ImageFileDTO.class));
-
+        
         // Not refused: the call went on to exportImage, which outside the plugin cannot draw anything and says so.
         String message = thrown.getCause().getMessage();
         assertTrue(message.startsWith("Astah API exportImage method failed"), message);
     }
-
+    
     // Check that the output lists every presentation on the diagram exactly once, with the geometry the Astah API reports for it.
     private static void assertMatchesAstahPresentations(IDiagram diagram, PresentationGeometriesDTO outputDTO) throws Exception {
         assertEquals(diagram.getId(), outputDTO.diagram().id());
         assertEquals(diagram.getName(), outputDTO.diagram().name());
         assertEquals(toRectangleDTO(diagram.getBoundRect()), outputDTO.diagramRectangle());
-
+        
         Map<String, INodePresentation> astahNodes = new HashMap<>();
         Map<String, ILinkPresentation> astahLinks = new HashMap<>();
         for (IPresentation presentation : diagram.getPresentations()) {
@@ -341,7 +341,7 @@ public class DiagramToolTest {
         assertFalse(astahLinks.isEmpty());
         assertEquals(astahNodes.size(), outputDTO.nodes().size());
         assertEquals(astahLinks.size(), outputDTO.links().size());
-
+        
         // Removing each matched presentation makes a duplicated entry fail as well as an unknown one.
         for (NodePresentationGeometryDTO node : outputDTO.nodes()) {
             INodePresentation astahNode = astahNodes.remove(node.id());
@@ -349,7 +349,7 @@ public class DiagramToolTest {
             assertEquals(astahNode.getType(), node.type());
             assertEquals(toRectangleDTO(astahNode.getRectangle()), node.drawnRectangle());
         }
-
+        
         for (LinkPresentationGeometryDTO link : outputDTO.links()) {
             ILinkPresentation astahLink = astahLinks.remove(link.id());
             assertNotNull(astahLink, "unexpected link presentation: " + link.id());
@@ -359,7 +359,7 @@ public class DiagramToolTest {
             assertEquals(toPointDoubleDTOs(astahLink.getPoints()), link.drawnPoints());
         }
     }
-
+    
     private static NodePresentationGeometryDTO findNodeByTypeAndLabel(PresentationGeometriesDTO outputDTO, String type, String label) {
         List<NodePresentationGeometryDTO> nodes = outputDTO.nodes().stream()
             .filter(node -> node.type().equals(type) && node.label().equals(label))
@@ -367,11 +367,11 @@ public class DiagramToolTest {
         assertEquals(1, nodes.size(), "node presentations of type " + type + " labeled " + label);
         return nodes.get(0);
     }
-
+    
     private static RectangleDTO toRectangleDTO(Rectangle2D rectangle) {
         return new RectangleDTO(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
     }
-
+    
     private static List<PointDoubleDTO> toPointDoubleDTOs(Point2D[] points) {
         List<PointDoubleDTO> pointDTOs = new ArrayList<>();
         for (Point2D point : points) {
